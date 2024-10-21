@@ -1,0 +1,66 @@
+<script lang="ts">
+    import type { CHResponse } from "./query";
+
+    let {
+        response,
+    }: {
+        response: CHResponse;
+    } = $props();
+</script>
+
+<section>
+    {#if response}
+        <table>
+            <thead>
+                <tr>
+                    {#each response.meta as column, i (column.name)}
+                        <th>{column.name} ({column.type})</th>
+                    {/each}
+                </tr>
+            </thead>
+            <tbody>
+                {#each response.data as row, i (row)}
+                    <tr>
+                        {#each Object.entries(row) as [key, value], i (key)}
+                            <td>{value}</td>
+                        {/each}
+                    </tr>
+                {/each}
+            </tbody>
+        </table>
+    {/if}
+</section>
+
+<style>
+    section {
+        background: rgba(40, 40, 40, 1);
+        height: 50vh;
+        overflow: scroll;
+    }
+
+    tr {
+        height: 30px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        border: none;
+    }
+
+    th {
+        text-align: left;
+        font-size: 12px;
+        border-bottom: 1px solid rgba(75, 75, 75, 1);
+    }
+
+    td {
+        font-size: 12px;
+    }
+
+    th,
+    td {
+        padding: 0 5px;
+        width: 100px;
+    }
+</style>

@@ -3,10 +3,10 @@ use std::path::PathBuf;
 fn main() {
     tauri_build::build();
 
-    // Tell cargo to look for shared libraries in the specified directory
+    // // Tell cargo to look for shared libraries in the specified directory
     println!("cargo:rustc-link-search=./");
 
-    // Tell cargo to tell rustc to link the system chdb library.
+    // // Tell cargo to tell rustc to link the system chdb library.
     println!("cargo:rustc-link-lib=chdb");
 
     // Tell cargo to invalidate the built crate whenever the wrapper changes.

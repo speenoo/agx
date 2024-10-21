@@ -6,9 +6,7 @@ use std::time::Duration;
 use crate::bindings;
 use crate::error::Error;
 
-use serde::ser::{Serialize, SerializeStruct, Serializer};
-
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QueryResult(pub(crate) *mut bindings::local_result_v2);
 
 impl QueryResult {
@@ -61,24 +59,5 @@ impl QueryResult {
 impl Drop for QueryResult {
     fn drop(&mut self) {
         unsafe { bindings::free_result_v2(self.0) };
-    }
-}
-
-impl Serialize for QueryResult {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut state = serializer.serialize_struct("QueryResult", 4)?;
-
-        state.serialize_field(
-            "data_utf8",
-            &self.data_utf8().unwrap_or_else(|_| String::from("")),
-        )?;
-        state.serialize_field("rows_read", &self.rows_read())?;
-        state.serialize_field("bytes_read", &self.bytes_read())?;
-        state.serialize_field("elapsed", &self.elapsed().as_secs_f64())?;
-
-        state.end()
     }
 }

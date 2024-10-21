@@ -1,13 +1,33 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use serde_json;
+use std::borrow::Cow;
+use String;
+
+use agx::arg::Arg;
+
+use std::env;
+mod conf;
 
 #[tauri::command]
-fn query(query: &str) -> String {
-    let result = agx::execute(query, None).unwrap_or(None);
+fn query(query: &str, udfs: &str) -> String {
+    let config_path = conf::gen_clickhouse_config(udfs);
+
+    let args = if !udfs.is_empty() {
+        vec![
+            Arg::Custom("output-format".into(), Some("JSON".into())),
+            Arg::ConfigFilePath(Cow::Borrowed(&config_path)),
+        ]
+    } else {
+        vec![Arg::Custom("output-format".into(), Some("JSON".into()))]
+    };
+
+    let result = agx::execute(query, Some(&args));
     match result {
-        Some(query_result) => serde_json::to_string(&query_result).unwrap_or_default(),
-        None => "".to_string(),
+        Ok(Some(query_result)) => query_result
+            .data_utf8()
+            .unwrap_or_else(|_| String::from("invalid utf8 char")),
+        Ok(None) => String::from("No result"),
+        Err(e) => format!("Error: {:?}", e),
     }
 }
 
