@@ -10,7 +10,6 @@ pub fn gen_clickhouse_config<P: AsRef<Path>>(udfs_path: P) -> String {
         r#"<clickhouse>
     <user_defined_executable_functions_config>{udfs_path}/user_defined/*.xml</user_defined_executable_functions_config>
     <user_scripts_path>{udfs_path}/bin</user_scripts_path>
-    <user_defined_path>{udfs_path}/user_defined</user_defined_path>
 </clickhouse>"#,
         udfs_path = udfs_path
     );
@@ -23,7 +22,7 @@ pub fn gen_clickhouse_config<P: AsRef<Path>>(udfs_path: P) -> String {
         Some(path_str) => path_str.to_string(),
         None => {
             eprintln!("Failed to convert path to string");
-            return String::new(); // Return an empty string on failure
+            return String::new();
         }
     };
 

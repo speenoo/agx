@@ -9,19 +9,21 @@ use std::env;
 mod conf;
 
 #[tauri::command]
-fn query(query: &str, udfs: &str) -> String {
-    let config_path = conf::gen_clickhouse_config(udfs);
+async fn query(query: String, udfs: String) -> String {
+    let config_path = conf::gen_clickhouse_config(&udfs);
 
     let args = if !udfs.is_empty() {
         vec![
+            // Arg::Custom("logger.level".into(), Some("debug".into())),
             Arg::Custom("output-format".into(), Some("JSON".into())),
+            Arg::Custom("path".into(), Some(udfs.into())),
             Arg::ConfigFilePath(Cow::Borrowed(&config_path)),
         ]
     } else {
         vec![Arg::Custom("output-format".into(), Some("JSON".into()))]
     };
 
-    let result = agx::execute(query, Some(&args));
+    let result = agx::execute(&query, Some(&args));
     match result {
         Ok(Some(query_result)) => query_result
             .data_utf8()
