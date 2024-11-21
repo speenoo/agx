@@ -4,7 +4,6 @@ export async function exec(query: string) {
     try {
         const r: string = await invoke("query", {
             query,
-            udfs: "", // @todo: add it to the config
         });
         return JSON.parse(r);
     } catch (e) {

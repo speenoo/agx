@@ -1,4 +1,3 @@
-pub mod arg;
 #[allow(
     dead_code,
     unused,
@@ -6,18 +5,12 @@ pub mod arg;
     non_camel_case_types,
     non_upper_case_globals
 )]
-mod bindings;
-pub mod error;
-pub mod format;
-pub mod log_level;
-pub mod query_result;
-pub mod session;
-
 use std::ffi::{c_char, CString};
 
-use crate::arg::Arg;
-use crate::error::Error;
-use crate::query_result::QueryResult;
+use super::arg::Arg;
+use super::bindings;
+use super::error::Error;
+use super::query_result::QueryResult;
 
 pub fn execute(query: &str, query_args: Option<&[Arg]>) -> Result<Option<QueryResult>, Error> {
     let mut argv = Vec::with_capacity(query_args.as_ref().map_or(0, |v| v.len()) + 2);
@@ -33,7 +26,7 @@ pub fn execute(query: &str, query_args: Option<&[Arg]>) -> Result<Option<QueryRe
     call_chdb(argv)
 }
 
-fn call_chdb(mut argv: Vec<*mut c_char>) -> Result<Option<QueryResult>, Error> {
+pub fn call_chdb(mut argv: Vec<*mut c_char>) -> Result<Option<QueryResult>, Error> {
     let argc = argv.len() as i32;
     let argv = argv.as_mut_ptr();
     let result_ptr = unsafe { bindings::query_stable_v2(argc, argv) };
@@ -45,14 +38,14 @@ fn call_chdb(mut argv: Vec<*mut c_char>) -> Result<Option<QueryResult>, Error> {
     Ok(Some(QueryResult(result_ptr).check_error()?))
 }
 
-fn arg_clickhouse() -> Result<CString, Error> {
+pub fn arg_clickhouse() -> Result<CString, Error> {
     Ok(CString::new("clickhouse")?)
 }
 
-fn arg_data_path(value: &str) -> Result<CString, Error> {
+pub fn arg_data_path(value: &str) -> Result<CString, Error> {
     Ok(CString::new(format!("--path={}", value))?)
 }
 
-fn arg_query(value: &str) -> Result<CString, Error> {
+pub fn arg_query(value: &str) -> Result<CString, Error> {
     Ok(CString::new(format!("--query={}", value))?)
 }

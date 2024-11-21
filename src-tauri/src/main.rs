@@ -1,41 +1,34 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::borrow::Cow;
-use String;
+mod chdb;
+mod clickhouse;
+mod commands;
 
-use agx::arg::Arg;
+use std::{path::PathBuf, sync::Mutex};
+use tauri::Manager;
 
-use std::env;
-mod conf;
-
-#[tauri::command]
-async fn query(query: String, udfs: String) -> String {
-    let config_path = conf::gen_clickhouse_config(&udfs);
-
-    let args = if !udfs.is_empty() {
-        vec![
-            // Arg::Custom("logger.level".into(), Some("debug".into())),
-            Arg::Custom("output-format".into(), Some("JSON".into())),
-            Arg::Custom("path".into(), Some(udfs.into())),
-            Arg::ConfigFilePath(Cow::Borrowed(&config_path)),
-        ]
-    } else {
-        vec![Arg::Custom("output-format".into(), Some("JSON".into()))]
-    };
-
-    let result = agx::execute(&query, Some(&args));
-    match result {
-        Ok(Some(query_result)) => query_result
-            .data_utf8()
-            .unwrap_or_else(|_| String::from("invalid utf8 char")),
-        Ok(None) => String::from("No result"),
-        Err(e) => format!("Error: {:?}", e),
-    }
+#[derive(Default)]
+struct AppState {
+    clickhouse_dir: PathBuf,
 }
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![query])
+        .setup(|app| {
+            let working_dir = app.path_resolver().app_local_data_dir().unwrap();
+            let clickhouse_dir = working_dir.join("ch");
+
+            clickhouse::setup_clickhouse(&clickhouse_dir);
+
+            app.manage(Mutex::new(AppState::default()));
+
+            let state = app.state::<Mutex<AppState>>();
+            let mut state = state.lock().unwrap();
+            state.clickhouse_dir = clickhouse_dir.clone();
+
+            Ok(())
+        })
+        .invoke_handler(tauri::generate_handler![commands::query])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -2,13 +2,13 @@ use std::ffi::CString;
 use std::fs;
 use std::path::PathBuf;
 
-use crate::arg::Arg;
-use crate::arg_clickhouse;
-use crate::arg_data_path;
-use crate::arg_query;
-use crate::call_chdb;
-use crate::error::Error;
-use crate::query_result::QueryResult;
+use super::arg::Arg;
+use super::error::Error;
+use super::lib::arg_clickhouse;
+use super::lib::arg_data_path;
+use super::lib::arg_query;
+use super::lib::call_chdb;
+use super::query_result::QueryResult;
 
 pub struct SessionBuilder<'a> {
     data_path: PathBuf,

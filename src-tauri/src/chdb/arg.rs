@@ -1,9 +1,9 @@
 use std::borrow::Cow;
 use std::ffi::CString;
 
-use crate::error::Error;
-use crate::format::OutputFormat;
-use crate::log_level::LogLevel;
+use super::error::Error;
+use super::format::OutputFormat;
+use super::log_level::LogLevel;
 
 #[derive(Debug)]
 pub enum Arg<'a> {

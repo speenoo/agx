@@ -3,8 +3,8 @@ use std::borrow::Cow;
 use std::ffi::CStr;
 use std::time::Duration;
 
-use crate::bindings;
-use crate::error::Error;
+use super::bindings;
+use super::error::Error;
 
 #[derive(Clone, Debug)]
 pub struct QueryResult(pub(crate) *mut bindings::local_result_v2);
