@@ -30,7 +30,6 @@
 <style>
 	section {
 		background: rgba(40, 40, 40, 1);
-		height: 50vh;
 		overflow: scroll;
 	}
 

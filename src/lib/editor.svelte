@@ -26,9 +26,7 @@
 <style>
 	textarea {
 		display: block;
-		width: 100%;
 		font-family: monospace;
-		height: 50vh;
 		background: black;
 		border: none;
 		resize: none;
