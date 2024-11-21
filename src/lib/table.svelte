@@ -1,11 +1,7 @@
 <script lang="ts">
 	import type { CHResponse } from './query';
 
-	let {
-		response
-	}: {
-		response: CHResponse;
-	} = $props();
+	let { response }: { response: CHResponse } = $props();
 </script>
 
 <section>
@@ -13,7 +9,7 @@
 		<table>
 			<thead>
 				<tr>
-					{#each response.meta as column, i (column.name)}
+					{#each response.meta as column (column.name)}
 						<th>{column.name} ({column.type})</th>
 					{/each}
 				</tr>

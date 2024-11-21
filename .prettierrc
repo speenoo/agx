@@ -6,9 +6,9 @@
 	"plugins": ["prettier-plugin-svelte"],
 	"overrides": [
 		{
-			"files": ["*.svelte"],
+			"files": "*.svelte",
 			"options": {
-				"bracketSameLine": false
+				"parser": "svelte"
 			}
 		}
 	]
