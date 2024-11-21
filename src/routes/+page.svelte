@@ -1,17 +1,26 @@
 <script lang="ts">
 	import { SplitPane } from '$lib/components/SplitPane';
 	import WindowTitleBar from '$lib/components/WindowTitleBar.svelte';
-	import Editor from '$lib/editor.svelte';
-	import type { CHResponse } from '$lib/query';
+	import { Editor } from '$lib/components/Editor';
+	import { exec, type CHResponse } from '$lib/query';
 	import Schema from '$lib/schema.svelte';
 	import Table from '$lib/table.svelte';
 
 	let response: CHResponse = $state.raw(undefined);
+
+	let query = $state('');
+	let loading = $state(false);
+
+	async function handleExec() {
+		if (loading) return;
+		loading = true;
+		response = await exec(query).finally(() => (loading = false));
+	}
 </script>
 
 <WindowTitleBar>
 	{#snippet actions()}
-		<button>Run</button>
+		<button onclick={handleExec} disabled={loading}>Run</button>
 	{/snippet}
 </WindowTitleBar>
 
@@ -24,7 +33,7 @@
 			<section class="right">
 				<SplitPane orientation="vertical" min="20%" max="80%">
 					{#snippet a()}
-						<Editor bind:response />
+						<Editor bind:value={query} onExec={handleExec} />
 					{/snippet}
 					{#snippet b()}
 						<Table {response} />
