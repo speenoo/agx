@@ -4,7 +4,7 @@
 	import { Editor } from '$lib/components/Editor';
 	import { exec, type CHResponse } from '$lib/query';
 	import Schema from '$lib/schema.svelte';
-	import Table from '$lib/table.svelte';
+	import Result from '$lib/components/Result.svelte';
 
 	let response: CHResponse = $state.raw(undefined);
 
@@ -30,16 +30,14 @@
 			<Schema />
 		{/snippet}
 		{#snippet b()}
-			<section class="right">
-				<SplitPane orientation="vertical" min="20%" max="80%">
-					{#snippet a()}
-						<Editor bind:value={query} onExec={handleExec} />
-					{/snippet}
-					{#snippet b()}
-						<Table {response} />
-					{/snippet}
-				</SplitPane>
-			</section>
+			<SplitPane orientation="vertical" min="20%" max="80%" --color="hsl(0deg 0% 12%)">
+				{#snippet a()}
+					<Editor bind:value={query} onExec={handleExec} />
+				{/snippet}
+				{#snippet b()}
+					<Result {response} />
+				{/snippet}
+			</SplitPane>
 		{/snippet}
 	</SplitPane>
 </section>

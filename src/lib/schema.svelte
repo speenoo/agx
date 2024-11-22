@@ -33,7 +33,7 @@
 <style>
 	section {
 		padding: 10px;
-		background: rgba(30, 30, 30, 1);
+		background: hsl(0deg 0% 12%);
 		overflow: scroll;
 		font-size: 10px;
 	}
