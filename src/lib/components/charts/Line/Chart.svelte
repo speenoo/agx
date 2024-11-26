@@ -1,8 +1,8 @@
 <script lang="ts" generics="Item">
+	import { getTextWidth } from '$lib/utils';
 	import * as d3 from 'd3';
 	import { sineOut } from 'svelte/easing';
 	import { tweened } from 'svelte/motion';
-	import { fade } from 'svelte/transition';
 	import { line_chart, line_generator } from './graph';
 
 	interface Props {
@@ -30,8 +30,16 @@
 	let width = $state(0);
 	let height = $state(0);
 
-	const margin = { top: 30, right: 40, bottom: 30, left: 40 };
+	const margin = $state({ top: 0, right: 0, bottom: 30, left: 40 });
 	const tick_size = 3;
+
+	$effect(() => {
+		if (data.length) {
+			const last_index = data.length - 1;
+			const text = y_format(y_accessor(data[last_index]));
+			margin.left = getTextWidth(text) + tick_size + 4;
+		}
+	});
 
 	const { scales, coords } = $derived(
 		line_chart(data, {
@@ -82,7 +90,7 @@
 					stroke-width="1"
 				/>
 
-				{#if i % 2 === 0}
+				{#if i % 2 === 1}
 					<text
 						fill="var(--line-color)"
 						text-anchor="middle"
@@ -105,7 +113,7 @@
 				stroke="var(--line-color)"
 				stroke-width="1"
 			/>
-			{#each scales.y.ticks(10) as tick, i (tick)}
+			{#each scales.y.ticks(9) as tick, i (tick)}
 				{@const y = scales.y(tick)}
 				<line
 					x1={margin.left}
