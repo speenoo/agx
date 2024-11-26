@@ -12,3 +12,17 @@ export function getTextWidth(text: string) {
 
 	return width;
 }
+
+export function getRelativeParent<E extends Element>(node: E) {
+  let parent = node.parentElement
+
+  while (parent && getComputedStyle(parent).position !== 'relative') {
+    parent = parent.parentElement
+  }
+
+  return parent
+}
+
+export function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(value, min))
+}
