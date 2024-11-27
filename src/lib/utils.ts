@@ -14,15 +14,15 @@ export function getTextWidth(text: string) {
 }
 
 export function getRelativeParent<E extends Element>(node: E) {
-  let parent = node.parentElement
+	let parent = node.parentElement;
 
-  while (parent && getComputedStyle(parent).position !== 'relative') {
-    parent = parent.parentElement
-  }
+	while (parent && getComputedStyle(parent).position !== 'relative') {
+		parent = parent.parentElement;
+	}
 
-  return parent
+	return parent;
 }
 
 export function clamp(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(value, min))
+	return Math.min(max, Math.max(value, min));
 }

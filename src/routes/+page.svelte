@@ -3,8 +3,10 @@
 	import WindowTitleBar from '$lib/components/WindowTitleBar.svelte';
 	import { Editor } from '$lib/components/Editor';
 	import { exec, type CHResponse } from '$lib/query';
-	import Schema from '$lib/schema.svelte';
+	import SideBar from '$lib/components/SideBar.svelte';
 	import Result from '$lib/components/Result.svelte';
+	import type { Dataset } from '$lib/types';
+	import { getDefaultSource } from '$lib/components/Datasets/utils';
 
 	let response: CHResponse = $state.raw(undefined);
 
@@ -16,6 +18,15 @@
 		loading = true;
 		response = await exec(query).finally(() => (loading = false));
 	}
+
+	let sources = $state<Dataset[]>([]);
+	$effect.pre(() => {
+		if (!sources.length) {
+			getDefaultSource().then((source) => {
+				if (source) sources.push(source);
+			});
+		}
+	});
 </script>
 
 <WindowTitleBar>
@@ -27,7 +38,7 @@
 <section class="screen">
 	<SplitPane orientation="horizontal" position="242px" min="242px" max="40%">
 		{#snippet a()}
-			<Schema />
+			<SideBar {sources} />
 		{/snippet}
 		{#snippet b()}
 			<SplitPane orientation="vertical" min="20%" max="80%" --color="hsl(0deg 0% 12%)">
