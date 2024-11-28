@@ -1,5 +1,4 @@
 {
-	"svelte.enable-ts-plugin": true,
 	"prettier.enable": true,
 	"editor.formatOnSave": true,
 
