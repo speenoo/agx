@@ -1,5 +1,6 @@
 import { exec, type CHResponse } from '$lib/query';
 import type { ColumnDescriptor, Dataset } from '$lib/types';
+import type { FormValues as AddDatasetFormValues } from './AddDataset.svelte';
 
 export function filter(sources: Dataset[], search: string) {
 	if (!search) return sources;
@@ -55,4 +56,30 @@ export async function getDefaultSource() {
 	defaults.columns = describe_to_column_descriptors(response);
 
 	return defaults;
+}
+
+export async function form_values_to_dataset(values: AddDatasetFormValues): Promise<Dataset> {
+	const ext = get_extension(values.path);
+	const type = ext?.toLowerCase() === 'parquet' ? 'Parquet' : 'CSV';
+
+	const dataset_path = `${values.connection_type}('${values.path}', '${type}')`;
+
+	const set: Dataset = {
+		name: values.name,
+		slug: values.slug,
+		path: dataset_path,
+		type: type,
+		last_refresh: Date.now()
+	};
+
+	const response = await exec(`DESCRIBE TABLE ${dataset_path};`);
+	if (!response) throw Error('Unexpected response: empty response');
+
+	set.columns = describe_to_column_descriptors(response);
+
+	return set;
+}
+
+function get_extension(path: string) {
+	return path.split('.').pop();
 }

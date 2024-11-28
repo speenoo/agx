@@ -11,7 +11,7 @@ tauri-build = { version = "1", features = [] }
 bindgen = "0.70.1"
 
 [dependencies]
-tauri = { version = "1", features = [ "window-unmaximize", "window-start-dragging", "window-maximize", "shell-open"] }
+tauri = { version = "1", features = [ "dialog-open", "window-unmaximize", "window-start-dragging", "window-maximize", "shell-open"] }
 thiserror = "1"
 
 [features]

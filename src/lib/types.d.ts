@@ -14,3 +14,5 @@ export interface Dataset {
 	/** Timestamp */
 	last_refresh: number;
 }
+
+type MaybePromise<T> = T | Promise<T>;

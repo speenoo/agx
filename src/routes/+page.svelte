@@ -38,7 +38,7 @@
 <section class="screen">
 	<SplitPane orientation="horizontal" position="242px" min="242px" max="40%">
 		{#snippet a()}
-			<SideBar {sources} />
+			<SideBar bind:sources />
 		{/snippet}
 		{#snippet b()}
 			<SplitPane orientation="vertical" min="20%" max="80%" --color="hsl(0deg 0% 12%)">

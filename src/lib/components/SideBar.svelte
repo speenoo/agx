@@ -8,7 +8,7 @@
 
 	type Navigation = 'sources' | 'queries' | 'history';
 
-	let { sources = [] }: Props = $props();
+	let { sources = $bindable([]) }: Props = $props();
 
 	let tab = $state<Navigation>('sources');
 	function navigate(next_tab: Navigation) {
@@ -23,7 +23,7 @@
 		<button aria-current={tab === 'history'} onclick={() => navigate('history')}>History</button>
 	</nav>
 	{#if tab === 'sources'}
-		<Datasets {sources} />
+		<Datasets bind:sources />
 	{/if}
 </section>
 

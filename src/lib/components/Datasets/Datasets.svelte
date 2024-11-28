@@ -1,13 +1,15 @@
 <script lang="ts">
+	import SearchBar from '$lib/components/SearchBar.svelte';
 	import Database from '$lib/icons/Database.svelte';
 	import Plus from '$lib/icons/Plus.svelte';
 	import Table from '$lib/icons/Table.svelte';
 	import type { Dataset } from '$lib/types';
-	import SearchBar from '../SearchBar.svelte';
+	import AddDataset from './AddDataset.svelte';
 	import {
 		DATASOURCE_TYPE_COLOR_MAP,
 		DATASOURCE_TYPE_SHORT_NAME_MAP,
 		filter,
+		form_values_to_dataset,
 		remove_nullable
 	} from './utils';
 
@@ -15,10 +17,12 @@
 		sources: Dataset[];
 	}
 
-	let { sources }: Props = $props();
+	let { sources = $bindable() }: Props = $props();
 
 	let search = $state<string>('');
 	const filtered = $derived(filter(sources, search));
+
+	let add_dataset_modal: ReturnType<typeof AddDataset>;
 </script>
 
 <SearchBar bind:value={search} />
@@ -47,9 +51,19 @@
 		</details>
 	{/each}
 	<div class="Actions">
-		<button><Plus size="12" /></button>
+		<button onclick={() => add_dataset_modal.show()}><Plus size="12" /></button>
 	</div>
 </article>
+
+<AddDataset
+	bind:this={add_dataset_modal}
+	onCreate={async (values) => {
+		const index = sources.findIndex((s) => s.slug === values.slug);
+		const source = await form_values_to_dataset(values);
+		if (index === -1) sources.push(source);
+		else sources[index] = source;
+	}}
+/>
 
 <style>
 	article {
@@ -115,7 +129,6 @@
 			}
 
 			& > span:last-of-type {
-				flex-shrink: 0;
 				font-size: 8px;
 				font-weight: 500;
 				padding: 2px;
@@ -123,6 +136,12 @@
 				background-color: hsl(0deg 0% 19%);
 				text-align: center;
 				font-family: 'Fira Mono', monospace;
+
+				flex-shrink: 1;
+
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				overflow: hidden;
 			}
 		}
 
