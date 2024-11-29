@@ -1,21 +1,26 @@
 <script lang="ts">
 	import { sql } from '@codemirror/lang-sql';
-	import { EditorState } from '@codemirror/state';
+	import { Compartment, EditorState } from '@codemirror/state';
 	import { EditorView, keymap, placeholder } from '@codemirror/view';
 	import { untrack } from 'svelte';
 	import './codemirror.css';
 	import { default_extensions, default_keymaps } from './extensions';
 	import { ProxyDialect } from './SQLDialect';
+	import type { ColumnDescriptor } from '$lib/types';
+	import { schema_to_completions } from './utils';
 
 	type Props = {
 		value: string;
 		onExec?: () => unknown;
+		schema?: { [table_name: string]: ColumnDescriptor[] };
 	};
 
-	let { value = $bindable(''), onExec }: Props = $props();
+	let { value = $bindable(''), onExec, schema = {} }: Props = $props();
 
 	let container: HTMLDivElement;
 	let editor_view: EditorView;
+	const dialect_compartment = new Compartment();
+	const sql_schema = $derived(schema_to_completions(schema));
 
 	$effect(() => {
 		editor_view = new EditorView({ parent: container });
@@ -26,7 +31,7 @@
 				...default_extensions,
 				default_keymaps,
 				EditorView.darkTheme.of(true),
-				sql({ dialect: ProxyDialect }),
+				dialect_compartment.of(sql({ dialect: ProxyDialect, schema: untrack(() => sql_schema) })),
 				EditorView.updateListener.of((update) => {
 					if (update.docChanged) {
 						value = update.state.doc.toString();
@@ -48,6 +53,22 @@
 		editor_view.setState(state);
 
 		return () => editor_view.destroy();
+	});
+
+	$effect(() => {
+		if (editor_view && value !== editor_view.state.doc.toString()) {
+			editor_view.dispatch({
+				changes: { from: 0, to: editor_view.state.doc.length, insert: value }
+			});
+		}
+	});
+
+	$effect(() => {
+		if (editor_view) {
+			editor_view.dispatch({
+				effects: dialect_compartment.reconfigure(sql({ dialect: ProxyDialect, schema: sql_schema }))
+			});
+		}
 	});
 </script>
 

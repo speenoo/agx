@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { SplitPane } from '$lib/components/SplitPane';
 	import WindowTitleBar from '$lib/components/WindowTitleBar.svelte';
-	import { Editor } from '$lib/components/Editor';
+	import { datasets_to_schema, Editor } from '$lib/components/Editor';
 	import { exec, type CHResponse } from '$lib/query';
 	import SideBar from '$lib/components/SideBar.svelte';
 	import Result from '$lib/components/Result.svelte';
 	import type { Dataset } from '$lib/types';
 	import { getDefaultSource } from '$lib/components/Datasets/utils';
+	import { applySlugs } from '$lib/utils/datasets';
 
 	let response: CHResponse = $state.raw(undefined);
 
@@ -16,7 +17,7 @@
 	async function handleExec() {
 		if (loading) return;
 		loading = true;
-		response = await exec(query).finally(() => (loading = false));
+		response = await exec(applySlugs(query, sources)).finally(() => (loading = false));
 	}
 
 	let sources = $state<Dataset[]>([]);
@@ -43,7 +44,7 @@
 		{#snippet b()}
 			<SplitPane orientation="vertical" min="20%" max="80%" --color="hsl(0deg 0% 12%)">
 				{#snippet a()}
-					<Editor bind:value={query} onExec={handleExec} />
+					<Editor bind:value={query} onExec={handleExec} schema={datasets_to_schema(sources)} />
 				{/snippet}
 				{#snippet b()}
 					<Result {response} />
@@ -74,5 +75,6 @@
 	.screen {
 		padding-top: var(--window-title-bar-height);
 		height: 100vh;
+		width: 100vw;
 	}
 </style>
