@@ -12,6 +12,9 @@
 	import { slugify } from '$lib/slugify';
 	import type { MaybePromise } from '$lib/types';
 	import { dialog } from '@tauri-apps/api';
+	import { TauriEvent, type UnlistenFn } from '@tauri-apps/api/event';
+	import { appWindow } from '@tauri-apps/api/window';
+	import { onDestroy, tick } from 'svelte';
 
 	interface Props {
 		onCreate?: (values: FormValues) => MaybePromise<unknown>;
@@ -61,6 +64,28 @@
 			connection_type = 'file';
 		}
 	}
+
+	let unlisten = $state<UnlistenFn>();
+
+	appWindow
+		.onFileDropEvent(async (event) => {
+			if (event.payload.type !== 'drop') return;
+			if (event.payload.paths.length !== 1) return;
+			const [path] = event.payload.paths;
+			const ext = path.split('.').pop();
+			if (!ext || !['csv', 'parquet'].includes(ext.toLowerCase())) return;
+			if (!open) {
+				open = true;
+				await tick();
+			}
+
+			name_value = path.split('/').pop() ?? '';
+			path_value = path;
+			connection_type = 'file';
+		})
+		.then((unlistenFn) => (unlisten = unlistenFn));
+
+	onDestroy(() => unlisten?.());
 </script>
 
 {#if open}
