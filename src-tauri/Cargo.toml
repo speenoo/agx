@@ -12,6 +12,7 @@ bindgen = "0.70.1"
 
 [dependencies]
 tauri = { version = "1", features = [ "dialog-open", "window-unmaximize", "window-start-dragging", "window-maximize", "shell-open"] }
+tauri-plugin-store = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 thiserror = "1"
 
 [features]
