@@ -1,3 +1,5 @@
+import type { Datasets } from './sources.svelte';
+
 export interface ColumnDescriptor {
 	name: string;
 	type: string;
@@ -16,3 +18,7 @@ export interface Dataset {
 }
 
 type MaybePromise<T> = T | Promise<T>;
+
+export type AppContext = {
+	datasets: Datasets;
+};

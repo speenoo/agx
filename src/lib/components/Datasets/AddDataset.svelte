@@ -3,7 +3,6 @@
 		name: string;
 		slug: string;
 		path: string;
-		connection_type: 's3' | 'file';
 	};
 </script>
 
@@ -12,7 +11,7 @@
 	import { slugify } from '$lib/slugify';
 	import type { MaybePromise } from '$lib/types';
 	import { dialog } from '@tauri-apps/api';
-	import { TauriEvent, type UnlistenFn } from '@tauri-apps/api/event';
+	import { type UnlistenFn } from '@tauri-apps/api/event';
 	import { appWindow } from '@tauri-apps/api/window';
 	import { onDestroy, tick } from 'svelte';
 
@@ -42,14 +41,12 @@
 
 	let name_value = $state('');
 	let path_value = $state('');
-	let connection_type = $state('s3');
 
 	$effect(() => {
 		open;
 
 		name_value = '';
 		path_value = '';
-		connection_type = 's3';
 	});
 
 	async function open_file() {
@@ -60,8 +57,8 @@
 		});
 
 		if (typeof path === 'string') {
-			path_value = path;
-			connection_type = 'file';
+			name_value = path.split('/').pop() ?? '';
+			path_value = 'file://' + path;
 		}
 	}
 
@@ -80,8 +77,7 @@
 			}
 
 			name_value = path.split('/').pop() ?? '';
-			path_value = path;
-			connection_type = 'file';
+			path_value = 'file://' + path;
 		})
 		.then((unlistenFn) => (unlisten = unlistenFn));
 
@@ -117,20 +113,13 @@
 				<div>
 					<input
 						type="text"
-						placeholder="https://data.agnostic.dev/ethereum-mainnet-pq/logs/*.parquet"
+						placeholder="s3://data.agnostic.dev/ethereum-mainnet-pq/logs/*.parquet"
 						name="path"
 						bind:value={path_value}
 						required
 					/>
 					<button type="button" onclick={open_file}>Choose file</button>
 				</div>
-			</label>
-			<label>
-				<span>Connection type:</span>
-				<select name="connection_type" bind:value={connection_type}>
-					<option value="s3">S3</option>
-					<option value="file">Local file</option>
-				</select>
 			</label>
 
 			<div class="Actions">
@@ -213,5 +202,6 @@
 		justify-content: flex-end;
 		gap: 12px;
 		height: 28px;
+		margin-top: 12px;
 	}
 </style>

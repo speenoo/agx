@@ -1,15 +1,20 @@
 <script lang="ts">
+	import { DEFAULT_SOURCE } from '$lib/components/Datasets/utils';
+	import { datasets_to_schema, Editor } from '$lib/components/Editor';
+	import Result from '$lib/components/Result.svelte';
+	import SideBar from '$lib/components/SideBar.svelte';
 	import { SplitPane } from '$lib/components/SplitPane';
 	import WindowTitleBar from '$lib/components/WindowTitleBar.svelte';
-	import { datasets_to_schema, Editor } from '$lib/components/Editor';
+	import { set_app_context } from '$lib/context';
 	import { exec, type CHResponse } from '$lib/query';
-	import SideBar from '$lib/components/SideBar.svelte';
-	import Result from '$lib/components/Result.svelte';
-	import type { Dataset } from '$lib/types';
-	import { getDefaultSource } from '$lib/components/Datasets/utils';
+	import { Datasets } from '$lib/sources.svelte';
+	import { set_sources_in_store } from '$lib/store';
 	import { applySlugs } from '$lib/utils/datasets';
+	import type { PageData } from './$types';
 
 	let response: CHResponse = $state.raw(undefined);
+
+	let { data }: { data: PageData } = $props();
 
 	let query = $state('');
 	let loading = $state(false);
@@ -17,15 +22,23 @@
 	async function handleExec() {
 		if (loading) return;
 		loading = true;
-		response = await exec(applySlugs(query, sources)).finally(() => (loading = false));
+		response = await exec(applySlugs(query, datasets.sources)).finally(() => (loading = false));
 	}
 
-	let sources = $state<Dataset[]>([]);
+	const datasets = new Datasets(data.sources, {
+		onreset(datasets) {
+			set_sources_in_store(datasets);
+		},
+		onupdate(_dataset) {
+			set_sources_in_store(datasets.sources);
+		}
+	});
+
+	set_app_context({ datasets });
+
 	$effect.pre(() => {
-		if (!sources.length) {
-			getDefaultSource().then((source) => {
-				if (source) sources.push(source);
-			});
+		if (!datasets.sources.length) {
+			datasets.add(DEFAULT_SOURCE);
 		}
 	});
 </script>
@@ -39,12 +52,16 @@
 <section class="screen">
 	<SplitPane orientation="horizontal" position="242px" min="242px" max="40%">
 		{#snippet a()}
-			<SideBar bind:sources />
+			<SideBar />
 		{/snippet}
 		{#snippet b()}
 			<SplitPane orientation="vertical" min="20%" max="80%" --color="hsl(0deg 0% 12%)">
 				{#snippet a()}
-					<Editor bind:value={query} onExec={handleExec} schema={datasets_to_schema(sources)} />
+					<Editor
+						bind:value={query}
+						onExec={handleExec}
+						schema={datasets_to_schema(datasets.sources)}
+					/>
 				{/snippet}
 				{#snippet b()}
 					<Result {response} />

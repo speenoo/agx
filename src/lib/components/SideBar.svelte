@@ -1,29 +1,22 @@
 <script lang="ts">
-	import type { Dataset } from '$lib/types';
 	import Datasets from './Datasets/Datasets.svelte';
 
-	interface Props {
-		sources?: Dataset[];
-	}
+	type Tab = 'sources' | 'queries' | 'history';
 
-	type Navigation = 'sources' | 'queries' | 'history';
-
-	let { sources = $bindable([]) }: Props = $props();
-
-	let tab = $state<Navigation>('sources');
-	function navigate(next_tab: Navigation) {
+	let tab = $state<Tab>('sources');
+	function switch_to(next_tab: Tab) {
 		tab = next_tab;
 	}
 </script>
 
 <section>
 	<nav>
-		<button aria-current={tab === 'sources'} onclick={() => navigate('sources')}>Sources</button>
-		<button aria-current={tab === 'queries'} onclick={() => navigate('queries')}>Queries</button>
-		<button aria-current={tab === 'history'} onclick={() => navigate('history')}>History</button>
+		<button aria-current={tab === 'sources'} onclick={() => switch_to('sources')}>Sources</button>
+		<button aria-current={tab === 'queries'} onclick={() => switch_to('queries')}>Queries</button>
+		<button aria-current={tab === 'history'} onclick={() => switch_to('history')}>History</button>
 	</nav>
 	{#if tab === 'sources'}
-		<Datasets bind:sources />
+		<Datasets />
 	{/if}
 </section>
 

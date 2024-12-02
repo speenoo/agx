@@ -1,26 +1,21 @@
 <script lang="ts">
 	import SearchBar from '$lib/components/SearchBar.svelte';
+	import { get_app_context } from '$lib/context';
 	import Database from '$lib/icons/Database.svelte';
 	import Plus from '$lib/icons/Plus.svelte';
 	import Table from '$lib/icons/Table.svelte';
-	import type { Dataset } from '$lib/types';
 	import AddDataset from './AddDataset.svelte';
 	import {
 		DATASOURCE_TYPE_COLOR_MAP,
 		DATASOURCE_TYPE_SHORT_NAME_MAP,
 		filter,
-		form_values_to_dataset,
 		remove_nullable
 	} from './utils';
 
-	interface Props {
-		sources: Dataset[];
-	}
-
-	let { sources = $bindable() }: Props = $props();
+	const { datasets } = get_app_context();
 
 	let search = $state<string>('');
-	const filtered = $derived(filter(sources, search));
+	const filtered = $derived(filter(datasets.sources, search));
 
 	let add_dataset_modal: ReturnType<typeof AddDataset>;
 </script>
@@ -58,10 +53,8 @@
 <AddDataset
 	bind:this={add_dataset_modal}
 	onCreate={async (values) => {
-		const index = sources.findIndex((s) => s.slug === values.slug);
-		const source = await form_values_to_dataset(values);
-		if (index === -1) sources.push(source);
-		else sources[index] = source;
+		const index = datasets.sources.findIndex((s) => s.slug === values.slug);
+		if (index === -1) datasets.add({ name: values.name, slug: values.slug, path_url: values.path });
 	}}
 />
 
