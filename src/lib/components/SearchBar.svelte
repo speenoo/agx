@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { SvelteHTMLElements } from 'svelte/elements';
 	import Search from '$lib/icons/Search.svelte';
+	import type { SvelteHTMLElements } from 'svelte/elements';
 
 	type Props = Omit<
 		SvelteHTMLElements['input'],
@@ -36,7 +36,7 @@
 		padding: 5px 10px;
 
 		& > input {
-			height: 100%;
+			flex: 1;
 		}
 
 		&:has(> input:is(:focus-within, :hover)) {
