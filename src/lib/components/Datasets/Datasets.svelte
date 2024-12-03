@@ -4,10 +4,13 @@
 	import Database from '$lib/icons/Database.svelte';
 	import Plus from '$lib/icons/Plus.svelte';
 	import Table from '$lib/icons/Table.svelte';
+	import { listen } from '@tauri-apps/api/event';
+	import { showMenu } from 'tauri-plugin-context-menu';
 	import AddDataset from './AddDataset.svelte';
 	import {
 		DATASOURCE_TYPE_COLOR_MAP,
 		DATASOURCE_TYPE_SHORT_NAME_MAP,
+		DEFAULT_SOURCE,
 		filter,
 		remove_nullable
 	} from './utils';
@@ -24,7 +27,41 @@
 <article>
 	{#each filtered as source, i (source.slug)}
 		<details open={i === 0}>
-			<summary>
+			<summary
+				oncontextmenu={async (e) => {
+					e.preventDefault();
+					const element = e.currentTarget;
+					element.classList.add('Selected');
+					await showMenu({
+						theme: 'dark',
+						items: [
+							{
+								label: 'Reload',
+								event: () => datasets.refresh(source)
+							},
+							{
+								label: 'Copy path',
+								event: () => navigator.clipboard.writeText(source.path)
+							},
+							{
+								label: 'Copy slug',
+								event: () => navigator.clipboard.writeText(source.slug)
+							},
+							{ is_separator: true },
+							{
+								label: 'Remove',
+								event: () => datasets.remove(source),
+								disabled: source.slug === DEFAULT_SOURCE.slug
+							}
+						]
+					});
+
+					const unlistenMenuClose = await listen('menu-did-close', () => {
+						element.classList.remove('Selected');
+						unlistenMenuClose();
+					});
+				}}
+			>
 				{#if source.type === 'MergeTree'}
 					<Database size="15" />
 				{:else}
@@ -80,8 +117,15 @@
 		align-items: center;
 		gap: 5px;
 
+		padding: 3px 5px;
+		border-radius: 3px;
+
 		&::-webkit-details-marker {
 			display: none;
+		}
+
+		&:global(.Selected) {
+			background-color: hsl(210deg 100% 52%);
 		}
 	}
 

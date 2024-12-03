@@ -63,17 +63,17 @@ export class Datasets {
 	}
 
 	remove(source: Dataset) {
-		const index = this.#sources.indexOf(source);
+		const index = this.#sources.findIndex((s) => s.slug === source.slug);
 		if (index === -1)
 			throw new Error('Tried to remove a source that is not registered in the datasets');
 
-		this.#sources = this.#sources.filter((s) => s !== source);
+		this.#sources = this.#sources.filter((s) => s.slug !== source.slug);
 
 		this.#onreset(this.#sources);
 	}
 
 	async refresh(source: Dataset) {
-		const index = this.#sources.indexOf(source);
+		const index = this.#sources.findIndex((s) => s.slug === source.slug);
 		if (index === -1)
 			throw new Error('Tried to refresh a source that is not registered in the datasets');
 

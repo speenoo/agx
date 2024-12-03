@@ -15,6 +15,7 @@ struct AppState {
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_store::Builder::default().build())
+        .plugin(tauri_plugin_context_menu::init())
         .setup(|app| {
             let working_dir = app.path_resolver().app_local_data_dir().unwrap();
             let clickhouse_dir = working_dir.join("ch");
