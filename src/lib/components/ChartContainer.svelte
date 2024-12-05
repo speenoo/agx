@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { CHResponse } from '$lib/query';
 	import { applyType, formatValue, isSupportedType, LineChart } from '$lib/components/charts/Line';
+	import type { CHResponse } from '$lib/query';
 
 	interface Props {
 		response: NonNullable<CHResponse>;
