@@ -1,11 +1,8 @@
+import type { Range } from '$lib/components/charts/types';
+import { relative_x_range, relative_y_range } from '$lib/components/charts/utils';
 import * as d3 from 'd3';
 
 export const line_generator = d3.line().curve(d3.curveCardinal.tension(0.7));
-
-const relative_x_range = [0, 100] as Range;
-const relative_y_range = [100, 0] as Range;
-
-type Range = [number, number];
 
 interface LineConfig<T> {
 	x_accessor: (item: T) => d3.NumberValue;
@@ -36,5 +33,35 @@ export function line_chart<Item>(data: Array<Item>, config: LineConfig<Item>) {
 
 	const x_to_y_scale = d3.scaleLinear(X, Y);
 
-	return { scales: { x: x_scale, y: y_scale, x_to_y: x_to_y_scale }, coords };
+	return {
+		scales: { x: x_scale, y: y_scale, x_to_y: x_to_y_scale },
+		coords,
+		axis: {
+			x: {
+				y: y_scale(get_position(...y_scale.domain())),
+				y_min: config.y_range[0],
+				y_max: config.y_range[1]
+			},
+			y: {
+				x: x_scale(get_position(...x_scale.domain())),
+				x_min: config.x_range[0],
+				x_max: config.x_range[1]
+			}
+		}
+	};
+}
+
+function get_position(...domain: number[]) {
+	const max = Math.max(...domain);
+	const min = Math.min(...domain);
+
+	if (min < 0 && max < 0) {
+		return max;
+	}
+
+	if (min < 0 && max > 0) {
+		return 0;
+	}
+
+	return min;
 }

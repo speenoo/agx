@@ -44,7 +44,7 @@
 		}
 	});
 
-	const { scales, coords } = $derived(
+	const { scales, coords, axis } = $derived(
 		line_chart(data, {
 			x_accessor,
 			y_accessor,
@@ -58,47 +58,15 @@
 		const [pointer_x] = d3.pointer(e);
 		cursor.set(scales.x.invert(pointer_x));
 	}
-
-	const axis_x_position = $derived.by(() => {
-		const domain = scales.y.domain();
-		const max = Math.max(...domain);
-		const min = Math.min(...domain);
-
-		if (min < 0 && max < 0) {
-			return scales.y(max);
-		}
-
-		if (min < 0 && max > 0) {
-			return scales.y(0);
-		}
-
-		return scales.y(min);
-	});
-
-	const axis_y_position = $derived.by(() => {
-		const domain = scales.x.domain();
-		const max = Math.max(...domain);
-		const min = Math.min(...domain);
-
-		if (min < 0 && max < 0) {
-			return scales.x(max);
-		}
-
-		if (min < 0 && max > 0) {
-			return scales.x(0);
-		}
-
-		return scales.x(min);
-	});
 </script>
 
 <div class="Container" bind:clientWidth={width} bind:clientHeight={height}>
 	<svg {height} {width} viewBox="0 0 {width} {height}" onpointermove={handleMouseMove}>
 		<XAxis
 			scale={scales.x}
-			y={axis_x_position}
-			y-min={scales.y(Math.min(...scales.y.domain()))}
-			y-max={scales.y(Math.max(...scales.y.domain()))}
+			y={axis.x.y}
+			y-min={axis.x.y_min}
+			y-max={axis.x.y_max}
 			line-color="var(--line-color)"
 			format={(d, i) => (i % 2 === 1 ? x_format(d) : '')}
 			tick-height={tick_size}
@@ -106,9 +74,9 @@
 
 		<YAxis
 			scale={scales.y}
-			x={axis_y_position}
-			x-min={scales.x(Math.min(...scales.x.domain()))}
-			x-max={scales.x(Math.max(...scales.x.domain()))}
+			x={axis.y.x}
+			x-min={axis.y.x_min}
+			x-max={axis.y.x_max}
 			line-color="var(--line-color)"
 			format={y_format}
 			tick-width={tick_size}
