@@ -116,7 +116,7 @@
 		{@const y_value = scales.x_to_y($cursor)}
 		{@const x = scales.x($cursor)}
 		{@const y = scales.y(y_value)}
-		<div in:fade={{ duration: 150 }} class="Tooltip" use:position={[x, y]}>
+		<div in:fade={{ duration: 150 }} class="Tooltip" data-spacing="10" use:position={[x, y]}>
 			<article>
 				<span>{x_label}: </span>
 				<span>{x_format($cursor)}</span>

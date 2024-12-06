@@ -36,11 +36,32 @@ export function bar_chart<Item>(data: Array<Item>, config: ChartConfig<Item>) {
 
 	y.nice().clamp(true);
 
+	const x_to_value = data.reduce(
+		(acc, d) => acc.set(config.x_accessor(d), d),
+		new Map<ReturnType<(typeof config)['x_accessor']>, Item>()
+	);
+
+	function get_value(_x: number) {
+		const closest = d3.least(X, (d) => {
+			const start = x(d);
+
+			if (start) {
+				const end = start + x.bandwidth();
+				return Math.sqrt(Math.pow(start - _x, 2) + Math.pow(_x - end, 2));
+			}
+		});
+
+		if (!closest) return;
+
+		return x_to_value.get(closest);
+	}
+
 	return {
 		scales: { x, y },
 		axis: {
 			x: { y: y(0), y_min: config.y_range[0], y_max: config.y_range[1] },
 			y: { x: config.x_range[0], x_min: config.x_range[0], x_max: config.x_range[1] }
-		}
+		},
+		x_to_value: get_value
 	};
 }

@@ -1,7 +1,12 @@
 <script lang="ts" generics="Item">
-	import XAxis from '../axis/XAxis.svelte';
-	import YAxis from '../axis/YAxis.svelte';
-	import { getTextWidth } from '../utils';
+	import XAxis from '$lib/components/charts/axis/XAxis.svelte';
+	import YAxis from '$lib/components/charts/axis/YAxis.svelte';
+	import { getTextWidth } from '$lib/components/charts/utils';
+	import * as d3 from 'd3';
+	import { sineOut } from 'svelte/easing';
+	import { tweened } from 'svelte/motion';
+	import { fade } from 'svelte/transition';
+	import { position } from '../actions/constraints';
 	import { bar_chart } from './graph';
 
 	interface Props {
@@ -39,7 +44,7 @@
 		}
 	});
 
-	const { scales, axis } = $derived(
+	const { scales, axis, x_to_value } = $derived(
 		bar_chart(data, {
 			x_accessor,
 			y_accessor,
@@ -47,10 +52,27 @@
 			y_range: [height - margin.bottom, margin.top]
 		})
 	);
+
+	const cursor = tweened<number | undefined>(undefined, { easing: sineOut });
+	function handlePointerMove(e: PointerEvent) {
+		const [x] = d3.pointer(e);
+
+		const closest = d3.least(d3.map(data, x_accessor), (d) => {
+			const start = scales.x(d);
+
+			if (start) {
+				const end = start + scales.x.bandwidth();
+				return Math.sqrt(Math.pow(start - x, 2) + Math.pow(x - end, 2));
+			}
+		});
+
+		if (!closest) return;
+		cursor.set(scales.x(closest));
+	}
 </script>
 
 <div class="Container" bind:clientWidth={width} bind:clientHeight={height}>
-	<svg {height} {width} viewBox="0 0 {width} {height}">
+	<svg {height} {width} viewBox="0 0 {width} {height}" onpointermove={handlePointerMove}>
 		<XAxis
 			grid={false}
 			scale={scales.x}
@@ -92,7 +114,37 @@
 				{/if}
 			{/each}
 		</g>
+
+		{#if $cursor}
+			<g fill="var(--line-color)" fill-opacity="0.4">
+				<rect
+					x={$cursor}
+					y={axis.x.y_max}
+					height={axis.x.y_min - axis.x.y_max}
+					width={scales.x.bandwidth()}
+				/>
+			</g>
+		{/if}
 	</svg>
+
+	{#if $cursor}
+		{@const x = $cursor + scales.x.bandwidth() / 2}
+		{@const d = x_to_value(x)}
+		{#if d}
+			{@const y_value = y_accessor(d)}
+			{@const y = scales.y(y_value)}
+			<div in:fade={{ duration: 150 }} class="Tooltip" use:position={[x, y]}>
+				<article>
+					<span>{x_label}: </span>
+					<span>{x_format(x_accessor(d))}</span>
+				</article>
+				<article>
+					<span>{y_label}: </span>
+					<span>{y_format(y_value)}</span>
+				</article>
+			</div>
+		{/if}
+	{/if}
 </div>
 
 <style>
@@ -110,5 +162,29 @@
 
 		height: 100%;
 		width: 100%;
+	}
+
+	.Tooltip {
+		pointer-events: none;
+		user-select: none;
+		-webkit-user-select: none;
+
+		border: 1px solid hsl(0deg 0% 29%);
+		border-radius: 6px;
+		background-color: hsl(0deg 0% 0%);
+		padding: 8px 12px;
+		z-index: 1;
+
+		& > article {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 20px;
+			text-wrap: nowrap;
+
+			& > span:first-of-type {
+				color: hsl(0deg 0% 71%);
+			}
+		}
 	}
 </style>
