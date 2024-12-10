@@ -1,3 +1,8 @@
+import type { Range } from '$lib/components/charts/types';
+
+export const relative_x_range = [0, 100] as Range;
+export const relative_y_range = [100, 0] as Range;
+
 export function getTextWidth(text: string) {
 	let width = 0;
 	const div = document.createElement('div');

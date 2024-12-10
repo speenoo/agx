@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { CHResponse } from '$lib/query';
 	import { Table } from '$lib/components/Table';
+	import type { CHResponse } from '$lib/query';
 	import ChartContainer from './ChartContainer.svelte';
 
 	interface Props {
@@ -12,6 +12,7 @@
 	let tab = $state<'table' | 'chart'>('table');
 	let y_axis = $state<string>('');
 	let x_axis = $state<string>('');
+	let chart_type = $state('line');
 
 	$effect(() => {
 		response;
@@ -27,7 +28,7 @@
 			{#if tab === 'table'}
 				<Table {response} />
 			{:else if tab === 'chart'}
-				<ChartContainer {response} bind:x_axis bind:y_axis />
+				<ChartContainer {response} bind:x_axis bind:y_axis bind:type={chart_type} />
 			{/if}
 		{/if}
 	</div>

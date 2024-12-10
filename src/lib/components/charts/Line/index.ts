@@ -1,3 +1,5 @@
+import { format_date } from '$lib/utils/date';
+
 export { default as LineChart } from './Chart.svelte';
 
 const isIntegerRegExp = /U?Int[0-9]+/i;
@@ -32,7 +34,7 @@ export function applyType(value: any, type: string) {
 export function formatValue(value: any, type: string) {
 	const normalized = remove_nullable(type);
 
-	if (isDateRegExp.test(normalized)) return new Date(value).toISOString();
+	if (isDateRegExp.test(normalized)) return format_date(new Date(value), "dd MMM 'yy");
 	if (isIntegerRegExp.test(normalized)) return Math.round(value).toLocaleString('en');
 	return Number(value).toLocaleString('en');
 }

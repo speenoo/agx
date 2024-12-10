@@ -1,10 +1,13 @@
 <script lang="ts" generics="Item">
-	import { clamp, getRelativeParent, getTextWidth } from '$lib/components/charts/utils';
+	import { position } from '$lib/components/charts/actions/constraints';
+	import { getTextWidth } from '$lib/components/charts/utils';
 	import * as d3 from 'd3';
 	import { sineOut } from 'svelte/easing';
 	import { tweened } from 'svelte/motion';
-	import { line_chart, line_generator } from './graph';
 	import { fade } from 'svelte/transition';
+	import XAxis from '../axis/XAxis.svelte';
+	import YAxis from '../axis/YAxis.svelte';
+	import { line_chart, line_generator } from './graph';
 
 	interface Props {
 		data: Array<Item>;
@@ -36,13 +39,12 @@
 
 	$effect(() => {
 		if (data.length) {
-			const last_index = data.length - 1;
-			const text = y_format(y_accessor(data[last_index]));
-			margin.left = getTextWidth(text) + tick_size + 4;
+			const max_text_width = Math.max(...data.map((d) => getTextWidth(y_format(y_accessor(d)))));
+			margin.left = max_text_width + tick_size + 4;
 		}
 	});
 
-	const { scales, coords } = $derived(
+	const { scales, coords, axis } = $derived(
 		line_chart(data, {
 			x_accessor,
 			y_accessor,
@@ -56,124 +58,29 @@
 		const [pointer_x] = d3.pointer(e);
 		cursor.set(scales.x.invert(pointer_x));
 	}
-
-	function position<N extends HTMLElement>(node: N, position: [x: number, y: number]) {
-		const space = 10;
-
-		function update([x, y]: [x: number, y: number]) {
-			const constraint_rect = getRelativeParent(node)?.getBoundingClientRect();
-			if (!constraint_rect) return;
-
-			const rect = node.getBoundingClientRect();
-
-			const left = x + space;
-			const right = left + rect.width;
-
-			node.style.position = 'absolute';
-			node.style.left = '';
-			if (right > constraint_rect.width) node.style.left = `${x - space - rect.width}px`;
-			else node.style.left = `${left}px`;
-
-			const top = clamp(y - rect.height / 2, 0 + space, constraint_rect.height - space);
-			node.style.top = `${top}px`;
-		}
-
-		update(position);
-
-		return { update };
-	}
 </script>
 
 <div class="Container" bind:clientWidth={width} bind:clientHeight={height}>
 	<svg {height} {width} viewBox="0 0 {width} {height}" onpointermove={handleMouseMove}>
-		<g class="X-Axis">
-			<line
-				x1={margin.left}
-				x2={width - margin.right}
-				y1={height - margin.bottom}
-				y2={height - margin.bottom}
-				stroke="var(--line-color)"
-				stroke-width="1"
-			/>
-			{#each scales.x.ticks(10) as tick, i (tick)}
-				{@const x = scales.x(tick)}
-				<line
-					x1={x}
-					x2={x}
-					y1={height - margin.bottom}
-					y2={height - margin.bottom + tick_size}
-					stroke="var(--line-color)"
-					stroke-width="1"
-				/>
+		<XAxis
+			scale={scales.x}
+			y={axis.x.y}
+			y-min={axis.x.y_min}
+			y-max={axis.x.y_max}
+			line-color="var(--line-color)"
+			format={(d, i) => (i % 2 === 1 ? x_format(d) : '')}
+			tick-height={tick_size}
+		/>
 
-				<line
-					x1={x}
-					x2={x}
-					y1={margin.top}
-					y2={height - margin.bottom}
-					stroke="var(--line-color)"
-					stroke-dasharray="4"
-					stroke-opacity="0.7"
-					stroke-width="1"
-				/>
-
-				{#if i % 2 === 1}
-					<text
-						fill="var(--line-color)"
-						text-anchor="middle"
-						{x}
-						y={height - margin.bottom + tick_size}
-						dy="14"
-					>
-						{x_format(tick)}
-					</text>
-				{/if}
-			{/each}
-		</g>
-
-		<g class="Y-Axis">
-			<line
-				x1={margin.left}
-				x2={margin.left}
-				y1={height - margin.bottom}
-				y2={margin.top}
-				stroke="var(--line-color)"
-				stroke-width="1"
-			/>
-			{#each scales.y.ticks(9) as tick, i (tick)}
-				{@const y = scales.y(tick)}
-				<line
-					x1={margin.left}
-					x2={margin.left - tick_size}
-					y1={y}
-					y2={y}
-					stroke="var(--line-color)"
-					stroke-width="1"
-				/>
-
-				<line
-					x1={margin.left}
-					x2={width - margin.right}
-					y1={y}
-					y2={y}
-					stroke="var(--line-color)"
-					stroke-dasharray="4"
-					stroke-opacity="0.7"
-					stroke-width="1"
-				/>
-
-				<text
-					fill="var(--line-color)"
-					text-anchor="end"
-					x={margin.left - tick_size}
-					{y}
-					dx="-4"
-					dy="3"
-				>
-					{y_format(tick)}
-				</text>
-			{/each}
-		</g>
+		<YAxis
+			scale={scales.y}
+			x={axis.y.x}
+			x-min={axis.y.x_min}
+			x-max={axis.y.x_max}
+			line-color="var(--line-color)"
+			format={y_format}
+			tick-width={tick_size}
+		/>
 
 		<g stroke-width="2" fill="transparent">
 			<path d={line_generator(coords)} stroke={color} />
@@ -209,7 +116,7 @@
 		{@const y_value = scales.x_to_y($cursor)}
 		{@const x = scales.x($cursor)}
 		{@const y = scales.y(y_value)}
-		<div in:fade={{ duration: 150 }} class="Tooltip" use:position={[x, y]}>
+		<div in:fade={{ duration: 150 }} class="Tooltip" data-spacing="10" use:position={[x, y]}>
 			<article>
 				<span>{x_label}: </span>
 				<span>{x_format($cursor)}</span>
