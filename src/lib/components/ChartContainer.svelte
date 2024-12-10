@@ -57,8 +57,8 @@
 			</select>
 		</label>
 		<label>
-			y-axis:
-			<select bind:value={y_axis}>
+			x-axis:
+			<select bind:value={x_axis}>
 				<option value="">None</option>
 				{#each response.meta as column}
 					{#if isSupportedType(column.type)}
@@ -68,8 +68,8 @@
 			</select>
 		</label>
 		<label>
-			x-axis:
-			<select bind:value={x_axis}>
+			y-axis:
+			<select bind:value={y_axis}>
 				<option value="">None</option>
 				{#each response.meta as column}
 					{#if isSupportedType(column.type)}

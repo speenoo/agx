@@ -44,7 +44,7 @@
 								event: () => navigator.clipboard.writeText(source.path)
 							},
 							{
-								label: 'Copy slug',
+								label: 'Copy alias',
 								event: () => navigator.clipboard.writeText(source.slug)
 							},
 							{ is_separator: true },
