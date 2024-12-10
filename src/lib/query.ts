@@ -5,10 +5,9 @@ export async function exec(query: string) {
 		const r: string = await invoke('query', {
 			query
 		});
-		return JSON.parse(r);
+		return JSON.parse(r) as CHResponse;
 	} catch (e) {
 		console.error(e);
-		return {};
 	}
 }
 

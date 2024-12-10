@@ -7,7 +7,7 @@ use crate::AppState;
 use String;
 
 #[tauri::command]
-pub async fn query(query: String, state: State<'_, Mutex<AppState>>) -> Result<String, ()> {
+pub async fn query(query: String, state: State<'_, Mutex<AppState>>) -> Result<String, String> {
     let state = state.lock().unwrap();
 
     let args = vec![
@@ -21,9 +21,9 @@ pub async fn query(query: String, state: State<'_, Mutex<AppState>>) -> Result<S
     return match lib::execute(&query, Some(&args)) {
         Ok(Some(query_result)) => query_result
             .data_utf8()
-            .map_err(|_| ())
+            .map_err(|_| "Bad encoding".to_string())
             .map(|data| data.to_string()),
         Ok(None) => Ok(String::from("No result")),
-        Err(_e) => Err(()),
+        Err(_e) => Err(_e.to_string()),
     };
 }

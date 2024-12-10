@@ -23,6 +23,10 @@
         "maximize": true,
         "unmaximize": true,
         "startDragging": true
+      },
+      "dialog": {
+        "all": false,
+        "open": true
       }
     },
     "windows": [

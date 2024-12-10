@@ -1,5 +1,5 @@
 <script lang="ts" generics="Item">
-	import { clamp, getRelativeParent, getTextWidth } from '$lib/utils';
+	import { clamp, getRelativeParent, getTextWidth } from '$lib/components/charts/utils';
 	import * as d3 from 'd3';
 	import { sineOut } from 'svelte/easing';
 	import { tweened } from 'svelte/motion';
