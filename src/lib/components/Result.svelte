@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Table } from '$lib/components/Table';
 	import type { CHResponse } from '$lib/query';
+	import { untrack } from 'svelte';
 	import ChartContainer from './ChartContainer.svelte';
 
 	interface Props {
@@ -15,10 +16,10 @@
 	let chart_type = $state('line');
 
 	$effect(() => {
-		response;
+		const names = response?.meta.map((m) => m.name);
 
-		y_axis = '';
-		x_axis = '';
+		if (!names?.includes(untrack(() => y_axis))) y_axis = '';
+		if (!names?.includes(untrack(() => x_axis))) x_axis = '';
 	});
 </script>
 
