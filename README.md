@@ -1,6 +1,6 @@
 # agx
 
-***agx*** is a desktop application built with Tauri and SvelteKit that provides a modern interface for exploring and querying data using ClickHouse's embedded database engine (chdb).
+**_agx_** is a desktop application built with Tauri and SvelteKit that provides a modern interface for exploring and querying data using ClickHouse's embedded database engine (chdb).
 
 ## Features
 
@@ -20,27 +20,32 @@
 ## Getting Started
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/agnosticeng/agx
 cd agx
 ```
 
 2. Download and setup chdb library:
+
 ```bash
 ./src-tauri/update_libchdb.sh
 ```
 
 3. Install dependencies:
+
 ```bash
 npm install
 ```
 
 4. Run in development mode:
+
 ```bash
 npm run tauri dev
 ```
 
 5. Build for production:
+
 ```bash
 npm run tauri build
 ```
@@ -75,6 +80,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 The MIT License is one of the most popular open-source licenses because it:
+
 - Is simple and permissive
 - Allows commercial use
 - Allows modification and distribution

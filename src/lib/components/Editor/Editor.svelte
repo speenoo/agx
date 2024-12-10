@@ -58,5 +58,6 @@
 		width: 100%;
 		height: 100%;
 		padding: 7px 2px;
+		background-color: hsl(0deg 0% 5%);
 	}
 </style>
