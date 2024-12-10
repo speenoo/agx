@@ -99,7 +99,7 @@
 				/>
 			</label>
 			<label>
-				<span>Slug:</span>
+				<span>Alias:</span>
 				<input
 					type="text"
 					placeholder="ethereum_events"
@@ -164,16 +164,6 @@
 
 		&:not(:read-only):is(:focus-within, :hover) {
 			border-color: hsl(0deg 0% 34%);
-		}
-
-		&:read-only {
-			background-color: inherit;
-			border-color: transparent;
-			padding-left: 0;
-
-			&::placeholder {
-				color: inherit;
-			}
 		}
 	}
 
