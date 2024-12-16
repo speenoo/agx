@@ -4,7 +4,7 @@
 	import { BarChart } from './charts/Bar';
 
 	interface Props {
-		response: NonNullable<CHResponse>;
+		response: CHResponse;
 		x_axis: string;
 		y_axis: string;
 		type: string;
