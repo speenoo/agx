@@ -4,7 +4,7 @@ use std::borrow::Cow;
 use std::sync::Mutex;
 use tauri::State;
 
-use crate::{chdb, AppState};
+use crate::AppState;
 use String;
 
 #[tauri::command]
