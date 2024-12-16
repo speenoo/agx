@@ -22,6 +22,7 @@
 	let { onCreate }: Props = $props();
 
 	let open = $state(false);
+	let error_message = $state('');
 
 	export function show() {
 		open = true;
@@ -31,12 +32,19 @@
 
 	async function handleSubmit(e: SubmitEvent & { currentTarget: HTMLFormElement }) {
 		e.preventDefault();
-
+		error_message = '';
 		const form_data = new FormData(e.currentTarget);
 		const values = Object.fromEntries(form_data) as FormValues;
 
-		modal?.close();
-		await onCreate?.(values);
+		try {
+			await onCreate?.(values);
+			modal?.close();
+		} catch (e) {
+			if (e instanceof TypeError) {
+				error_message = e.message;
+			}
+			console.error(e);
+		}
 	}
 
 	let name_value = $state('');
@@ -47,6 +55,7 @@
 
 		name_value = '';
 		path_value = '';
+		error_message = '';
 	});
 
 	async function open_file() {
@@ -93,6 +102,8 @@
 				<input
 					type="text"
 					placeholder="Ethereum events"
+					spellcheck="false"
+					autocomplete="off"
 					name="name"
 					bind:value={name_value}
 					required
@@ -114,6 +125,8 @@
 					<input
 						type="text"
 						placeholder="s3://data.agnostic.dev/ethereum-mainnet-pq/logs/*.parquet"
+						spellcheck="false"
+						autocomplete="off"
 						name="path"
 						bind:value={path_value}
 						required
@@ -121,6 +134,12 @@
 					<button type="button" onclick={open_file}>Choose file</button>
 				</div>
 			</label>
+
+			<div class="Error">
+				{#if error_message}
+					{error_message}
+				{/if}
+			</div>
 
 			<div class="Actions">
 				<button type="button" onclick={() => modal!.close()}>Cancel</button>
@@ -185,6 +204,14 @@
 		&:is(:active) {
 			background-color: hsl(0deg 0% 52%);
 		}
+	}
+
+	div.Error {
+		font-size: 0.9rem;
+		text-align: center;
+		color: hsl(0 100% 70%);
+		height: 0.9rem;
+		padding: 6px 0;
 	}
 
 	div.Actions {

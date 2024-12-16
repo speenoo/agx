@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { DEFAULT_SOURCE } from '$lib/components/Datasets/utils';
-	import { datasets_to_schema, Editor } from '$lib/components/Editor';
+	import { Editor } from '$lib/components/Editor';
 	import Result from '$lib/components/Result.svelte';
 	import SideBar from '$lib/components/SideBar.svelte';
 	import { SplitPane } from '$lib/components/SplitPane';
@@ -12,7 +12,7 @@
 	import { applySlugs } from '$lib/utils/datasets';
 	import type { PageData } from './$types';
 
-	let response: CHResponse = $state.raw(undefined);
+	let response = $state.raw<CHResponse>();
 
 	let { data }: { data: PageData } = $props();
 
@@ -57,11 +57,7 @@
 		{#snippet b()}
 			<SplitPane orientation="vertical" min="20%" max="80%" --color="hsl(0deg 0% 12%)">
 				{#snippet a()}
-					<Editor
-						bind:value={query}
-						onExec={handleExec}
-						schema={datasets_to_schema(datasets.sources)}
-					/>
+					<Editor bind:value={query} onExec={handleExec} />
 				{/snippet}
 				{#snippet b()}
 					<Result {response} />
