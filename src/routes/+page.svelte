@@ -1,15 +1,11 @@
 <script lang="ts">
-	import { DEFAULT_SOURCE } from '$lib/components/Datasets/utils';
-	import { Editor } from '$lib/components/Editor';
+	import { exec, Sources, type CHResponse } from '$lib/ch-engine';
+	import { Editor, sources_to_schema } from '$lib/components/Editor';
 	import Result from '$lib/components/Result.svelte';
 	import SideBar from '$lib/components/SideBar.svelte';
 	import { SplitPane } from '$lib/components/SplitPane';
 	import WindowTitleBar from '$lib/components/WindowTitleBar.svelte';
 	import { set_app_context } from '$lib/context';
-	import { exec, type CHResponse } from '$lib/query';
-	import { Datasets } from '$lib/sources.svelte';
-	import { set_sources_in_store } from '$lib/store';
-	import { applySlugs } from '$lib/utils/datasets';
 	import type { PageData } from './$types';
 
 	let response = $state.raw<CHResponse>();
@@ -22,25 +18,12 @@
 	async function handleExec() {
 		if (loading) return;
 		loading = true;
-		response = await exec(applySlugs(query, datasets.sources)).finally(() => (loading = false));
+		response = await exec(query).finally(() => (loading = false));
 	}
 
-	const datasets = new Datasets(data.sources, {
-		onreset(datasets) {
-			set_sources_in_store(datasets);
-		},
-		onupdate(_dataset) {
-			set_sources_in_store(datasets.sources);
-		}
-	});
+	const sources = new Sources();
 
-	set_app_context({ datasets });
-
-	$effect.pre(() => {
-		if (!datasets.sources.length) {
-			datasets.add(DEFAULT_SOURCE);
-		}
-	});
+	set_app_context({ sources });
 </script>
 
 <WindowTitleBar>
@@ -57,7 +40,11 @@
 		{#snippet b()}
 			<SplitPane orientation="vertical" min="20%" max="80%" --color="hsl(0deg 0% 12%)">
 				{#snippet a()}
-					<Editor bind:value={query} onExec={handleExec} />
+					<Editor
+						bind:value={query}
+						onExec={handleExec}
+						schema={sources_to_schema(sources.tables)}
+					/>
 				{/snippet}
 				{#snippet b()}
 					<Result {response} />
