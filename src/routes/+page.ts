@@ -1,6 +1,8 @@
-import { get_sources_from_store } from '$lib/store';
+import { init } from '$lib/ch-engine';
 import type { PageLoad } from './$types';
 
 export const load = (async () => {
-	return { sources: await get_sources_from_store() };
+	await init();
+
+	return {};
 }) satisfies PageLoad;

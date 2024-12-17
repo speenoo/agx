@@ -1,11 +1,11 @@
-import type { ColumnDescriptor, Dataset } from '$lib/types';
+import type { ColumnDescriptor, Source } from '$lib/ch-engine';
 import type { Completion } from '@codemirror/autocomplete';
 
-export function datasets_to_schema(datasets: Dataset[]): {
+export function sources_to_schema(sources: Source[]): {
 	[table_name: string]: ColumnDescriptor[];
 } {
-	return datasets.reduce((acc, k) => {
-		if (k.columns?.length) return { ...acc, [k.slug]: k.columns };
+	return sources.reduce((acc, k) => {
+		if (k.columns.length) return { ...acc, [k.name]: k.columns };
 		return acc;
 	}, {});
 }

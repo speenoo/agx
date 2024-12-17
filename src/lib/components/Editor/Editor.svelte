@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { ColumnDescriptor } from '$lib/ch-engine';
 	import { sql } from '@codemirror/lang-sql';
 	import { Compartment, EditorState } from '@codemirror/state';
 	import { EditorView, keymap, placeholder } from '@codemirror/view';
@@ -6,7 +7,6 @@
 	import './codemirror.css';
 	import { default_extensions, default_keymaps } from './extensions';
 	import { ProxyDialect } from './SQLDialect';
-	import type { ColumnDescriptor } from '$lib/types';
 	import { schema_to_completions } from './utils';
 
 	type Props = {
