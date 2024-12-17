@@ -64,6 +64,14 @@ agx/
 └── README.md
 ```
 
+## Installing Agnostic UDF
+
+Install Agnostic ClickHouse UDFs with a single command:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/agnosticeng/agx/main/scripts/install_agnostic_udfs.sh | sh
+```
+
 ## Development
 
 - The frontend is built with SvelteKit, offering a reactive and efficient UI
