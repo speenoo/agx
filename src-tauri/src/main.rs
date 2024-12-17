@@ -30,6 +30,7 @@ fn main() {
             clickhouse::setup_clickhouse(&clickhouse_dir);
 
             let session = SessionBuilder::new()
+                // .with_arg(Arg::LogLevel(chdb::log_level::LogLevel::Debug))
                 .with_arg(Arg::OutputFormat(format::OutputFormat::JSON))
                 .with_arg(Arg::ConfigFilePath(Cow::Borrowed(
                     config_path.to_str().unwrap(),

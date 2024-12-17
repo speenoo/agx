@@ -26,6 +26,12 @@ impl QueryResult {
     pub fn data_ref(&self) -> &[u8] {
         let buf = unsafe { (*self.0).buf };
         let len = unsafe { (*self.0).len };
+        if buf.is_null() {
+            return &[];
+        }
+        if len > isize::MAX as usize {
+            return &[];
+        }
         let bytes: &[u8] = unsafe { slice::from_raw_parts(buf as *const u8, len) };
         bytes
     }
