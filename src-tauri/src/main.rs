@@ -4,12 +4,18 @@ mod chdb;
 mod clickhouse;
 mod commands;
 
-use std::{path::PathBuf, sync::Mutex};
+use std::borrow::Cow;
+
+use chdb::{
+    arg::Arg,
+    format,
+    session::{Session, SessionBuilder},
+};
+use std::sync::Mutex;
 use tauri::Manager;
 
-#[derive(Default)]
 struct AppState {
-    clickhouse_dir: PathBuf,
+    session: Session,
 }
 
 fn main() {
@@ -19,14 +25,20 @@ fn main() {
         .setup(|app| {
             let working_dir = app.path_resolver().app_local_data_dir().unwrap();
             let clickhouse_dir = working_dir.join("ch");
+            let config_path = clickhouse_dir.join("config.xml".to_string());
 
             clickhouse::setup_clickhouse(&clickhouse_dir);
 
-            app.manage(Mutex::new(AppState::default()));
+            let session = SessionBuilder::new()
+                .with_arg(Arg::OutputFormat(format::OutputFormat::JSON))
+                .with_arg(Arg::ConfigFilePath(Cow::Borrowed(
+                    config_path.to_str().unwrap(),
+                )))
+                .with_data_path(clickhouse_dir)
+                .build()
+                .unwrap();
 
-            let state = app.state::<Mutex<AppState>>();
-            let mut state = state.lock().unwrap();
-            state.clickhouse_dir = clickhouse_dir.clone();
+            app.manage(Mutex::new(AppState { session }));
 
             Ok(())
         })
