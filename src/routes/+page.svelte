@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { engine, type OLAPResponse } from '$lib/olap-engine';
 	import type { Table } from '$lib/olap-engine';
+	import { engine, type OLAPResponse } from '$lib/olap-engine';
 
 	import { Editor } from '$lib/components/Editor';
 	import Result from '$lib/components/Result.svelte';
