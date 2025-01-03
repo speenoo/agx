@@ -1,8 +1,9 @@
 <script lang="ts">
+	import type { Table } from '$lib/olap-engine';
+
 	import SearchBar from '$lib/components/SearchBar.svelte';
-	import { get_app_context } from '$lib/context';
 	import Database from '$lib/icons/Database.svelte';
-	import Table from '$lib/icons/Table.svelte';
+	import TableC from '$lib/icons/Table.svelte';
 	import {
 		filter,
 		remove_nullable,
@@ -10,12 +11,16 @@
 		SOURCE_TYPE_SHORT_NAME_MAP
 	} from './utils';
 
-	const { sources } = get_app_context();
+	type Props = {
+		tables?: Table[];
+	};
+
+	let { tables = [] }: Props = $props();
 
 	let loading = $state(false);
 
 	let search = $state<string>('');
-	const filtered = $derived(filter(sources.tables, search));
+	const filtered = $derived(filter(tables, search));
 </script>
 
 <SearchBar bind:value={search} />
@@ -23,9 +28,7 @@
 	<button
 		disabled={loading}
 		onclick={() => {
-			if (loading) return;
-			loading = true;
-			sources.fetch().finally(() => (loading = false));
+			// @todo: reload
 		}}>Refresh</button
 	>
 </div>
@@ -36,7 +39,7 @@
 				{#if source.engine === 'MergeTree'}
 					<Database size="15" />
 				{:else}
-					<Table size="15" />
+					<TableC size="15" />
 				{/if}
 				<h3>{source.name}</h3>
 				<span class="Tag" style:background-color={SOURCE_TYPE_COLOR_MAP[source.engine]}>

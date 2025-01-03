@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Table } from '$lib/ch-engine';
 	import Datasets from './Datasets/Datasets.svelte';
 
 	type Tab = 'sources' | 'queries' | 'history';
@@ -7,6 +8,12 @@
 	function switch_to(next_tab: Tab) {
 		tab = next_tab;
 	}
+
+	type Props = {
+		tables?: Table[];
+	};
+
+	let { tables = [] }: Props = $props();
 </script>
 
 <section>
@@ -16,7 +23,7 @@
 		<button aria-current={tab === 'history'} onclick={() => switch_to('history')}>History</button>
 	</nav>
 	{#if tab === 'sources'}
-		<Datasets />
+		<Datasets {tables} />
 	{/if}
 </section>
 

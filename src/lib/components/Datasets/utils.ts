@@ -1,6 +1,6 @@
-import { type Source } from '$lib/ch-engine';
+import { type Table } from '$lib/olap-engine';
 
-export function filter(sources: Source[], search: string) {
+export function filter(sources: Table[], search: string) {
 	if (!search) return sources;
 	const search_ = search.toLowerCase();
 

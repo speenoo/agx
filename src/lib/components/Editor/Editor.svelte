@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ColumnDescriptor } from '$lib/ch-engine';
+	import type { Table } from '$lib/ch-engine';
 	import { sql } from '@codemirror/lang-sql';
 	import { Compartment, EditorState } from '@codemirror/state';
 	import { EditorView, keymap, placeholder } from '@codemirror/view';
@@ -7,20 +7,20 @@
 	import './codemirror.css';
 	import { default_extensions, default_keymaps } from './extensions';
 	import { ProxyDialect } from './SQLDialect';
-	import { schema_to_completions } from './utils';
+	import { schema_to_completions, sources_to_schema } from './utils';
 
 	type Props = {
 		value: string;
 		onExec?: () => unknown;
-		schema?: { [table_name: string]: ColumnDescriptor[] };
+		tables?: Table[];
 	};
 
-	let { value = $bindable(''), onExec, schema = {} }: Props = $props();
+	let { value = $bindable(''), onExec, tables = [] }: Props = $props();
 
 	let container: HTMLDivElement;
 	let editor_view: EditorView;
 	const dialect_compartment = new Compartment();
-	const sql_schema = $derived(schema_to_completions(schema));
+	const sql_schema = $derived(schema_to_completions(sources_to_schema(tables)));
 
 	$effect(() => {
 		editor_view = new EditorView({ parent: container });
