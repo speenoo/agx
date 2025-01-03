@@ -1,8 +1,8 @@
-import { init } from '$lib/ch-engine';
+import { engine } from '$lib/olap-engine';
 import type { PageLoad } from './$types';
 
 export const load = (async () => {
-	await init();
+	await engine.init();
 
 	return {};
 }) satisfies PageLoad;

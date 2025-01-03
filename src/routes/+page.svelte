@@ -1,14 +1,15 @@
 <script lang="ts">
-	import { exec, Sources, type CHResponse } from '$lib/ch-engine';
-	import { Editor, sources_to_schema } from '$lib/components/Editor';
+	import { engine, type OLAPResponse } from '$lib/olap-engine';
+	import type { Table } from '$lib/olap-engine';
+
+	import { Editor } from '$lib/components/Editor';
 	import Result from '$lib/components/Result.svelte';
 	import SideBar from '$lib/components/SideBar.svelte';
 	import { SplitPane } from '$lib/components/SplitPane';
 	import WindowTitleBar from '$lib/components/WindowTitleBar.svelte';
-	import { set_app_context } from '$lib/context';
 	import type { PageData } from './$types';
 
-	let response = $state.raw<CHResponse>();
+	let response = $state.raw<OLAPResponse>();
 
 	let { data }: { data: PageData } = $props();
 
@@ -18,12 +19,16 @@
 	async function handleExec() {
 		if (loading) return;
 		loading = true;
-		response = await exec(query).finally(() => (loading = false));
+		response = await engine.exec(query).finally(() => (loading = false));
 	}
 
-	const sources = new Sources();
+	let tables = $state<Table[]>([]);
 
-	set_app_context({ sources });
+	$effect(() => {
+		engine.getSchema().then((t) => {
+			tables = t;
+		});
+	});
 </script>
 
 <WindowTitleBar>
@@ -35,16 +40,12 @@
 <section class="screen">
 	<SplitPane orientation="horizontal" position="242px" min="242px" max="40%">
 		{#snippet a()}
-			<SideBar />
+			<SideBar {tables} />
 		{/snippet}
 		{#snippet b()}
 			<SplitPane orientation="vertical" min="20%" max="80%" --color="hsl(0deg 0% 12%)">
 				{#snippet a()}
-					<Editor
-						bind:value={query}
-						onExec={handleExec}
-						schema={sources_to_schema(sources.tables)}
-					/>
+					<Editor bind:value={query} onExec={handleExec} {tables} />
 				{/snippet}
 				{#snippet b()}
 					<Result {response} />

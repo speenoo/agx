@@ -1,9 +1,9 @@
-import type { ColumnDescriptor, Source } from '$lib/ch-engine';
+import type { ColumnDescriptor, Table } from '$lib/ch-engine';
 import type { Completion } from '@codemirror/autocomplete';
 
-export function sources_to_schema(sources: Source[]): {
-	[table_name: string]: ColumnDescriptor[];
-} {
+export type Schema = { [table_name: string]: ColumnDescriptor[] };
+
+export function sources_to_schema(sources: Table[]): Schema {
 	return sources.reduce((acc, k) => {
 		if (k.columns.length) return { ...acc, [k.name]: k.columns };
 		return acc;
