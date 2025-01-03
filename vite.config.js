@@ -19,6 +19,6 @@ export default defineConfig(async () => ({
 		}
 	},
 	define: {
-		__REMOTE_APP__: process.env.REMOTE_APP === 'true'
+		FORCE_REMOTE_ENGINE: process.env.FORCE_REMOTE_ENGINE === 'true'
 	}
 }));

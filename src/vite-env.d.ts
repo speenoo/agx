@@ -1,1 +1,1 @@
-declare const __REMOTE_APP__: string;
+declare const FORCE_REMOTE_ENGINE: string;
