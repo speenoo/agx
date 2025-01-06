@@ -7,7 +7,9 @@ export class RemoteEngine implements OLAPEngine {
 
 	async exec(query: string) {
 		try {
-			const response = await fetch('https://proxy.agx.app/query', {
+			const proxy =
+				new URLSearchParams(window.location.search).get('proxy') ?? 'https://proxy.agx.app/query';
+			const response = await fetch(`${proxy}`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
