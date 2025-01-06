@@ -18,6 +18,9 @@ export default defineConfig(async () => ({
 			ignored: ['**/src-tauri/**']
 		}
 	},
+	optimizeDeps: {
+		exclude: ['@sqlite.org/sqlite-wasm']
+	},
 	define: {
 		FORCE_REMOTE_ENGINE: process.env.FORCE_REMOTE_ENGINE === 'true'
 	}
