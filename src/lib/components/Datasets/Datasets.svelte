@@ -24,14 +24,6 @@
 </script>
 
 <SearchBar bind:value={search} />
-<div>
-	<button
-		disabled={loading}
-		onclick={() => {
-			// @todo: reload
-		}}>Refresh</button
-	>
-</div>
 <article>
 	{#each filtered as source, i (source.name)}
 		<details open={i === 0}>
