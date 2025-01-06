@@ -7,6 +7,8 @@
 	import SideBar from '$lib/components/SideBar.svelte';
 	import { SplitPane } from '$lib/components/SplitPane';
 	import WindowTitleBar from '$lib/components/WindowTitleBar.svelte';
+	import { db } from '$lib/database';
+	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 
 	let response = $state.raw<OLAPResponse>();
@@ -28,6 +30,16 @@
 		engine.getSchema().then((t) => {
 			tables = t;
 		});
+	});
+
+	onMount(() => {
+		db.exec('SELECT * FROM sqlite_master')
+			.then((res) => {
+				console.log(res);
+			})
+			.catch((err) => {
+				console.error(err);
+			});
 	});
 </script>
 
