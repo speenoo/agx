@@ -1,10 +1,9 @@
 <script lang="ts">
-	import type { CHResponse } from '$lib/ch-engine';
 	import { applyType, formatValue, isSupportedType, LineChart } from '$lib/components/charts/Line';
+	import type { OLAPResponse } from '$lib/olap-engine';
 	import { BarChart } from './charts/Bar';
-
 	interface Props {
-		response: CHResponse;
+		response: OLAPResponse;
 		x_axis: string;
 		y_axis: string;
 		type: string;

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Table } from '$lib/ch-engine';
+	import type { Table } from '$lib/olap-engine';
 	import { sql } from '@codemirror/lang-sql';
 	import { Compartment, EditorState } from '@codemirror/state';
 	import { EditorView, keymap, placeholder } from '@codemirror/view';

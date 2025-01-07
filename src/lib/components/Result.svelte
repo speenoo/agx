@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { CHResponse } from '$lib/ch-engine';
 	import { Table } from '$lib/components/Table';
+	import type { OLAPResponse } from '$lib/olap-engine';
 	import { untrack } from 'svelte';
 	import ChartContainer from './ChartContainer.svelte';
 
 	interface Props {
-		response?: CHResponse;
+		response?: OLAPResponse;
 	}
 
 	let { response }: Props = $props();
