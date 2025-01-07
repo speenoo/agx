@@ -7,6 +7,7 @@
 	import type { Table } from '$lib/olap-engine';
 	import { engine, type OLAPResponse } from '$lib/olap-engine';
 	import { history_repository, type HistoryEntry } from '$lib/repositories/history';
+	import { query_repository, type Query } from '$lib/repositories/queries';
 	import type { PageData } from './$types';
 
 	let response = $state.raw<OLAPResponse>();
@@ -23,8 +24,9 @@
 		if (response) await addHistoryEntry();
 	}
 
-	let tables = $state<Table[]>([]);
-	let history = $state<HistoryEntry[]>([]);
+	let tables = $state.raw<Table[]>([]);
+	let history = $state.raw<HistoryEntry[]>([]);
+	let queries = $state.raw<Query[]>([]);
 
 	$effect(() => {
 		engine.getSchema().then((t) => {
@@ -33,7 +35,7 @@
 	});
 
 	$effect(() => {
-		history_repository.get_all().then((entries) => {
+		history_repository.getAll().then((entries) => {
 			history = entries;
 		});
 	});
@@ -50,6 +52,10 @@
 	function handleHistoryClick(entry: HistoryEntry) {
 		query = entry.content;
 	}
+
+	$effect(() => {
+		query_repository.getAll().then((q) => (queries = q));
+	});
 </script>
 
 <WindowTitleBar>
@@ -61,7 +67,7 @@
 <section class="screen">
 	<SplitPane orientation="horizontal" position="242px" min="242px" max="40%">
 		{#snippet a()}
-			<SideBar {tables} {history} onHistoryClick={handleHistoryClick} />
+			<SideBar {tables} {history} onHistoryClick={handleHistoryClick} {queries} />
 		{/snippet}
 		{#snippet b()}
 			<SplitPane orientation="vertical" min="20%" max="80%" --color="hsl(0deg 0% 12%)">

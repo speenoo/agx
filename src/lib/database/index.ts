@@ -1,3 +1,4 @@
+import { dev } from '$app/environment';
 import { MIGRATIONS } from '$lib/migrations';
 import { IndexedDBCache } from '@agnosticeng/cache';
 import { MigrationManager } from '@agnosticeng/migrate';
@@ -41,3 +42,8 @@ class Database {
 
 export type { Database };
 export const db = new Database();
+
+if (dev) {
+	// @ts-ignore
+	window.db = db;
+}

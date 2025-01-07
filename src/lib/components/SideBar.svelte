@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Table } from '$lib/olap-engine';
 	import type { HistoryEntry } from '$lib/repositories/history';
+	import type { Query } from '$lib/repositories/queries';
 	import Datasets from './Datasets/Datasets.svelte';
 	import History from './History.svelte';
 
@@ -15,9 +16,10 @@
 		tables?: Table[];
 		history?: HistoryEntry[];
 		onHistoryClick?: (entry: HistoryEntry) => void;
+		queries?: Query[];
 	};
 
-	let { tables = [], history = [], onHistoryClick }: Props = $props();
+	let { tables = [], history = [], onHistoryClick, queries = [] }: Props = $props();
 </script>
 
 <section>
