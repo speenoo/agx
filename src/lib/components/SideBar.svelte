@@ -4,6 +4,7 @@
 	import type { Query } from '$lib/repositories/queries';
 	import Datasets from './Datasets/Datasets.svelte';
 	import History from './History.svelte';
+	import Queries from './Queries/Queries.svelte';
 
 	type Tab = 'sources' | 'queries' | 'history';
 
@@ -30,6 +31,9 @@
 	</nav>
 	{#if tab === 'sources'}
 		<Datasets {tables} />
+	{/if}
+	{#if tab === 'queries'}
+		<Queries {queries} />
 	{/if}
 	{#if tab === 'history'}
 		<History {history} {onHistoryClick} />
