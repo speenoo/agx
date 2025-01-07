@@ -1,3 +1,4 @@
+import { MIGRATIONS } from '$lib/migrations';
 import { IndexedDBCache } from '@agnosticeng/cache';
 import { MigrationManager } from '@agnosticeng/migrate';
 import { SQLite } from '@agnosticeng/sqlite';
@@ -25,7 +26,7 @@ class Database {
 
 		this.db.on('exec', debounce(this.snapshot.bind(this), 1000));
 
-		await this.migration.migrate([]);
+		await this.migration.migrate(MIGRATIONS);
 	}
 
 	private async snapshot() {
