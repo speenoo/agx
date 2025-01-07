@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { CHResponse } from '$lib/ch-engine';
+	import type { OLAPResponse } from '$lib/olap-engine';
 	import { Types } from './utils';
 
 	interface Props {
-		response: CHResponse;
+		response: OLAPResponse;
 	}
 
 	let { response }: Props = $props();

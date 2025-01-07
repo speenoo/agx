@@ -1,4 +1,4 @@
-import type { ColumnDescriptor, Table } from '$lib/ch-engine';
+import type { ColumnDescriptor, Table } from '$lib/olap-engine';
 import type { Completion } from '@codemirror/autocomplete';
 
 export type Schema = { [table_name: string]: ColumnDescriptor[] };
