@@ -21,11 +21,7 @@
 				e.preventDefault();
 			}}
 			role="menuitem"
-			onkeydown={(e) => {
-				if (e.key === 'Enter') {
-					e.currentTarget.blur();
-				}
-			}}
+			onkeydown={(e) => {}}
 			onclick={(e) => {
 				if (e.detail >= 2) {
 					e.currentTarget.blur();

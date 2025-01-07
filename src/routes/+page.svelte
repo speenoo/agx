@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Editor } from '$lib/components/Editor';
+	import { SaveQueryModal } from '$lib/components/Queries';
 	import Result from '$lib/components/Result.svelte';
 	import SideBar from '$lib/components/SideBar.svelte';
 	import { SplitPane } from '$lib/components/SplitPane';
@@ -56,10 +57,24 @@
 	$effect(() => {
 		query_repository.getAll().then((q) => (queries = q));
 	});
+
+	let save_query_modal = $state<ReturnType<typeof SaveQueryModal>>();
+
+	function handleKeyDown(event: KeyboardEvent) {
+		if (event.key === 's' && event.metaKey) {
+			if (query) {
+				event.preventDefault();
+				save_query_modal?.show();
+			}
+		}
+	}
 </script>
+
+<svelte:window onkeydown={handleKeyDown} />
 
 <WindowTitleBar>
 	{#snippet actions()}
+		<button onclick={() => save_query_modal?.show()} disabled={!query}>Save</button>
 		<button onclick={handleExec} disabled={loading}>Run</button>
 	{/snippet}
 </WindowTitleBar>
@@ -82,6 +97,14 @@
 	</SplitPane>
 </section>
 
+<SaveQueryModal
+	bind:this={save_query_modal}
+	onCreate={async ({ name }) => {
+		const q = await query_repository.create(name, query);
+		queries = queries.concat(q);
+	}}
+/>
+
 <style>
 	button {
 		appearance: none;
@@ -93,9 +116,8 @@
 		padding: 4px 10px;
 		border-radius: 3px;
 
-		cursor: pointer;
-
-		&:is(:hover, :focus-within) {
+		&:is(:hover, :focus-within):not(:disabled) {
+			cursor: pointer;
 			background-color: hsl(0deg 0% 15%);
 		}
 	}
