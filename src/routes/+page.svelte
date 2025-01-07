@@ -1,14 +1,12 @@
 <script lang="ts">
-	import type { Table } from '$lib/olap-engine';
-	import { engine, type OLAPResponse } from '$lib/olap-engine';
-
 	import { Editor } from '$lib/components/Editor';
 	import Result from '$lib/components/Result.svelte';
 	import SideBar from '$lib/components/SideBar.svelte';
 	import { SplitPane } from '$lib/components/SplitPane';
 	import WindowTitleBar from '$lib/components/WindowTitleBar.svelte';
-	import { db } from '$lib/database';
-	import { onMount } from 'svelte';
+	import type { Table } from '$lib/olap-engine';
+	import { engine, type OLAPResponse } from '$lib/olap-engine';
+	import { history_repository, type HistoryEntry } from '$lib/repositories/history';
 	import type { PageData } from './$types';
 
 	let response = $state.raw<OLAPResponse>();
@@ -22,9 +20,11 @@
 		if (loading) return;
 		loading = true;
 		response = await engine.exec(query).finally(() => (loading = false));
+		if (response) await addHistoryEntry();
 	}
 
 	let tables = $state<Table[]>([]);
+	let history = $state<HistoryEntry[]>([]);
 
 	$effect(() => {
 		engine.getSchema().then((t) => {
@@ -32,15 +32,24 @@
 		});
 	});
 
-	onMount(() => {
-		db.exec('SELECT * FROM sqlite_master')
-			.then((res) => {
-				console.log(res);
-			})
-			.catch((err) => {
-				console.error(err);
-			});
+	$effect(() => {
+		history_repository.get_all().then((entries) => {
+			history = entries;
+		});
 	});
+
+	async function addHistoryEntry() {
+		try {
+			const entry = await history_repository.add(query);
+			history = [entry, ...history];
+		} catch (e) {
+			console.error(e);
+		}
+	}
+
+	function handleHistoryClick(entry: HistoryEntry) {
+		query = entry.content;
+	}
 </script>
 
 <WindowTitleBar>
@@ -52,7 +61,7 @@
 <section class="screen">
 	<SplitPane orientation="horizontal" position="242px" min="242px" max="40%">
 		{#snippet a()}
-			<SideBar {tables} />
+			<SideBar {tables} {history} onHistoryClick={handleHistoryClick} />
 		{/snippet}
 		{#snippet b()}
 			<SplitPane orientation="vertical" min="20%" max="80%" --color="hsl(0deg 0% 12%)">

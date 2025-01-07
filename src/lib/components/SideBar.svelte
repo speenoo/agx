@@ -1,6 +1,8 @@
 <script lang="ts">
-	import type { Table } from '$lib/ch-engine';
+	import type { Table } from '$lib/olap-engine';
+	import type { HistoryEntry } from '$lib/repositories/history';
 	import Datasets from './Datasets/Datasets.svelte';
+	import History from './History.svelte';
 
 	type Tab = 'sources' | 'queries' | 'history';
 
@@ -11,9 +13,11 @@
 
 	type Props = {
 		tables?: Table[];
+		history?: HistoryEntry[];
+		onHistoryClick?: (entry: HistoryEntry) => void;
 	};
 
-	let { tables = [] }: Props = $props();
+	let { tables = [], history = [], onHistoryClick }: Props = $props();
 </script>
 
 <section>
@@ -24,6 +28,9 @@
 	</nav>
 	{#if tab === 'sources'}
 		<Datasets {tables} />
+	{/if}
+	{#if tab === 'history'}
+		<History {history} {onHistoryClick} />
 	{/if}
 </section>
 

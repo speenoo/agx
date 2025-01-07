@@ -1,4 +1,4 @@
-import { format_date } from '$lib/utils/date';
+import dayjs from 'dayjs';
 
 export { default as LineChart } from './Chart.svelte';
 
@@ -34,7 +34,7 @@ export function applyType(value: any, type: string) {
 export function formatValue(value: any, type: string) {
 	const normalized = remove_nullable(type);
 
-	if (isDateRegExp.test(normalized)) return format_date(new Date(value), "dd MMM 'yy");
+	if (isDateRegExp.test(normalized)) return dayjs(new Date(value)).format("DD MMM [']YY");
 	if (isIntegerRegExp.test(normalized)) return Math.round(value).toLocaleString('en');
 	return Number(value).toLocaleString('en');
 }
