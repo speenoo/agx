@@ -57,8 +57,8 @@
 		max-block-size: min(80vh, 100%);
 		margin-top: 0;
 		overflow: hidden;
-		transition: opacity 0.5s;
-		animation: slide-out-up 0.5s cubic-bezier(0.25, 0, 0.3, 1) forwards;
+		transition: opacity 0.3s;
+		animation: slide-out-up 0.3s cubic-bezier(0.25, 0, 0.3, 1) forwards;
 		filter: drop-shadow(3px 5px 10px hsla(0deg 0% 0% / 10%));
 		z-index: 2147483647;
 		padding: 0;
@@ -70,11 +70,11 @@
 		border-top-right-radius: 0;
 
 		width: 100%;
-		max-width: 580px;
+		max-width: 420px;
 	}
 
 	dialog[open] {
-		animation: slide-in-down 0.5s cubic-bezier(0.25, 0, 0.3, 1) forwards;
+		animation: slide-in-down 0.3s cubic-bezier(0.25, 0, 0.3, 1) forwards;
 	}
 
 	dialog:not([open]) {

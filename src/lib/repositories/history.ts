@@ -1,4 +1,8 @@
 import { db, type Database } from '$lib/database';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 export interface HistoryEntry {
 	id: number;
@@ -7,19 +11,21 @@ export interface HistoryEntry {
 }
 
 export interface HistoryRepository {
-	get_all(): Promise<HistoryEntry[]>;
+	getAll(): Promise<HistoryEntry[]>;
 	add(content: string): Promise<HistoryEntry>;
 }
 
 class SQLiteHistoryRepository implements HistoryRepository {
 	constructor(private db: Database) {}
 
-	async get_all(): Promise<HistoryEntry[]> {
+	async getAll(): Promise<HistoryEntry[]> {
 		const rows = await this.db.exec('SELECT * FROM history ORDER BY timestamp DESC');
 		return rows.map((row) => ({
 			id: row.id as number,
 			content: row.content as string,
-			timestamp: new Date(row.timestamp as string)
+			timestamp: dayjs(row.timestamp as string)
+				.utc(true)
+				.toDate()
 		}));
 	}
 
@@ -33,7 +39,9 @@ class SQLiteHistoryRepository implements HistoryRepository {
 		return {
 			id: row.id as number,
 			content: row.content as string,
-			timestamp: new Date(row.timestamp as string)
+			timestamp: dayjs(row.timestamp as string)
+				.utc(true)
+				.toDate()
 		};
 	}
 }

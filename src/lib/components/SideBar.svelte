@@ -1,8 +1,10 @@
 <script lang="ts">
 	import type { Table } from '$lib/olap-engine';
 	import type { HistoryEntry } from '$lib/repositories/history';
+	import type { Query } from '$lib/repositories/queries';
 	import Datasets from './Datasets/Datasets.svelte';
 	import History from './History.svelte';
+	import Queries from './Queries/Queries.svelte';
 
 	type Tab = 'sources' | 'queries' | 'history';
 
@@ -13,11 +15,25 @@
 
 	type Props = {
 		tables?: Table[];
+
 		history?: HistoryEntry[];
 		onHistoryClick?: (entry: HistoryEntry) => void;
+
+		queries?: Query[];
+		onQueryOpen?: (query: Query) => MaybePromise<void>;
+		onQueryRename?: (query: Query) => MaybePromise<void>;
+		onQueryDelete?: (query: Query) => MaybePromise<void>;
 	};
 
-	let { tables = [], history = [], onHistoryClick }: Props = $props();
+	let {
+		tables = [],
+		history = [],
+		onHistoryClick,
+		queries = [],
+		onQueryDelete,
+		onQueryOpen,
+		onQueryRename
+	}: Props = $props();
 </script>
 
 <section>
@@ -28,6 +44,9 @@
 	</nav>
 	{#if tab === 'sources'}
 		<Datasets {tables} />
+	{/if}
+	{#if tab === 'queries'}
+		<Queries {queries} ondelete={onQueryDelete} onopen={onQueryOpen} onrename={onQueryRename} />
 	{/if}
 	{#if tab === 'history'}
 		<History {history} {onHistoryClick} />

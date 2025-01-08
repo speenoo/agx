@@ -1,12 +1,17 @@
 <script lang="ts">
+	import { ContextMenuState } from '$lib/components/ContextMenu';
+	import ContextMenu from '$lib/components/ContextMenu/ContextMenu.svelte';
 	import { Editor } from '$lib/components/Editor';
+	import { SaveQueryModal } from '$lib/components/Queries';
 	import Result from '$lib/components/Result.svelte';
 	import SideBar from '$lib/components/SideBar.svelte';
 	import { SplitPane } from '$lib/components/SplitPane';
 	import WindowTitleBar from '$lib/components/WindowTitleBar.svelte';
+	import { set_app_context } from '$lib/context';
 	import type { Table } from '$lib/olap-engine';
 	import { engine, type OLAPResponse } from '$lib/olap-engine';
 	import { history_repository, type HistoryEntry } from '$lib/repositories/history';
+	import { query_repository, type Query } from '$lib/repositories/queries';
 	import type { PageData } from './$types';
 
 	let response = $state.raw<OLAPResponse>();
@@ -23,8 +28,9 @@
 		if (response) await addHistoryEntry();
 	}
 
-	let tables = $state<Table[]>([]);
-	let history = $state<HistoryEntry[]>([]);
+	let tables = $state.raw<Table[]>([]);
+	let history = $state.raw<HistoryEntry[]>([]);
+	let queries = $state.raw<Query[]>([]);
 
 	$effect(() => {
 		engine.getSchema().then((t) => {
@@ -33,7 +39,7 @@
 	});
 
 	$effect(() => {
-		history_repository.get_all().then((entries) => {
+		history_repository.getAll().then((entries) => {
 			history = entries;
 		});
 	});
@@ -50,10 +56,33 @@
 	function handleHistoryClick(entry: HistoryEntry) {
 		query = entry.content;
 	}
+
+	$effect(() => {
+		query_repository.getAll().then((q) => (queries = q));
+	});
+
+	let save_query_modal = $state<ReturnType<typeof SaveQueryModal>>();
+
+	function handleKeyDown(event: KeyboardEvent) {
+		if (event.key === 's' && event.metaKey) {
+			if (query) {
+				event.preventDefault();
+				save_query_modal?.show();
+			}
+		}
+	}
+
+	const context_menu = new ContextMenuState();
+	set_app_context({ context_menu });
 </script>
+
+<svelte:window onkeydown={handleKeyDown} />
+
+<ContextMenu state={context_menu} />
 
 <WindowTitleBar>
 	{#snippet actions()}
+		<button onclick={() => save_query_modal?.show()} disabled={!query}>Save</button>
 		<button onclick={handleExec} disabled={loading}>Run</button>
 	{/snippet}
 </WindowTitleBar>
@@ -61,7 +90,30 @@
 <section class="screen">
 	<SplitPane orientation="horizontal" position="242px" min="242px" max="40%">
 		{#snippet a()}
-			<SideBar {tables} {history} onHistoryClick={handleHistoryClick} />
+			<SideBar
+				{tables}
+				{history}
+				onHistoryClick={handleHistoryClick}
+				{queries}
+				onQueryDelete={async (query) => {
+					await query_repository.delete(query.id);
+					const index = queries.indexOf(query);
+					queries = queries.slice(0, index).concat(queries.slice(index + 1));
+				}}
+				onQueryOpen={(q) => {
+					query = q.sql;
+				}}
+				onQueryRename={async (q) => {
+					const updated = await query_repository.update(q);
+					const index = queries.findIndex((_q) => _q.id === updated.id);
+					if (index !== -1) {
+						queries = queries
+							.slice(0, index)
+							.concat(updated)
+							.concat(queries.slice(index + 1));
+					}
+				}}
+			/>
 		{/snippet}
 		{#snippet b()}
 			<SplitPane orientation="vertical" min="20%" max="80%" --color="hsl(0deg 0% 12%)">
@@ -76,6 +128,14 @@
 	</SplitPane>
 </section>
 
+<SaveQueryModal
+	bind:this={save_query_modal}
+	onCreate={async ({ name }) => {
+		const q = await query_repository.create(name, query);
+		queries = queries.concat(q);
+	}}
+/>
+
 <style>
 	button {
 		appearance: none;
@@ -87,9 +147,8 @@
 		padding: 4px 10px;
 		border-radius: 3px;
 
-		cursor: pointer;
-
-		&:is(:hover, :focus-within) {
+		&:is(:hover, :focus-within):not(:disabled) {
+			cursor: pointer;
 			background-color: hsl(0deg 0% 15%);
 		}
 	}

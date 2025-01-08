@@ -34,8 +34,8 @@
 				}
 			}}
 		>
-			<span class="time">{dayjs(entry.timestamp).fromNow()}</span>
 			<div class="content">{entry.content}</div>
+			<span class="time">{dayjs(entry.timestamp).fromNow()}</span>
 		</li>
 	{/each}
 </ol>
@@ -63,13 +63,17 @@
 		user-select: none;
 		-webkit-user-select: none;
 
-		&:focus {
+		&:is(:focus-within) {
 			outline: none;
-			background-color: hsl(210deg 100% 52%);
+			background-color: hsl(0deg 0% 19% / 100%);
 		}
 	}
 
 	.content {
+		height: 18px;
+		padding: 3px 0;
+		line-height: 1.15;
+
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
