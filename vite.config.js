@@ -22,6 +22,7 @@ export default defineConfig(async () => ({
 		exclude: ['@sqlite.org/sqlite-wasm']
 	},
 	define: {
-		FORCE_REMOTE_ENGINE: process.env.FORCE_REMOTE_ENGINE === 'true'
+		FORCE_REMOTE_ENGINE: process.env.FORCE_REMOTE_ENGINE === 'true',
+		WEB_APP: process.env.WEB_APP === 'true'
 	}
 }));

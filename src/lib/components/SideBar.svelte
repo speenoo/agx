@@ -55,6 +55,9 @@
 
 <style>
 	section {
+		height: 100%;
+		width: 100%;
+
 		padding: 14px 18px;
 		background-color: hsl(0deg 0% 9%);
 		display: flex;

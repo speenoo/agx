@@ -4,8 +4,6 @@
 
 @layer variables {
 	:root {
-		--window-title-bar-height: 28px;
-
 		font-size: 0.75rem;
 	}
 }
