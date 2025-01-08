@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { OLAPResponse } from '$lib/olap-engine';
-	import { Types } from './utils';
 
 	interface Props {
 		response: OLAPResponse;
@@ -9,30 +8,88 @@
 	let { response }: Props = $props();
 
 	const columns = $derived(response.meta);
-	const rows = $derived(response.data);
+
+	function formatValue(value: any) {
+		if (value === null) return 'NULL';
+		if (value === undefined) return 'UNDEFINED';
+		if (Array.isArray(value)) return JSON.stringify(value);
+		if (typeof value === 'object') return JSON.stringify(value);
+		if (typeof value === 'string' && !Number.isNaN(Number(value))) {
+			return Number(value).toLocaleString('en-US');
+		}
+		return value;
+	}
+
+	let sortedBy = $state<string | null>(null);
+	let sortDirection = $state<'asc' | 'desc'>('asc');
+
+	$effect(() => {
+		sortedBy = null;
+		sortDirection = 'asc';
+	});
+
+	const sortedRows = $derived(
+		response.data.toSorted((a, b) => {
+			if (!sortedBy) return 0;
+
+			let aVal = a[sortedBy];
+			let bVal = b[sortedBy];
+
+			const columnType = columns.find((col) => col.name === sortedBy)?.type;
+			const isDateType = columnType?.toLowerCase().includes('date');
+			const isNumberType =
+				columnType?.toLowerCase().includes('int') || columnType?.toLowerCase().includes('float');
+
+			if (isNumberType) {
+				aVal = Number(aVal);
+				bVal = Number(bVal);
+			}
+
+			if (sortDirection === 'asc') {
+				return isDateType ? (aVal < bVal ? 1 : -1) : aVal < bVal ? 1 : -1;
+			} else {
+				return isDateType ? (aVal > bVal ? 1 : -1) : aVal > bVal ? 1 : -1;
+			}
+		})
+	);
+
+	function handleSort(columnName: string) {
+		if (sortedBy === columnName) {
+			sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+		} else {
+			sortedBy = columnName;
+			sortDirection = 'asc';
+		}
+	}
 </script>
 
-<table class="Table">
-	<thead class="Table-head Table-head__sticky">
-		<tr class="Table-row">
-			<th class="Table-cell Table-cell__width__min Table-cell__align__right"> # </th>
+<table>
+	<thead>
+		<tr>
 			{#each columns as { name, type }}
-				{@const dir = Types.is_number(type) ? 'right' : 'left'}
-				<th class="Table-cell Table-cell__align__{dir}">{name} ({Types.remove_nullable(type)})</th>
+				<th onclick={() => handleSort(name)}>
+					<div class="th-content">
+						<span>{name} <i>({type.replace(/Nullable\((.*)\)/, '$1')})</i></span>
+						{#if sortedBy === name}
+							<span class="sort-arrow">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+						{/if}
+					</div>
+				</th>
 			{/each}
 		</tr>
 	</thead>
-	<tbody class="Table-body">
-		{#each rows as row, index}
-			<tr class="Table-row">
-				<td class="Table-cell Table-cell__width__min Table-cell__align__right">
-					{index}
-				</td>
+	<tbody>
+		{#each sortedRows as row, i}
+			<tr class={i % 2 === 0 ? 'even' : 'odd'}>
 				{#each columns as { name, type }}
 					{@const value = row[name]}
-					{@const dir = Types.is_number(type) ? 'right' : 'left'}
-					<td class="Table-cell Table-cell__align__{dir}">
-						{value}
+					{@const isNumberType =
+						type.toLowerCase().includes('int') || type.toLowerCase().includes('float')}
+					{@const isDateType = type.toLowerCase().includes('date')}
+					<td class:text-right={isNumberType || isDateType}>
+						<div class="td-content">
+							{formatValue(value)}
+						</div>
 					</td>
 				{/each}
 			</tr>
@@ -41,53 +98,74 @@
 </table>
 
 <style>
-	/* Reset */
 	td,
 	th {
-		padding: 0;
-	}
-
-	.Table {
-		width: 100%;
-		border-collapse: collapse;
-		border-spacing: 0;
-	}
-
-	.Table-head .Table-cell {
-		border-top: 1px solid hsl(0deg 0% 12%);
-	}
-
-	.Table-cell {
-		width: auto;
-		padding: 0 0 0 12px;
+		padding: 0 10px;
 		height: 26px;
-	}
-
-	.Table-row .Table-cell:last-child {
-		padding-right: 20px;
-	}
-
-	.Table-cell__width__min {
-		width: 1px;
+		text-align: left;
+		font-family: monospace;
+		cursor: default;
+		position: relative;
 		white-space: nowrap;
+		overflow: auto;
 	}
 
-	.Table-cell__align__right {
+	.text-right {
 		text-align: right;
 	}
 
-	.Table-cell__align__left {
-		text-align: left;
+	.th-content,
+	.td-content {
+		overflow: auto;
+		white-space: nowrap;
+		color: hsl(0deg 0% 80%);
+		position: relative;
 	}
 
-	.Table-cell__align__center {
+	.sort-arrow {
+		position: absolute;
+		right: 0;
+	}
+
+	td:not(:first-child),
+	th:not(:first-child) {
+		border-left: 1px solid hsl(0deg 0% 12%);
+	}
+
+	i {
+		font-size: 10px;
+		font-style: normal;
+		color: hsl(0deg 0% 60%);
+	}
+
+	th {
 		text-align: center;
-	}
-
-	.Table-head.Table-head__sticky .Table-cell {
-		background-color: hsl(0deg 0% 0%);
+		background-color: hsl(0deg 0% 5%);
 		position: sticky;
 		top: 0;
 		z-index: 1;
+		border-top: 1px solid hsl(0deg 0% 20%);
+		border-bottom: 1px solid hsl(0deg 0% 12%);
+		font-weight: 400;
+		cursor: pointer;
+	}
+
+	table {
+		width: 100%;
+		border-collapse: separate;
+		border-spacing: 0;
+		table-layout: fixed;
+	}
+
+	tr:hover td {
+		background-color: hsl(0deg 0% 10%);
+	}
+
+	.odd td {
+		background-color: hsl(0deg 0% 7%);
+	}
+
+	.even td {
+		background-color: hsl(0deg 0% 4%);
 	}
 </style>

@@ -63,6 +63,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 18px;
+		border-right: 1px solid hsl(0deg 0% 20%);
 	}
 
 	nav {
