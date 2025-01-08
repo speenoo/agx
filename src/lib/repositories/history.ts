@@ -1,4 +1,8 @@
 import { db, type Database } from '$lib/database';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 export interface HistoryEntry {
 	id: number;
@@ -19,7 +23,9 @@ class SQLiteHistoryRepository implements HistoryRepository {
 		return rows.map((row) => ({
 			id: row.id as number,
 			content: row.content as string,
-			timestamp: new Date(row.timestamp as string)
+			timestamp: dayjs(row.timestamp as string)
+				.utc(true)
+				.toDate()
 		}));
 	}
 
@@ -33,7 +39,9 @@ class SQLiteHistoryRepository implements HistoryRepository {
 		return {
 			id: row.id as number,
 			content: row.content as string,
-			timestamp: new Date(row.timestamp as string)
+			timestamp: dayjs(row.timestamp as string)
+				.utc(true)
+				.toDate()
 		};
 	}
 }

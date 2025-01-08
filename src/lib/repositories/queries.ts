@@ -1,4 +1,8 @@
 import { db, type Database } from '$lib/database';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 export interface Query {
 	id: number;
@@ -63,8 +67,12 @@ function row_to_query(row: Awaited<ReturnType<Database['exec']>>[number]): Query
 		id: row.id as number,
 		name: row.name as string,
 		sql: row.sql as string,
-		createdAt: new Date(row.created_at as string),
-		updatedAt: new Date(row.updated_at as string)
+		createdAt: dayjs(row.created_at as string)
+			.utc(true)
+			.toDate(),
+		updatedAt: dayjs(row.updated_at as string)
+			.utc(true)
+			.toDate()
 	};
 }
 
