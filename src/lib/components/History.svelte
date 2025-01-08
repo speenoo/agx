@@ -52,7 +52,7 @@
 
 	.time {
 		font-size: 10px;
-		color: hsl(0deg 0% 96%);
+		color: hsl(0deg 0% 70%);
 	}
 
 	li {
@@ -62,6 +62,7 @@
 		cursor: default;
 		user-select: none;
 		-webkit-user-select: none;
+		font-weight: 500;
 
 		&:is(:focus-within) {
 			outline: none;

@@ -22,10 +22,18 @@
 	let loading = $state(false);
 
 	async function handleExec() {
-		if (loading) return;
+		if (loading || !query) {
+			return;
+		}
+
 		loading = true;
 		response = await engine.exec(query).finally(() => (loading = false));
-		if (response) await addHistoryEntry();
+
+		const last = await history_repository.getLast();
+
+		if (response && last?.content !== query) {
+			await addHistoryEntry();
+		}
 	}
 
 	let tables = $state.raw<Table[]>([]);
@@ -149,7 +157,6 @@
 
 		&:is(:hover, :focus-within):not(:disabled) {
 			cursor: pointer;
-			background-color: hsl(0deg 0% 15%);
 		}
 	}
 

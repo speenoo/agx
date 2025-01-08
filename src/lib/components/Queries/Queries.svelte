@@ -154,11 +154,12 @@
 				white-space: nowrap;
 				overflow: hidden;
 				text-overflow: ellipsis;
+				font-weight: 500;
 			}
 
 			& > span.time {
 				font-size: 10px;
-				color: hsl(0deg 0% 96%);
+				color: hsl(0deg 0% 60%);
 			}
 		}
 

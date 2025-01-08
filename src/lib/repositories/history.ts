@@ -13,6 +13,7 @@ export interface HistoryEntry {
 export interface HistoryRepository {
 	getAll(): Promise<HistoryEntry[]>;
 	add(content: string): Promise<HistoryEntry>;
+	getLast(): Promise<HistoryEntry | null>;
 }
 
 class SQLiteHistoryRepository implements HistoryRepository {
@@ -27,6 +28,18 @@ class SQLiteHistoryRepository implements HistoryRepository {
 				.utc(true)
 				.toDate()
 		}));
+	}
+
+	async getLast(): Promise<HistoryEntry | null> {
+		const [row] = await this.db.exec('SELECT * FROM history ORDER BY timestamp DESC LIMIT 1');
+		if (!row) return null;
+		return {
+			id: row.id as number,
+			content: row.content as string,
+			timestamp: dayjs(row.timestamp as string)
+				.utc(true)
+				.toDate()
+		};
 	}
 
 	async add(content: string): Promise<HistoryEntry> {
