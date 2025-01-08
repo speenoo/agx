@@ -70,7 +70,7 @@
 		border-top-right-radius: 0;
 
 		width: 100%;
-		max-width: 580px;
+		max-width: 420px;
 	}
 
 	dialog[open] {

@@ -15,12 +15,25 @@
 
 	type Props = {
 		tables?: Table[];
+
 		history?: HistoryEntry[];
 		onHistoryClick?: (entry: HistoryEntry) => void;
+
 		queries?: Query[];
+		onQueryOpen?: (query: Query) => MaybePromise<void>;
+		onQueryRename?: (query: Query) => MaybePromise<void>;
+		onQueryDelete?: (query: Query) => MaybePromise<void>;
 	};
 
-	let { tables = [], history = [], onHistoryClick, queries = [] }: Props = $props();
+	let {
+		tables = [],
+		history = [],
+		onHistoryClick,
+		queries = [],
+		onQueryDelete,
+		onQueryOpen,
+		onQueryRename
+	}: Props = $props();
 </script>
 
 <section>
@@ -33,7 +46,7 @@
 		<Datasets {tables} />
 	{/if}
 	{#if tab === 'queries'}
-		<Queries {queries} />
+		<Queries {queries} ondelete={onQueryDelete} onopen={onQueryOpen} onrename={onQueryRename} />
 	{/if}
 	{#if tab === 'history'}
 		<History {history} {onHistoryClick} />

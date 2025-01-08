@@ -40,12 +40,11 @@
 {#if open}
 	<Modal onclose={() => (open = false)} bind:this={modal}>
 		<form onsubmit={handleSubmit}>
-			<h1>Save Query</h1>
 			<label>
-				<span>Name:</span>
+				<span>Name</span>
 				<input
 					type="text"
-					placeholder="Ethereum events"
+					placeholder="Price"
 					spellcheck="false"
 					autocomplete="off"
 					name="name"
@@ -63,11 +62,6 @@
 {/if}
 
 <style>
-	h1 {
-		font-size: 16px;
-		margin-top: 0;
-	}
-
 	form {
 		padding: 2rem;
 	}

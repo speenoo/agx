@@ -1,10 +1,13 @@
 <script lang="ts">
+	import { ContextMenuState } from '$lib/components/ContextMenu';
+	import ContextMenu from '$lib/components/ContextMenu/ContextMenu.svelte';
 	import { Editor } from '$lib/components/Editor';
 	import { SaveQueryModal } from '$lib/components/Queries';
 	import Result from '$lib/components/Result.svelte';
 	import SideBar from '$lib/components/SideBar.svelte';
 	import { SplitPane } from '$lib/components/SplitPane';
 	import WindowTitleBar from '$lib/components/WindowTitleBar.svelte';
+	import { set_app_context } from '$lib/context';
 	import type { Table } from '$lib/olap-engine';
 	import { engine, type OLAPResponse } from '$lib/olap-engine';
 	import { history_repository, type HistoryEntry } from '$lib/repositories/history';
@@ -68,9 +71,14 @@
 			}
 		}
 	}
+
+	const context_menu = new ContextMenuState();
+	set_app_context({ context_menu });
 </script>
 
 <svelte:window onkeydown={handleKeyDown} />
+
+<ContextMenu state={context_menu} />
 
 <WindowTitleBar>
 	{#snippet actions()}
@@ -82,7 +90,30 @@
 <section class="screen">
 	<SplitPane orientation="horizontal" position="242px" min="242px" max="40%">
 		{#snippet a()}
-			<SideBar {tables} {history} onHistoryClick={handleHistoryClick} {queries} />
+			<SideBar
+				{tables}
+				{history}
+				onHistoryClick={handleHistoryClick}
+				{queries}
+				onQueryDelete={async (query) => {
+					await query_repository.delete(query.id);
+					const index = queries.indexOf(query);
+					queries = queries.slice(0, index).concat(queries.slice(index + 1));
+				}}
+				onQueryOpen={(q) => {
+					query = q.sql;
+				}}
+				onQueryRename={async (q) => {
+					const updated = await query_repository.update(q);
+					const index = queries.findIndex((_q) => _q.id === updated.id);
+					if (index !== -1) {
+						queries = queries
+							.slice(0, index)
+							.concat(updated)
+							.concat(queries.slice(index + 1));
+					}
+				}}
+			/>
 		{/snippet}
 		{#snippet b()}
 			<SplitPane orientation="vertical" min="20%" max="80%" --color="hsl(0deg 0% 12%)">

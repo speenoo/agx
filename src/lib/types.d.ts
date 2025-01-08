@@ -1,5 +1,5 @@
-type MaybePromise<T> = T | Promise<T>;
+import type { ContextMenuState } from './components/ContextMenu';
 
 export type AppContext = {
-	tables: Table[];
+	context_menu: ContextMenuState;
 };
