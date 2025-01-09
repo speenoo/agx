@@ -28,12 +28,13 @@
 		}
 
 		loading = true;
-		response = await engine.exec(query).finally(() => (loading = false));
+		const query_to_execute = query;
+		response = await engine.exec(query_to_execute).finally(() => (loading = false));
 
 		const last = await history_repository.getLast();
 
-		if (response && last?.content !== query) {
-			await addHistoryEntry();
+		if (response && last?.content !== query_to_execute) {
+			await addHistoryEntry(query_to_execute);
 		}
 	}
 
@@ -53,7 +54,7 @@
 		});
 	});
 
-	async function addHistoryEntry() {
+	async function addHistoryEntry(query: string) {
 		try {
 			const entry = await history_repository.add(query);
 			history = [entry, ...history];
