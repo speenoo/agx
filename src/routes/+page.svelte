@@ -116,7 +116,7 @@
 	set_app_context({ context_menu });
 
 	let screen_width = $state(0);
-	let is_mobile = $derived(screen_width < 768 && WEB_APP);
+	let is_mobile = $derived(screen_width < 768 && PLATFORM === 'WEB');
 	let open_drawer = $state(false);
 
 	$effect(() => {

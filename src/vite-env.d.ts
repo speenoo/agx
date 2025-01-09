@@ -1,4 +1,3 @@
-declare const FORCE_REMOTE_ENGINE: boolean;
-declare const WEB_APP: boolean;
+declare const PLATFORM: 'NATIVE' | 'WEB';
 
 type MaybePromise<T> = T | Promise<T>;

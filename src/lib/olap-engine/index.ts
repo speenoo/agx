@@ -23,4 +23,4 @@ export interface OLAPEngine {
 	getSchema(): Promise<Table[]>;
 }
 
-export const engine: OLAPEngine = FORCE_REMOTE_ENGINE ? new RemoteEngine() : new CHDBEngine();
+export const engine: OLAPEngine = PLATFORM === 'WEB' ? new RemoteEngine() : new CHDBEngine();
