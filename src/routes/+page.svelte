@@ -196,6 +196,7 @@
 	.Tabs {
 		height: 28px;
 		display: flex;
+		border-bottom: 1px solid hsl(0deg 0% 20%);
 
 		& > .left {
 			flex: 1;
