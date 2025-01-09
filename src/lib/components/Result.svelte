@@ -52,6 +52,7 @@
 		}
 
 		& > nav {
+			flex-shrink: 0;
 			padding: 7px 5px;
 			border-top: 1px solid hsl(0deg 0% 29%);
 			user-select: none;

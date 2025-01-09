@@ -52,7 +52,6 @@
 	dialog {
 		display: block;
 		inset: 0;
-		top: var(--window-title-bar-height);
 		max-inline-size: min(90vw, 60ch);
 		max-block-size: min(80vh, 100%);
 		margin-top: 0;
