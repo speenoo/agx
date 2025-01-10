@@ -2,6 +2,7 @@
 	import type { HistoryEntry } from '$lib/repositories/history';
 	import dayjs from 'dayjs';
 	import relativeTime from 'dayjs/plugin/relativeTime';
+	import SearchBar from './SearchBar.svelte';
 
 	dayjs.extend(relativeTime);
 
@@ -11,10 +12,17 @@
 	}
 
 	let { history: entries, onHistoryClick }: Props = $props();
+
+	let search = $state('');
+
+	let filtered = $derived(
+		search ? entries.filter((e) => e.content.toLowerCase().includes(search.toLowerCase())) : entries
+	);
 </script>
 
+<SearchBar bind:value={search} />
 <ol role="menu">
-	{#each entries as entry}
+	{#each filtered as entry}
 		<li
 			tabindex="-1"
 			oncontextmenu={(e) => {
@@ -72,7 +80,7 @@
 
 	.content {
 		height: 18px;
-		font-weight: 600;
+		font-weight: 500;
 		padding: 3px 0;
 		line-height: 1.15;
 
