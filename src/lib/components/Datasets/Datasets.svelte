@@ -2,7 +2,6 @@
 	import type { Table } from '$lib/olap-engine';
 
 	import SearchBar from '$lib/components/SearchBar.svelte';
-	import Database from '$lib/icons/Database.svelte';
 	import TableC from '$lib/icons/Table.svelte';
 	import {
 		filter,
@@ -17,8 +16,6 @@
 
 	let { tables = [] }: Props = $props();
 
-	let loading = $state(false);
-
 	let search = $state<string>('');
 	const filtered = $derived(filter(tables, search));
 </script>
@@ -28,15 +25,14 @@
 	{#each filtered as source, i (source.name)}
 		<details open={i === 0}>
 			<summary>
-				{#if source.engine === 'MergeTree'}
-					<Database size="15" />
+				{#if Object.keys(SOURCE_TYPE_SHORT_NAME_MAP).includes(source.engine)}
+					<span class="Tag" style:background-color={SOURCE_TYPE_COLOR_MAP[source.engine]}>
+						{SOURCE_TYPE_SHORT_NAME_MAP[source.engine]}
+					</span>
 				{:else}
 					<TableC size="15" />
 				{/if}
 				<h3>{source.name}</h3>
-				<span class="Tag" style:background-color={SOURCE_TYPE_COLOR_MAP[source.engine]}>
-					{SOURCE_TYPE_SHORT_NAME_MAP[source.engine]}
-				</span>
 			</summary>
 			<ul>
 				{#each source.columns ?? [] as column}
@@ -94,6 +90,8 @@
 	}
 
 	h3 {
+		font-size: 1rem;
+		font-weight: 500;
 		margin: 0;
 	}
 

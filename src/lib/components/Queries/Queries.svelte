@@ -3,6 +3,7 @@
 	import type { Query } from '$lib/repositories/queries';
 	import dayjs from 'dayjs';
 	import relativeTime from 'dayjs/plugin/relativeTime';
+	import SearchBar from '../SearchBar.svelte';
 
 	dayjs.extend(relativeTime);
 
@@ -29,10 +30,25 @@
 
 	let input = $state.raw<HTMLInputElement>();
 	$effect(() => input?.focus());
+
+	let search = $state('');
+	const filtered = $derived(search ? filter(queries, search) : queries);
+
+	function filter(queries: Query[], search: string) {
+		if (!search) return queries;
+
+		const lower_search = search.toLowerCase();
+		return queries.filter((q) => {
+			return (
+				q.name.toLowerCase().includes(lower_search) || q.sql.toLowerCase().includes(lower_search)
+			);
+		});
+	}
 </script>
 
+<SearchBar bind:value={search} />
 <ol role="menu">
-	{#each queries as query (query.id)}
+	{#each filtered as query (query.id)}
 		<li
 			tabindex="-1"
 			oncontextmenu={(e) => {
@@ -139,7 +155,7 @@
 					-webkit-appearance: none;
 					width: 100%;
 					height: 18px;
-					font-weight: 600;
+					font-weight: 500;
 					outline: none;
 					margin: 0;
 					padding: 0;

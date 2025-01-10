@@ -14,13 +14,13 @@ export function filter(sources: Table[], search: string) {
 export const SOURCE_TYPE_COLOR_MAP: Record<string, string> = {
 	FILE: 'hsl(58deg 37% 28%)',
 	S3: 'hsl(20deg 37% 28%)',
-	MergeTree: 'hsl(199deg 37% 28%)'
+	ReplacingMergeTree: 'hsl(199deg 37% 28%)'
 };
 
 export const SOURCE_TYPE_SHORT_NAME_MAP: Record<string, string> = {
 	FILE: 'FILE',
 	S3: 'S3',
-	MergeTree: 'MT'
+	ReplacingMergeTree: 'MT'
 };
 
 export function remove_nullable(type: string) {
