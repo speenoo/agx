@@ -122,6 +122,13 @@
 	$effect(() => {
 		if (!is_mobile) open_drawer = false;
 	});
+
+	let tabs = [
+		{ id: '', content: 'select 1', name: 'new' },
+		{ id: '', content: 'select 2', name: 'query1' },
+		{ id: '', content: 'select 3', name: 'query2' }
+	];
+	let selected_tab = $state(0);
 </script>
 
 <svelte:window onkeydown={handleKeyDown} bind:innerWidth={screen_width} />
@@ -169,7 +176,18 @@
 										<Bars3 size="12" />
 									</button>
 								{/if}
+								<span class="tabs">
+									{#each tabs as tab, i}
+										<div
+											class="tab {i === selected_tab ? 'active' : ''}"
+											onclick={() => (selected_tab = i)}
+										>
+											<span>{tab.name}</span>
+										</div>
+									{/each}
+								</span>
 							</div>
+							<div></div>
 							<div class="right">
 								<button onclick={() => save_query_modal?.show()} disabled={!query}>
 									<Save size="12" />
@@ -177,9 +195,11 @@
 								<button onclick={handleExec} disabled={loading}><Play size="12" /></button>
 							</div>
 						</nav>
-						<div>
-							<Editor bind:value={query} onExec={handleExec} {tables} />
-						</div>
+						{#each tabs as tab, i}
+							<div style={`display: ${selected_tab == i ? 'block' : 'none'}`}>
+								<Editor bind:value={tab.content} onExec={handleExec} {tables} />
+							</div>
+						{/each}
 					</div>
 				{/snippet}
 				{#snippet b()}
@@ -200,6 +220,8 @@
 
 		& > .left {
 			flex: 1;
+			align-items: center;
+			height: 100%;
 		}
 
 		& > .right {
@@ -208,7 +230,6 @@
 		}
 
 		& button {
-			height: 100%;
 			background-color: transparent;
 			border-radius: 0;
 		}
@@ -216,6 +237,21 @@
 		& ~ div {
 			height: calc(100% - 28px);
 		}
+	}
+
+	.tab {
+		font-size: 11px;
+		border-right: 1px solid hsl(0deg 0% 20%);
+		padding: 0 10px 0 10px;
+		display: inline-flex;
+		align-items: center;
+		height: 100%;
+		color: hsl(0deg 0% 70%);
+	}
+
+	.active {
+		background-color: hsl(0deg 0% 12%);
+		color: white;
 	}
 
 	button {
