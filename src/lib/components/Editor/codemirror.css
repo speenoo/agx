@@ -1,6 +1,8 @@
 .cm-editor {
 	height: 100%;
 	width: 100%;
+	font-size: 11px;
+	line-height: 1.5;
 }
 
 .cm-editor.cm-focused {
@@ -16,7 +18,7 @@
 	border: none;
 	user-select: none;
 	-webkit-user-select: none;
-	color: hsl(0deg 0% 52%);
+	color: hsl(0deg 0% 40%);
 }
 
 .cm-editor .cm-scroller {
@@ -26,6 +28,7 @@
 
 .cm-editor .cm-gutters .cm-gutterElement {
 	width: 35px;
+	padding-right: 10px;
 }
 
 .cm-editor .cm-tooltip {
@@ -39,7 +42,7 @@
 
 .cm-editor .cm-tooltip.cm-tooltip-autocomplete > ul {
 	font:
-		14px/1.5 Menlo,
+		11px/1.5 Menlo,
 		Consolas,
 		monospace;
 	border-radius: 8px;
