@@ -184,7 +184,7 @@
 
 	function closeTab(index: number) {
 		tabs.splice(index, 1);
-		selected_tab_index = Math.max(0, index - 1);
+		selected_tab_index = Math.max(0, selected_tab_index - 1);
 	}
 </script>
 
@@ -246,7 +246,8 @@
 
 										<button
 											class="close"
-											class:hidden={tabs.length === 1 || i !== selected_tab_index}
+											class:hidden={tabs.length === 1}
+											disabled={tabs.length === 1}
 											onclick={(e) => {
 												e.stopPropagation();
 												closeTab(i);
@@ -336,7 +337,7 @@
 		height: 100%;
 		font-size: 11px;
 		border-right: 1px solid hsl(0deg 0% 20%);
-		padding: 0 16px 0 10px;
+		padding: 0 16px;
 		display: inline-flex;
 		align-items: center;
 		height: 100%;
@@ -361,10 +362,15 @@
 			background-color: transparent;
 			right: 0;
 			padding: 2px;
+			opacity: 0;
 
 			&.hidden {
 				display: none;
 			}
+		}
+
+		&:hover > .close {
+			opacity: 1;
 		}
 	}
 
