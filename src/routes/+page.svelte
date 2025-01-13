@@ -21,7 +21,6 @@
 
 	let response = $state.raw<OLAPResponse>();
 
-	let query = $state('');
 	let loading = $state(false);
 
 	async function handleExec() {
@@ -64,7 +63,10 @@
 	}
 
 	function handleHistoryClick(entry: HistoryEntry) {
-		query = entry.content;
+		if (current_tab.contents) {
+			selected_tab_index =
+				tabs.push({ id: crypto.randomUUID(), contents: entry.content, name: 'Untitled' }) - 1;
+		} else tabs[selected_tab_index] = { ...current_tab, contents: entry.content };
 		if (is_mobile) open_drawer = false;
 	}
 
@@ -74,12 +76,10 @@
 
 	let save_query_modal = $state<ReturnType<typeof SaveQueryModal>>();
 
-	function handleKeyDown(event: KeyboardEvent) {
+	async function handleKeyDown(event: KeyboardEvent) {
 		if (event.key === 's' && event.metaKey) {
-			if (query) {
-				event.preventDefault();
-				save_query_modal?.show();
-			}
+			event.preventDefault();
+			handleSaveQuery();
 		}
 
 		if (event.key === 'Enter' && event.metaKey) handleExec();
@@ -88,8 +88,9 @@
 	async function handleCreateQuery({
 		name
 	}: Parameters<NonNullable<ComponentProps<typeof SaveQueryModal>['onCreate']>>['0']) {
-		const q = await query_repository.create(name, query);
+		const q = await query_repository.create(name, current_tab.contents);
 		queries = queries.concat(q);
+		tabs[selected_tab_index] = { ...current_tab, name, query_id: q.id };
 	}
 
 	async function handleDeleteQuery(query: Query) {
@@ -97,8 +98,26 @@
 		queries = queries.toSpliced(queries.indexOf(query), 1);
 	}
 
-	function handleQueryOpen(_query: Query) {
-		query = _query.sql;
+	function handleQueryOpen(query: Query) {
+		const index = tabs.findIndex((t) => t.query_id === query.id);
+		if (index === -1) {
+			if (current_tab.contents) {
+				selected_tab_index =
+					tabs.push({
+						id: crypto.randomUUID(),
+						contents: query.sql,
+						name: query.name,
+						query_id: query.id
+					}) - 1;
+			} else
+				tabs[selected_tab_index] = {
+					...current_tab,
+					contents: query.sql,
+					name: query.name,
+					query_id: query.id
+				};
+		} else selected_tab_index = index;
+
 		if (is_mobile) open_drawer = false;
 	}
 
@@ -106,6 +125,24 @@
 		const updated = await query_repository.update(query);
 		const index = queries.findIndex((query) => query.id === updated.id);
 		if (index !== -1) queries = queries.with(index, updated);
+
+		const tab_index = tabs.findIndex((t) => t.query_id === updated.id);
+		if (tab_index !== -1) {
+			tabs[tab_index] = { ...tabs[tab_index], name: updated.name, contents: updated.sql };
+		}
+	}
+
+	async function handleSaveQuery() {
+		const { contents, query_id } = current_tab;
+		if (contents && !query_id) {
+			return save_query_modal?.show();
+		}
+
+		const index = queries.findIndex((q) => q.id === query_id);
+		if (index !== -1) {
+			const updated = await query_repository.update({ ...queries[index], sql: contents });
+			queries = queries.with(index, updated);
+		}
 	}
 
 	const context_menu = new ContextMenuState();
@@ -129,6 +166,15 @@
 	let tabs = $state<Tab[]>([{ id: crypto.randomUUID(), contents: '', name: 'Untitled' }]);
 	let selected_tab_index = $state(0);
 	const current_tab = $derived(tabs[selected_tab_index]);
+	const can_save = $derived.by(() => {
+		if (current_tab.query_id) {
+			const query = queries.find((q) => q.id === current_tab.query_id);
+			if (!query) return true;
+			return query.sql !== current_tab.contents;
+		}
+
+		return !!current_tab.contents;
+	});
 
 	function addNewTab() {
 		const next_index = tabs.length;
@@ -220,7 +266,7 @@
 								</button>
 							</div>
 							<div class="workspace-actions">
-								<button class="action" onclick={() => save_query_modal?.show()} disabled={!query}>
+								<button class="action" onclick={handleSaveQuery} disabled={!can_save}>
 									<Save size="12" />
 								</button>
 								<button class="action" onclick={handleExec} disabled={loading}>
