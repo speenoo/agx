@@ -9,7 +9,9 @@
 	import { set_app_context } from '$lib/context';
 	import Bars3 from '$lib/icons/Bars3.svelte';
 	import Play from '$lib/icons/Play.svelte';
+	import Plus from '$lib/icons/Plus.svelte';
 	import Save from '$lib/icons/Save.svelte';
+	import XMark from '$lib/icons/XMark.svelte';
 	import type { Table } from '$lib/olap-engine';
 	import { engine, type OLAPResponse } from '$lib/olap-engine';
 	import { history_repository, type HistoryEntry } from '$lib/repositories/history';
@@ -23,19 +25,17 @@
 	let loading = $state(false);
 
 	async function handleExec() {
+		const query = current_tab.contents;
 		if (loading || !query) {
 			return;
 		}
 
 		loading = true;
-		const query_to_execute = query;
-		response = await engine.exec(query_to_execute).finally(() => (loading = false));
+		response = await engine.exec(query).finally(() => (loading = false));
 
 		const last = await history_repository.getLast();
 
-		if (response && last?.content !== query_to_execute) {
-			await addHistoryEntry(query_to_execute);
-		}
+		if (response && last?.content !== query) await addHistoryEntry(query);
 	}
 
 	let tables = $state.raw<Table[]>([]);
@@ -81,6 +81,8 @@
 				save_query_modal?.show();
 			}
 		}
+
+		if (event.key === 'Enter' && event.metaKey) handleExec();
 	}
 
 	async function handleCreateQuery({
@@ -92,8 +94,7 @@
 
 	async function handleDeleteQuery(query: Query) {
 		await query_repository.delete(query.id);
-		const index = queries.indexOf(query);
-		queries = queries.slice(0, index).concat(queries.slice(index + 1));
+		queries = queries.toSpliced(queries.indexOf(query), 1);
 	}
 
 	function handleQueryOpen(_query: Query) {
@@ -104,12 +105,7 @@
 	async function handleQueryRename(query: Query) {
 		const updated = await query_repository.update(query);
 		const index = queries.findIndex((query) => query.id === updated.id);
-		if (index !== -1) {
-			queries = queries
-				.slice(0, index)
-				.concat(updated)
-				.concat(queries.slice(index + 1));
-		}
+		if (index !== -1) queries = queries.with(index, updated);
 	}
 
 	const context_menu = new ContextMenuState();
@@ -123,12 +119,27 @@
 		if (!is_mobile) open_drawer = false;
 	});
 
-	let tabs = [
-		{ id: '', content: 'select 1', name: 'new' },
-		{ id: '', content: 'select 2', name: 'query1' },
-		{ id: '', content: 'select 3', name: 'query2' }
-	];
-	let selected_tab = $state(0);
+	interface Tab {
+		id: string;
+		contents: string;
+		name: string;
+		query_id?: Query['id'];
+	}
+
+	let tabs = $state<Tab[]>([{ id: crypto.randomUUID(), contents: '', name: 'Untitled' }]);
+	let selected_tab_index = $state(0);
+	const current_tab = $derived(tabs[selected_tab_index]);
+
+	function addNewTab() {
+		const next_index = tabs.length;
+		tabs.push({ id: crypto.randomUUID(), name: 'Untitled', contents: '' });
+		selected_tab_index = next_index;
+	}
+
+	function closeTab(index: number) {
+		tabs.splice(index, 1);
+		selected_tab_index = Math.max(0, index - 1);
+	}
 </script>
 
 <svelte:window onkeydown={handleKeyDown} bind:innerWidth={screen_width} />
@@ -169,35 +180,57 @@
 			<SplitPane type="vertical" min="20%" max="80%" --color="hsl(0deg 0% 12%)">
 				{#snippet a()}
 					<div>
-						<nav class="Tabs">
-							<div class="left">
+						<nav class="navigation">
+							<div class="tabs-container">
 								{#if is_mobile}
-									<button onclick={() => (open_drawer = true)}>
+									<button class="action" onclick={() => (open_drawer = true)}>
 										<Bars3 size="12" />
 									</button>
 								{/if}
-								<span class="tabs">
-									{#each tabs as tab, i}
-										<div
-											class="tab {i === selected_tab ? 'active' : ''}"
-											onclick={() => (selected_tab = i)}
+								{#each tabs as tab, i}
+									<div
+										class="tab"
+										class:active={i === selected_tab_index}
+										role="button"
+										onclick={() => (selected_tab_index = i)}
+										tabindex="0"
+										onkeyup={() => {}}
+									>
+										<span>{tab.name}</span>
+
+										<button
+											class="close"
+											class:hidden={tabs.length === 1 || i !== selected_tab_index}
+											onclick={(e) => {
+												e.stopPropagation();
+												closeTab(i);
+											}}
 										>
-											<span>{tab.name}</span>
-										</div>
-									{/each}
-								</span>
+											<XMark size="12" />
+										</button>
+									</div>
+								{/each}
+								<button
+									onclick={addNewTab}
+									class="add-new"
+									aria-label="Open new tab"
+									title="Open new tab"
+								>
+									<Plus size="14" />
+								</button>
 							</div>
-							<div></div>
-							<div class="right">
-								<button onclick={() => save_query_modal?.show()} disabled={!query}>
+							<div class="workspace-actions">
+								<button class="action" onclick={() => save_query_modal?.show()} disabled={!query}>
 									<Save size="12" />
 								</button>
-								<button onclick={handleExec} disabled={loading}><Play size="12" /></button>
+								<button class="action" onclick={handleExec} disabled={loading}>
+									<Play size="12" />
+								</button>
 							</div>
 						</nav>
 						{#each tabs as tab, i}
-							<div style={`display: ${selected_tab == i ? 'block' : 'none'}`}>
-								<Editor bind:value={tab.content} onExec={handleExec} {tables} />
+							<div style:display={selected_tab_index == i ? 'block' : 'none'}>
+								<Editor bind:value={tab.contents} {tables} />
 							</div>
 						{/each}
 					</div>
@@ -213,23 +246,37 @@
 <SaveQueryModal bind:this={save_query_modal} onCreate={handleCreateQuery} />
 
 <style>
-	.Tabs {
+	.navigation {
 		height: 28px;
 		display: flex;
-		border-bottom: 1px solid hsl(0deg 0% 20%);
 
-		& > .left {
-			flex: 1;
-			align-items: center;
-			height: 100%;
+		position: relative;
+
+		&::before {
+			content: '';
+			position: absolute;
+			width: 100%;
+			height: 1px;
+			bottom: 0px;
+			left: 0;
+			background-color: hsl(0deg 0% 20%);
+			z-index: 1;
 		}
 
-		& > .right {
+		& > .tabs-container {
+			flex: 1;
+			display: flex;
+			align-items: center;
+			height: 100%;
+			overflow-x: hidden;
+		}
+
+		& > .workspace-actions {
 			display: flex;
 			gap: 0px;
 		}
 
-		& button {
+		& button.action {
 			background-color: transparent;
 			border-radius: 0;
 		}
@@ -240,18 +287,61 @@
 	}
 
 	.tab {
+		height: 100%;
 		font-size: 11px;
 		border-right: 1px solid hsl(0deg 0% 20%);
-		padding: 0 10px 0 10px;
+		padding: 0 16px 0 10px;
 		display: inline-flex;
 		align-items: center;
 		height: 100%;
 		color: hsl(0deg 0% 70%);
+		position: relative;
+
+		&:hover {
+			cursor: pointer;
+		}
+
+		&.active {
+			background-color: hsl(0deg 0% 5%);
+			color: hsl(0deg 0% 100%);
+			z-index: 2;
+		}
+
+		& > .close {
+			position: absolute;
+
+			display: flex;
+			place-items: center;
+			background-color: transparent;
+			right: 0;
+			padding: 2px;
+
+			&.hidden {
+				display: none;
+			}
+		}
 	}
 
-	.active {
-		background-color: hsl(0deg 0% 12%);
-		color: white;
+	.add-new {
+		height: calc(100% - 8px);
+		aspect-ratio: 1;
+		padding: 4px;
+		margin-left: 4px;
+		border-radius: 4px;
+
+		&:hover {
+			cursor: pointer;
+			background-color: hsl(0deg 0% 17%);
+		}
+
+		&:active {
+			background-color: hsl(0deg 0% 20%);
+		}
+
+		& :global(svg) {
+			width: 100%;
+			height: 100%;
+		}
 	}
 
 	button {
