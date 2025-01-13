@@ -27,7 +27,7 @@
 	label {
 		width: 100%;
 		background-color: hsl(0deg 0% 3%);
-		border: 1px solid hsl(0deg 0% 3%);
+		border: 1px solid hsl(0deg 0% 20%);
 		border-radius: 3px;
 
 		display: flex;

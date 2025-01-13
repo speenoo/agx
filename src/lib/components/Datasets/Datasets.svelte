@@ -118,6 +118,7 @@
 		/* Custom style */
 		padding: 12px 0;
 		padding-left: 5px;
+		color: hsl(0deg 0% 90%);
 
 		& > li {
 			display: flex;
@@ -132,7 +133,8 @@
 				font-weight: 500;
 				padding: 2px;
 				border-radius: 3px;
-				background-color: hsl(0deg 0% 19%);
+				background-color: hsl(0deg 0% 15%);
+				color: hsl(0deg 0% 70%);
 				text-align: center;
 				font-family: 'Fira Mono', monospace;
 
