@@ -58,7 +58,7 @@
 		height: 100%;
 		width: 100%;
 
-		padding: 14px 18px;
+		padding: 14px 25px;
 		background-color: hsl(0deg 0% 5%);
 		display: flex;
 		flex-direction: column;
@@ -68,8 +68,7 @@
 
 	nav {
 		display: flex;
-		justify-content: center;
-		gap: 12px;
+		justify-content: space-between;
 
 		& > button {
 			font-size: 10px;

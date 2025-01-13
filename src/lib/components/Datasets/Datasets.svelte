@@ -68,7 +68,7 @@
 		align-items: center;
 		gap: 5px;
 
-		padding: 3px 5px;
+		padding: 3px 0px;
 		border-radius: 3px;
 
 		&::-webkit-details-marker {
@@ -117,7 +117,6 @@
 
 		/* Custom style */
 		padding: 12px 0;
-		padding-left: 5px;
 		color: hsl(0deg 0% 90%);
 
 		& > li {
