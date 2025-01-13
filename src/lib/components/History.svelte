@@ -41,6 +41,10 @@
 					e.currentTarget.blur();
 				}
 			}}
+			ontouchend={(e) => {
+				onHistoryClick?.(entry);
+				e.currentTarget.blur();
+			}}
 		>
 			<div class="content">{entry.content}</div>
 			<span class="time">{dayjs(entry.timestamp).fromNow()}</span>

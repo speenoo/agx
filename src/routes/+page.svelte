@@ -253,7 +253,7 @@
 												closeTab(i);
 											}}
 										>
-											<XMark size="12" />
+											<XMark size="10" />
 										</button>
 									</div>
 								{/each}
@@ -275,7 +275,7 @@
 								</button>
 							</div>
 						</nav>
-						{#each tabs as tab, i}
+						{#each tabs as tab, i (tab.id)}
 							<div style:display={selected_tab_index == i ? 'block' : 'none'}>
 								<Editor bind:value={tab.contents} {tables} />
 							</div>
@@ -343,6 +343,8 @@
 		height: 100%;
 		color: hsl(0deg 0% 70%);
 		position: relative;
+		user-select: none;
+		-webkit-user-select: none;
 
 		&:hover {
 			cursor: pointer;
