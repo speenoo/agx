@@ -248,6 +248,11 @@
 						<div>
 							<nav class="navigation">
 								<div class="tabs-container">
+									{#if isMobile}
+										<button class="action burger" onclick={() => (drawerOpened = true)}>
+											<Bars3 size="12" />
+										</button>
+									{/if}
 									{#each tabs as tab, i}
 										<TabComponent
 											hide-close={tabs.length === 1}
@@ -290,11 +295,6 @@
 		</SplitPane>
 	</div>
 	<footer>
-		{#if isMobile}
-			<button onclick={() => (drawerOpened = true)}>
-				<Bars3 size="12" />
-			</button>
-		{/if}
 		<button
 			class:active={responsePanelOpened}
 			onclick={() => (responsePanelOpened = !responsePanelOpened)}
@@ -342,9 +342,16 @@
 			aspect-ratio: 1;
 			background-color: transparent;
 			border-radius: 0;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+
+			&.burger {
+				border-right: 1px solid hsl(0deg 0% 20%);
+			}
 
 			&:is(:hover, :focus-within):not(:disabled) {
-				background: hsl(0deg 0% 10%);
+				background-color: hsl(0deg 0% 10%);
 			}
 		}
 
@@ -416,7 +423,11 @@
 			}
 
 			&:is(:hover):not(:disabled) {
-				background: hsl(0deg 0% 10%);
+				background-color: hsl(0deg 0% 10%);
+
+				&:active {
+					background-color: hsl(0deg 0% 13%);
+				}
 			}
 		}
 	}

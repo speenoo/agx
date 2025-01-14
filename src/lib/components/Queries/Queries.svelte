@@ -76,10 +76,16 @@
 				});
 			}}
 			role="menuitem"
-			onkeydown={(e) => {
-				if (e.key === 'Enter' && !editingId) {
+			onkeydown={async (e) => {
+				if (editingId) return;
+				if (e.key === 'Enter') {
 					e.preventDefault();
 					editingId = query.id;
+				}
+
+				if (e.key === 'Backspace') {
+					await onDelete?.(query);
+					e.currentTarget.blur();
 				}
 			}}
 			onclick={async (e) => {
