@@ -204,7 +204,7 @@
 
 		& > .right {
 			display: flex;
-			gap: 2px;
+			gap: 0px;
 		}
 
 		& button {
@@ -225,11 +225,12 @@
 		font-size: 10px;
 		font-weight: 500;
 		background-color: hsl(0deg 0% 9%);
-		padding: 4px 10px;
+		padding: 4px 2;
 		border-radius: 3px;
 
 		&:is(:hover, :focus-within):not(:disabled) {
 			cursor: pointer;
+			background: hsl(0deg 0% 10%);
 		}
 	}
 
