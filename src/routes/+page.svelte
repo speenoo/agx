@@ -26,7 +26,7 @@
 	let loading = $state(false);
 
 	async function handleExec() {
-		const query = current_tab.contents;
+		const query = currentTab.contents;
 		if (loading || !query) {
 			return;
 		}
@@ -65,10 +65,10 @@
 	}
 
 	function handleHistoryClick(entry: HistoryEntry) {
-		if (current_tab.contents) {
-			selected_tab_index =
+		if (currentTab.contents) {
+			selectedTabIndex =
 				tabs.push({ id: crypto.randomUUID(), contents: entry.content, name: 'Untitled' }) - 1;
-		} else tabs[selected_tab_index] = { ...current_tab, contents: entry.content };
+		} else tabs[selectedTabIndex] = { ...currentTab, contents: entry.content };
 		if (is_mobile) open_drawer = false;
 	}
 
@@ -90,9 +90,9 @@
 	async function handleCreateQuery({
 		name
 	}: Parameters<NonNullable<ComponentProps<typeof SaveQueryModal>['onCreate']>>['0']) {
-		const q = await query_repository.create(name, current_tab.contents);
+		const q = await query_repository.create(name, currentTab.contents);
 		queries = queries.concat(q);
-		tabs[selected_tab_index] = { ...current_tab, name, query_id: q.id };
+		tabs[selectedTabIndex] = { ...currentTab, name, query_id: q.id };
 	}
 
 	async function handleDeleteQuery(query: Query) {
@@ -103,8 +103,8 @@
 	function handleQueryOpen(query: Query) {
 		const index = tabs.findIndex((t) => t.query_id === query.id);
 		if (index === -1) {
-			if (current_tab.contents) {
-				selected_tab_index =
+			if (currentTab.contents) {
+				selectedTabIndex =
 					tabs.push({
 						id: crypto.randomUUID(),
 						contents: query.sql,
@@ -112,13 +112,13 @@
 						query_id: query.id
 					}) - 1;
 			} else
-				tabs[selected_tab_index] = {
-					...current_tab,
+				tabs[selectedTabIndex] = {
+					...currentTab,
 					contents: query.sql,
 					name: query.name,
 					query_id: query.id
 				};
-		} else selected_tab_index = index;
+		} else selectedTabIndex = index;
 
 		if (is_mobile) open_drawer = false;
 	}
@@ -135,7 +135,7 @@
 	}
 
 	async function handleSaveQuery() {
-		const { contents, query_id } = current_tab;
+		const { contents, query_id: query_id } = currentTab;
 		if (contents && !query_id) {
 			return save_query_modal?.show();
 		}
@@ -158,43 +158,42 @@
 		if (!is_mobile) open_drawer = false;
 	});
 
-	let tabs = $state<Tab[]>([{ id: crypto.randomUUID(), contents: '', name: 'Untitled' }]);
+	let tabs = $state<Tab[]>([]);
 	$effect(
 		() =>
-			void tab_repository.get().then((t) => {
-				if (t.length) tabs = t;
+			void tab_repository.get().then(([t, active]) => {
+				if (t.length) (tabs = t), (selectedTabIndex = active);
+				else tabs.push({ id: crypto.randomUUID(), contents: '', name: 'Untitled' });
 			})
 	);
 
-	const set_tabs = debounce((tabs: Tab[]) => tab_repository.set(tabs), 300);
+	const saveTabs = debounce(
+		(tabs: Tab[], activeIndex: number) => tab_repository.save(tabs, activeIndex),
+		2_000
+	);
 
-	let selected_tab_index = $state(0);
-	const current_tab = $derived(tabs[selected_tab_index]);
-	const can_save = $derived.by(() => {
-		if (current_tab.query_id) {
-			const query = queries.find((q) => q.id === current_tab.query_id);
-			if (!query) return true;
-			return query.sql !== current_tab.contents;
+	let selectedTabIndex = $state(0);
+	const currentTab = $derived(tabs[selectedTabIndex]);
+	const canSave = $derived.by(() => {
+		if (!tabs.length) return false;
+		if (currentTab.query_id) {
+			const query = queries.find((q) => q.id === currentTab.query_id);
+			return query?.sql !== currentTab.contents;
 		}
 
-		return !!current_tab.contents;
+		return !!currentTab.contents;
 	});
 
 	function addNewTab() {
-		const next_index = tabs.length;
-		tabs.push({ id: crypto.randomUUID(), name: 'Untitled', contents: '' });
-		selected_tab_index = next_index;
+		selectedTabIndex = tabs.push({ id: crypto.randomUUID(), name: 'Untitled', contents: '' }) - 1;
 	}
 
 	function closeTab(index: number) {
 		tabs.splice(index, 1);
-		selected_tab_index = Math.max(0, selected_tab_index - 1);
+		selectedTabIndex = Math.max(0, selectedTabIndex - 1);
 	}
 
-	$effect(() => {
-		$state.snapshot(tabs);
-		set_tabs(tabs).catch(console.error);
-	});
+	$effect(() => void saveTabs($state.snapshot(tabs), selectedTabIndex).catch(console.error));
 </script>
 
 <svelte:window onkeydown={handleKeyDown} bind:innerWidth={screen_width} />
@@ -245,10 +244,10 @@
 								{#each tabs as tab, i}
 									<TabComponent
 										close-hidden={tabs.length === 1}
-										active={i === selected_tab_index}
+										active={i === selectedTabIndex}
 										label={tab.name}
 										onClose={() => closeTab(i)}
-										onSelect={() => (selected_tab_index = i)}
+										onSelect={() => (selectedTabIndex = i)}
 									/>
 								{/each}
 								<button
@@ -261,7 +260,7 @@
 								</button>
 							</div>
 							<div class="workspace-actions">
-								<button class="action" onclick={handleSaveQuery} disabled={!can_save}>
+								<button class="action" onclick={handleSaveQuery} disabled={!canSave}>
 									<Save size="12" />
 								</button>
 								<button class="action" onclick={handleExec} disabled={loading}>
@@ -270,7 +269,7 @@
 							</div>
 						</nav>
 						{#each tabs as tab, i (tab.id)}
-							<div style:display={selected_tab_index == i ? 'block' : 'none'}>
+							<div style:display={selectedTabIndex == i ? 'block' : 'none'}>
 								<Editor bind:value={tab.contents} {tables} />
 							</div>
 						{/each}
@@ -318,8 +317,14 @@
 		}
 
 		& button.action {
+			height: 100%;
+			aspect-ratio: 1;
 			background-color: transparent;
 			border-radius: 0;
+
+			&:is(:hover, :focus-within):not(:disabled) {
+				background: hsl(0deg 0% 10%);
+			}
 		}
 
 		& ~ div {
@@ -330,9 +335,13 @@
 	.add-new {
 		height: calc(100% - 8px);
 		aspect-ratio: 1;
-		padding: 4px;
+		display: flex;
+		place-items: center;
+		justify-content: center;
+		padding: 0;
 		margin-left: 4px;
 		border-radius: 4px;
+		background-color: transparent;
 
 		&:hover {
 			cursor: pointer;
@@ -350,13 +359,9 @@
 		border: none;
 		font-size: 10px;
 		font-weight: 500;
-		background-color: hsl(0deg 0% 9%);
-		padding: 4px 2;
-		border-radius: 3px;
 
 		&:is(:hover, :focus-within):not(:disabled) {
 			cursor: pointer;
-			background: hsl(0deg 0% 10%);
 		}
 	}
 

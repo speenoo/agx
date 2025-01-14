@@ -36,7 +36,7 @@
 						value = update.state.doc.toString();
 					}
 				}),
-				placeholder('Enter a query...')
+				placeholder('Type your query...')
 			]
 		});
 

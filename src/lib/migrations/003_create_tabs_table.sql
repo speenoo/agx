@@ -3,5 +3,6 @@ CREATE TABLE IF NOT EXISTS tabs (
     name TEXT NOT NULL,
     contents TEXT NOT NULL,
     query_id INTEGER,
-    tab_index INTEGER NOT NULL
+    tab_index INTEGER NOT NULL,
+    active BOOL NOT NULL DEFAULT FALSE
 );
