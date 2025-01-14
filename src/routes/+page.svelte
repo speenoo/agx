@@ -16,7 +16,9 @@
 	import { engine, type OLAPResponse } from '$lib/olap-engine';
 	import { history_repository, type HistoryEntry } from '$lib/repositories/history';
 	import { query_repository, type Query } from '$lib/repositories/queries';
+	import { tab_repository, type Tab } from '$lib/repositories/tabs';
 	import { SplitPane } from '@rich_harris/svelte-split-pane';
+	import debounce from 'p-debounce';
 	import type { ComponentProps } from 'svelte';
 
 	let response = $state.raw<OLAPResponse>();
@@ -156,14 +158,16 @@
 		if (!is_mobile) open_drawer = false;
 	});
 
-	interface Tab {
-		id: string;
-		contents: string;
-		name: string;
-		query_id?: Query['id'];
-	}
-
 	let tabs = $state<Tab[]>([{ id: crypto.randomUUID(), contents: '', name: 'Untitled' }]);
+	$effect(
+		() =>
+			void tab_repository.get().then((t) => {
+				if (t.length) tabs = t;
+			})
+	);
+
+	const set_tabs = debounce((tabs: Tab[]) => tab_repository.set(tabs), 300);
+
 	let selected_tab_index = $state(0);
 	const current_tab = $derived(tabs[selected_tab_index]);
 	const can_save = $derived.by(() => {
@@ -186,6 +190,11 @@
 		tabs.splice(index, 1);
 		selected_tab_index = Math.max(0, selected_tab_index - 1);
 	}
+
+	$effect(() => {
+		$state.snapshot(tabs);
+		set_tabs(tabs).catch(console.error);
+	});
 </script>
 
 <svelte:window onkeydown={handleKeyDown} bind:innerWidth={screen_width} />
