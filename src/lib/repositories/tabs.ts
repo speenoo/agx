@@ -36,7 +36,7 @@ VALUES ${Array.from({ length: rows.length }).fill('(?,?,?,?,?, ?)').join(',\n')}
 					r.contents,
 					r.query_id ?? null,
 					r.tab_index,
-					r.tab_index === activeIndex
+					r.tab_index === activeIndex || null
 				])
 				.flat()
 		);
