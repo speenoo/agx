@@ -9,6 +9,7 @@
 	import TabComponent from '$lib/components/Tab.svelte';
 	import { setAppContext } from '$lib/context';
 	import Bars3 from '$lib/icons/Bars3.svelte';
+	import CommandLine from '$lib/icons/CommandLine.svelte';
 	import Play from '$lib/icons/Play.svelte';
 	import Plus from '$lib/icons/Plus.svelte';
 	import Save from '$lib/icons/Save.svelte';
@@ -216,81 +217,91 @@
 {/snippet}
 
 <section class="screen">
-	{#if isMobile}
-		<Drawer bind:open={drawerOpened} width={242}>
-			{@render sidebar()}
-		</Drawer>
-	{/if}
-	<SplitPane
-		type="horizontal"
-		disabled={isMobile}
-		pos={isMobile ? '0px' : '242px'}
-		min={isMobile ? '0px' : '242px'}
-		max="40%"
-	>
-		{#snippet a()}
-			{#if !isMobile}
+	<div class="workspace">
+		{#if isMobile}
+			<Drawer bind:open={drawerOpened} width={242}>
 				{@render sidebar()}
-			{/if}
-		{/snippet}
-		{#snippet b()}
-			<SplitPane
-				type="vertical"
-				min="20%"
-				max={responsePanelOpened ? '80%' : '100%'}
-				pos={responsePanelOpened ? '65%' : '100%'}
-				disabled={!responsePanelOpened}
-				--color="hsl(0deg 0% 12%)"
-			>
-				{#snippet a()}
-					<div>
-						<nav class="navigation">
-							<div class="tabs-container">
-								{#if isMobile}
-									<button class="action" onclick={() => (drawerOpened = true)}>
-										<Bars3 size="12" />
+			</Drawer>
+		{/if}
+		<SplitPane
+			type="horizontal"
+			disabled={isMobile}
+			pos={isMobile ? '0px' : '242px'}
+			min={isMobile ? '0px' : '242px'}
+			max="40%"
+		>
+			{#snippet a()}
+				{#if !isMobile}
+					{@render sidebar()}
+				{/if}
+			{/snippet}
+			{#snippet b()}
+				<SplitPane
+					type="vertical"
+					min="20%"
+					max={responsePanelOpened ? '80%' : '100%'}
+					pos={responsePanelOpened ? '65%' : '100%'}
+					disabled={!responsePanelOpened}
+					--color="hsl(0deg 0% 20%)"
+				>
+					{#snippet a()}
+						<div>
+							<nav class="navigation">
+								<div class="tabs-container">
+									{#each tabs as tab, i}
+										<TabComponent
+											hide-close={tabs.length === 1}
+											active={i === selectedTabIndex}
+											label={tab.name}
+											onClose={() => closeTab(i)}
+											onSelect={() => (selectedTabIndex = i)}
+										/>
+									{/each}
+									<button
+										onclick={addNewTab}
+										class="add-new"
+										aria-label="Open new tab"
+										title="Open new tab"
+									>
+										<Plus size="14" />
 									</button>
-								{/if}
-								{#each tabs as tab, i}
-									<TabComponent
-										hide-close={tabs.length === 1}
-										active={i === selectedTabIndex}
-										label={tab.name}
-										onClose={() => closeTab(i)}
-										onSelect={() => (selectedTabIndex = i)}
-									/>
-								{/each}
-								<button
-									onclick={addNewTab}
-									class="add-new"
-									aria-label="Open new tab"
-									title="Open new tab"
-								>
-									<Plus size="14" />
-								</button>
-							</div>
-							<div class="workspace-actions">
-								<button class="action" onclick={handleSaveQuery} disabled={!canSave}>
-									<Save size="12" />
-								</button>
-								<button class="action" onclick={handleExec} disabled={loading}>
-									<Play size="12" />
-								</button>
-							</div>
-						</nav>
-						{#each tabs as tab, i (tab.id)}
-							<div style:display={selectedTabIndex == i ? 'block' : 'none'}>
-								<Editor bind:value={tab.contents} {tables} />
-							</div>
-						{/each}
-					</div>
-				{/snippet}
-				{#snippet b()}
-					<Result {response} />
-				{/snippet}
-			</SplitPane>
-		{/snippet}
-	</SplitPane>
+								</div>
+								<div class="workspace-actions">
+									<button class="action" onclick={handleSaveQuery} disabled={!canSave}>
+										<Save size="12" />
+									</button>
+									<button class="action" onclick={handleExec} disabled={loading}>
+										<Play size="12" />
+									</button>
+								</div>
+							</nav>
+							{#each tabs as tab, i (tab.id)}
+								<div style:display={selectedTabIndex == i ? 'block' : 'none'}>
+									<Editor bind:value={tab.contents} {tables} />
+								</div>
+							{/each}
+						</div>
+					{/snippet}
+					{#snippet b()}
+						<Result {response} />
+					{/snippet}
+				</SplitPane>
+			{/snippet}
+		</SplitPane>
+	</div>
+	<footer>
+		{#if isMobile}
+			<button onclick={() => (drawerOpened = true)}>
+				<Bars3 size="12" />
+			</button>
+		{/if}
+		<button
+			class:active={responsePanelOpened}
+			onclick={() => (responsePanelOpened = !responsePanelOpened)}
+		>
+			<CommandLine size="12" />
+		</button>
+	</footer>
 </section>
 
 <SaveQueryModal bind:this={saveQueryModal} onCreate={handleCreateQuery} />
@@ -376,7 +387,37 @@
 	}
 
 	.screen {
+		--footer-height: 22px;
+
 		height: 100%;
 		width: 100%;
+	}
+
+	.workspace {
+		height: calc(100% - var(--footer-height));
+
+		& :global(svelte-split-pane-divider.disabled) {
+			display: none;
+		}
+	}
+
+	footer {
+		height: var(--footer-height);
+		width: 100%;
+		border-top: 1px solid hsl(0deg 0% 20%);
+
+		& > button {
+			height: 100%;
+			aspect-ratio: 1;
+			background-color: transparent;
+
+			&.active {
+				color: hsl(204deg 88% 65%);
+			}
+
+			&:is(:hover):not(:disabled) {
+				background: hsl(0deg 0% 10%);
+			}
+		}
 	}
 </style>
