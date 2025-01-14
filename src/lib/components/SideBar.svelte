@@ -9,15 +9,16 @@
 	type Tab = 'sources' | 'queries' | 'history';
 
 	let tab = $state<Tab>('sources');
-	function switch_to(next_tab: Tab) {
-		tab = next_tab;
+	function switch_to(next: Tab) {
+		tab = next;
 	}
 
 	type Props = {
 		tables?: Table[];
 
 		history?: HistoryEntry[];
-		onHistoryClick?: (entry: HistoryEntry) => void;
+		onHistoryOpen?: (entry: HistoryEntry) => MaybePromise<void>;
+		onHistoryDelete?: (entry: HistoryEntry) => MaybePromise<void>;
 
 		queries?: Query[];
 		onQueryOpen?: (query: Query) => MaybePromise<void>;
@@ -28,7 +29,8 @@
 	let {
 		tables = [],
 		history = [],
-		onHistoryClick,
+		onHistoryOpen,
+		onHistoryDelete,
 		queries = [],
 		onQueryDelete,
 		onQueryOpen,
@@ -46,10 +48,10 @@
 		<Datasets {tables} />
 	{/if}
 	{#if tab === 'queries'}
-		<Queries {queries} ondelete={onQueryDelete} onopen={onQueryOpen} onrename={onQueryRename} />
+		<Queries {queries} onDelete={onQueryDelete} onOpen={onQueryOpen} onRename={onQueryRename} />
 	{/if}
 	{#if tab === 'history'}
-		<History {history} {onHistoryClick} />
+		<History {history} onOpen={onHistoryOpen} onDelete={onHistoryDelete} />
 	{/if}
 </section>
 

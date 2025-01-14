@@ -76,4 +76,4 @@ function row_to_query(row: Awaited<ReturnType<Database['exec']>>[number]): Query
 	};
 }
 
-export const query_repository: QueryRepository = new SQLiteQueryRepository(db);
+export const queryRepository: QueryRepository = new SQLiteQueryRepository(db);

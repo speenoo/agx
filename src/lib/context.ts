@@ -1,12 +1,12 @@
 import { getContext, setContext } from 'svelte';
 import type { AppContext } from './types';
 
-const key = Symbol('app');
+const key = Symbol('@app/context');
 
-export function get_app_context(): AppContext {
+export function getAppContext(): AppContext {
 	return getContext(key);
 }
 
-export function set_app_context(value: AppContext) {
+export function setAppContext(value: AppContext) {
 	setContext(key, value);
 }

@@ -4,45 +4,45 @@
 	import { BarChart } from './charts/Bar';
 	interface Props {
 		response: OLAPResponse;
-		x_axis: string;
-		y_axis: string;
+		xAxis: string;
+		yAxis: string;
 		type: string;
 	}
 
 	let {
 		response,
-		x_axis = $bindable(),
-		y_axis = $bindable(),
-		type: chart_type = $bindable()
+		xAxis = $bindable(),
+		yAxis = $bindable(),
+		type: chartType = $bindable()
 	}: Props = $props();
 
-	const x_type = $derived(response.meta.find((c) => c.name === x_axis)?.type ?? '');
-	const y_type = $derived(response.meta.find((c) => c.name === y_axis)?.type ?? '');
+	const xType = $derived(response.meta.find((c) => c.name === xAxis)?.type ?? '');
+	const yType = $derived(response.meta.find((c) => c.name === yAxis)?.type ?? '');
 </script>
 
 <article>
 	<div class="Container">
-		{#if x_axis && y_axis}
-			{#if chart_type === 'line' && isSupportedType(x_type) && isSupportedType(y_type)}
+		{#if xAxis && yAxis}
+			{#if chartType === 'line' && isSupportedType(xType) && isSupportedType(yType)}
 				<LineChart
 					data={response.data}
-					x_accessor={(d) => applyType(d[x_axis], x_type)}
-					y_accessor={(d) => applyType(d[y_axis], y_type)}
-					x_format={(x) => formatValue(x, x_type)}
-					y_format={(y) => formatValue(y, y_type)}
-					x_label={x_axis}
-					y_label={y_axis}
+					x_accessor={(d) => applyType(d[xAxis], xType)}
+					y_accessor={(d) => applyType(d[yAxis], yType)}
+					x_format={(x) => formatValue(x, xType)}
+					y_format={(y) => formatValue(y, yType)}
+					x_label={xAxis}
+					y_label={yAxis}
 				/>
 			{/if}
-			{#if chart_type === 'bar' && isSupportedType(y_type)}
+			{#if chartType === 'bar' && isSupportedType(yType)}
 				<BarChart
 					data={response.data}
-					x_accessor={(d) => d[x_axis].toString()}
-					y_accessor={(d) => applyType(d[y_axis], y_type)}
-					x_format={(x) => formatValue(x, x_type)}
-					y_format={(y) => formatValue(y, y_type)}
-					x_label={x_axis}
-					y_label={y_axis}
+					x_accessor={(d) => d[xAxis].toString()}
+					y_accessor={(d) => applyType(d[yAxis], yType)}
+					x_format={(x) => formatValue(x, xType)}
+					y_format={(y) => formatValue(y, yType)}
+					x_label={xAxis}
+					y_label={yAxis}
 				/>
 			{/if}
 		{/if}
@@ -50,14 +50,14 @@
 	<div class="Actions">
 		<label>
 			chart type:
-			<select bind:value={chart_type}>
+			<select bind:value={chartType}>
 				<option value="line">Line chart</option>
 				<option value="bar">Bar chart</option>
 			</select>
 		</label>
 		<label>
 			x-axis:
-			<select bind:value={x_axis}>
+			<select bind:value={xAxis}>
 				<option value="">None</option>
 				{#each response.meta as column}
 					{#if isSupportedType(column.type)}
@@ -68,7 +68,7 @@
 		</label>
 		<label>
 			y-axis:
-			<select bind:value={y_axis}>
+			<select bind:value={yAxis}>
 				<option value="">None</option>
 				{#each response.meta as column}
 					{#if isSupportedType(column.type)}

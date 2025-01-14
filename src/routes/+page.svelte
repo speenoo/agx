@@ -7,16 +7,16 @@
 	import Result from '$lib/components/Result.svelte';
 	import SideBar from '$lib/components/SideBar.svelte';
 	import TabComponent from '$lib/components/Tab.svelte';
-	import { set_app_context } from '$lib/context';
+	import { setAppContext } from '$lib/context';
 	import Bars3 from '$lib/icons/Bars3.svelte';
 	import Play from '$lib/icons/Play.svelte';
 	import Plus from '$lib/icons/Plus.svelte';
 	import Save from '$lib/icons/Save.svelte';
 	import type { Table } from '$lib/olap-engine';
 	import { engine, type OLAPResponse } from '$lib/olap-engine';
-	import { history_repository, type HistoryEntry } from '$lib/repositories/history';
-	import { query_repository, type Query } from '$lib/repositories/queries';
-	import { tab_repository, type Tab } from '$lib/repositories/tabs';
+	import { historyRepository, type HistoryEntry } from '$lib/repositories/history';
+	import { queryRepository, type Query } from '$lib/repositories/queries';
+	import { tabRepository, type Tab } from '$lib/repositories/tabs';
 	import { SplitPane } from '@rich_harris/svelte-split-pane';
 	import debounce from 'p-debounce';
 	import type { ComponentProps } from 'svelte';
@@ -34,7 +34,7 @@
 		loading = true;
 		response = await engine.exec(query).finally(() => (loading = false));
 
-		const last = await history_repository.getLast();
+		const last = await historyRepository.getLast();
 
 		if (response && last?.content !== query) await addHistoryEntry(query);
 	}
@@ -50,33 +50,39 @@
 	});
 
 	$effect(() => {
-		history_repository.getAll().then((entries) => {
+		historyRepository.getAll().then((entries) => {
 			history = entries;
 		});
 	});
 
 	async function addHistoryEntry(query: string) {
 		try {
-			const entry = await history_repository.add(query);
+			const entry = await historyRepository.add(query);
 			history = [entry, ...history];
 		} catch (e) {
 			console.error(e);
 		}
 	}
 
-	function handleHistoryClick(entry: HistoryEntry) {
+	function handleHistoryOpen(entry: HistoryEntry) {
 		if (currentTab.contents) {
 			selectedTabIndex =
 				tabs.push({ id: crypto.randomUUID(), contents: entry.content, name: 'Untitled' }) - 1;
 		} else tabs[selectedTabIndex] = { ...currentTab, contents: entry.content };
-		if (is_mobile) open_drawer = false;
+		if (isMobile) drawerOpened = false;
+	}
+
+	async function handleHistoryDelete(entry: HistoryEntry) {
+		const index = history.indexOf(entry);
+		await historyRepository.delete(entry.id);
+		history = history.toSpliced(index, 1);
 	}
 
 	$effect(() => {
-		query_repository.getAll().then((q) => (queries = q));
+		queryRepository.getAll().then((q) => (queries = q));
 	});
 
-	let save_query_modal = $state<ReturnType<typeof SaveQueryModal>>();
+	let saveQueryModal = $state<ReturnType<typeof SaveQueryModal>>();
 
 	async function handleKeyDown(event: KeyboardEvent) {
 		if (event.key === 's' && event.metaKey) {
@@ -90,13 +96,13 @@
 	async function handleCreateQuery({
 		name
 	}: Parameters<NonNullable<ComponentProps<typeof SaveQueryModal>['onCreate']>>['0']) {
-		const q = await query_repository.create(name, currentTab.contents);
+		const q = await queryRepository.create(name, currentTab.contents);
 		queries = queries.concat(q);
 		tabs[selectedTabIndex] = { ...currentTab, name, query_id: q.id };
 	}
 
 	async function handleDeleteQuery(query: Query) {
-		await query_repository.delete(query.id);
+		await queryRepository.delete(query.id);
 		queries = queries.toSpliced(queries.indexOf(query), 1);
 	}
 
@@ -120,11 +126,11 @@
 				};
 		} else selectedTabIndex = index;
 
-		if (is_mobile) open_drawer = false;
+		if (isMobile) drawerOpened = false;
 	}
 
 	async function handleQueryRename(query: Query) {
-		const updated = await query_repository.update(query);
+		const updated = await queryRepository.update(query);
 		const index = queries.findIndex((query) => query.id === updated.id);
 		if (index !== -1) queries = queries.with(index, updated);
 
@@ -137,38 +143,38 @@
 	async function handleSaveQuery() {
 		const { contents, query_id: query_id } = currentTab;
 		if (contents && !query_id) {
-			return save_query_modal?.show();
+			return saveQueryModal?.show();
 		}
 
 		const index = queries.findIndex((q) => q.id === query_id);
 		if (index !== -1) {
-			const updated = await query_repository.update({ ...queries[index], sql: contents });
+			const updated = await queryRepository.update({ ...queries[index], sql: contents });
 			queries = queries.with(index, updated);
 		}
 	}
 
-	const context_menu = new ContextMenuState();
-	set_app_context({ context_menu });
+	const contextmenu = new ContextMenuState();
+	setAppContext({ contextmenu: contextmenu });
 
-	let screen_width = $state(0);
-	let is_mobile = $derived(screen_width < 768 && PLATFORM === 'WEB');
-	let open_drawer = $state(false);
+	let screenWidth = $state(0);
+	let isMobile = $derived(screenWidth < 768 && PLATFORM === 'WEB');
+	let drawerOpened = $state(false);
 
 	$effect(() => {
-		if (!is_mobile) open_drawer = false;
+		if (!isMobile) drawerOpened = false;
 	});
 
 	let tabs = $state<Tab[]>([]);
 	$effect(
 		() =>
-			void tab_repository.get().then(([t, active]) => {
+			void tabRepository.get().then(([t, active]) => {
 				if (t.length) (tabs = t), (selectedTabIndex = active);
 				else tabs.push({ id: crypto.randomUUID(), contents: '', name: 'Untitled' });
 			})
 	);
 
 	const saveTabs = debounce(
-		(tabs: Tab[], activeIndex: number) => tab_repository.save(tabs, activeIndex),
+		(tabs: Tab[], activeIndex: number) => tabRepository.save(tabs, activeIndex),
 		2_000
 	);
 
@@ -196,15 +202,16 @@
 	$effect(() => void saveTabs($state.snapshot(tabs), selectedTabIndex).catch(console.error));
 </script>
 
-<svelte:window onkeydown={handleKeyDown} bind:innerWidth={screen_width} />
+<svelte:window onkeydown={handleKeyDown} bind:innerWidth={screenWidth} />
 
-<ContextMenu state={context_menu} />
+<ContextMenu state={contextmenu} />
 
 {#snippet sidebar()}
 	<SideBar
 		{tables}
 		{history}
-		onHistoryClick={handleHistoryClick}
+		onHistoryOpen={handleHistoryOpen}
+		onHistoryDelete={handleHistoryDelete}
 		{queries}
 		onQueryDelete={handleDeleteQuery}
 		onQueryOpen={handleQueryOpen}
@@ -213,20 +220,20 @@
 {/snippet}
 
 <section class="screen">
-	{#if is_mobile}
-		<Drawer bind:open={open_drawer} width={242}>
+	{#if isMobile}
+		<Drawer bind:open={drawerOpened} width={242}>
 			{@render sidebar()}
 		</Drawer>
 	{/if}
 	<SplitPane
 		type="horizontal"
-		disabled={is_mobile}
-		pos={is_mobile ? '0px' : '242px'}
-		min={is_mobile ? '0px' : '242px'}
+		disabled={isMobile}
+		pos={isMobile ? '0px' : '242px'}
+		min={isMobile ? '0px' : '242px'}
 		max="40%"
 	>
 		{#snippet a()}
-			{#if !is_mobile}
+			{#if !isMobile}
 				{@render sidebar()}
 			{/if}
 		{/snippet}
@@ -236,14 +243,14 @@
 					<div>
 						<nav class="navigation">
 							<div class="tabs-container">
-								{#if is_mobile}
-									<button class="action" onclick={() => (open_drawer = true)}>
+								{#if isMobile}
+									<button class="action" onclick={() => (drawerOpened = true)}>
 										<Bars3 size="12" />
 									</button>
 								{/if}
 								{#each tabs as tab, i}
 									<TabComponent
-										close-hidden={tabs.length === 1}
+										hide-close={tabs.length === 1}
 										active={i === selectedTabIndex}
 										label={tab.name}
 										onClose={() => closeTab(i)}
@@ -283,7 +290,7 @@
 	</SplitPane>
 </section>
 
-<SaveQueryModal bind:this={save_query_modal} onCreate={handleCreateQuery} />
+<SaveQueryModal bind:this={saveQueryModal} onCreate={handleCreateQuery} />
 
 <style>
 	.navigation {

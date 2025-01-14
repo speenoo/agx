@@ -11,15 +11,15 @@
 	let { response }: Props = $props();
 
 	let tab = $state<'table' | 'chart'>('table');
-	let y_axis = $state<string>('');
-	let x_axis = $state<string>('');
-	let chart_type = $state('line');
+	let yAxis = $state<string>('');
+	let xAxis = $state<string>('');
+	let chartType = $state('line');
 
 	$effect(() => {
 		const names = response?.meta.map((m) => m.name);
 
-		if (!names?.includes(untrack(() => y_axis))) y_axis = '';
-		if (!names?.includes(untrack(() => x_axis))) x_axis = '';
+		if (!names?.includes(untrack(() => yAxis))) yAxis = '';
+		if (!names?.includes(untrack(() => xAxis))) xAxis = '';
 	});
 </script>
 
@@ -29,7 +29,7 @@
 			{#if tab === 'table'}
 				<Table {response} />
 			{:else if tab === 'chart'}
-				<ChartContainer {response} bind:x_axis bind:y_axis bind:type={chart_type} />
+				<ChartContainer {response} bind:xAxis bind:yAxis bind:type={chartType} />
 			{/if}
 		{/if}
 	</div>

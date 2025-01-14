@@ -3,12 +3,7 @@
 
 	import SearchBar from '$lib/components/SearchBar.svelte';
 	import TableC from '$lib/icons/Table.svelte';
-	import {
-		filter,
-		remove_nullable,
-		SOURCE_TYPE_COLOR_MAP,
-		SOURCE_TYPE_SHORT_NAME_MAP
-	} from './utils';
+	import { filter, SOURCE_TYPE_COLOR_MAP, SOURCE_TYPE_SHORT_NAME_MAP } from './utils';
 
 	type Props = {
 		tables?: Table[];
@@ -38,7 +33,7 @@
 				{#each source.columns ?? [] as column}
 					<li>
 						<span>{column.name}</span>
-						<span>{remove_nullable(column.type)}</span>
+						<span>{column.type.replace(/Nullable\((.*)\)/i, '$1')}</span>
 					</li>
 				{/each}
 			</ul>
