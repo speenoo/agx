@@ -6,12 +6,12 @@
 	import { SaveQueryModal } from '$lib/components/Queries';
 	import Result from '$lib/components/Result.svelte';
 	import SideBar from '$lib/components/SideBar.svelte';
+	import TabComponent from '$lib/components/Tab.svelte';
 	import { set_app_context } from '$lib/context';
 	import Bars3 from '$lib/icons/Bars3.svelte';
 	import Play from '$lib/icons/Play.svelte';
 	import Plus from '$lib/icons/Plus.svelte';
 	import Save from '$lib/icons/Save.svelte';
-	import XMark from '$lib/icons/XMark.svelte';
 	import type { Table } from '$lib/olap-engine';
 	import { engine, type OLAPResponse } from '$lib/olap-engine';
 	import { history_repository, type HistoryEntry } from '$lib/repositories/history';
@@ -234,28 +234,13 @@
 									</button>
 								{/if}
 								{#each tabs as tab, i}
-									<div
-										class="tab"
-										class:active={i === selected_tab_index}
-										role="button"
-										onclick={() => (selected_tab_index = i)}
-										tabindex="0"
-										onkeyup={() => {}}
-									>
-										<span>{tab.name}</span>
-
-										<button
-											class="close"
-											class:hidden={tabs.length === 1}
-											disabled={tabs.length === 1}
-											onclick={(e) => {
-												e.stopPropagation();
-												closeTab(i);
-											}}
-										>
-											<XMark size="10" />
-										</button>
-									</div>
+									<TabComponent
+										close-hidden={tabs.length === 1}
+										active={i === selected_tab_index}
+										label={tab.name}
+										onClose={() => closeTab(i)}
+										onSelect={() => (selected_tab_index = i)}
+									/>
 								{/each}
 								<button
 									onclick={addNewTab}
@@ -333,49 +318,6 @@
 		}
 	}
 
-	.tab {
-		height: 100%;
-		font-size: 11px;
-		border-right: 1px solid hsl(0deg 0% 20%);
-		padding: 0 16px;
-		display: inline-flex;
-		align-items: center;
-		height: 100%;
-		color: hsl(0deg 0% 70%);
-		position: relative;
-		user-select: none;
-		-webkit-user-select: none;
-
-		&:hover {
-			cursor: pointer;
-		}
-
-		&.active {
-			background-color: hsl(0deg 0% 5%);
-			color: hsl(0deg 0% 100%);
-			z-index: 2;
-		}
-
-		& > .close {
-			position: absolute;
-
-			display: flex;
-			place-items: center;
-			background-color: transparent;
-			right: 0;
-			padding: 2px;
-			opacity: 0;
-
-			&.hidden {
-				display: none;
-			}
-		}
-
-		&:hover > .close {
-			opacity: 1;
-		}
-	}
-
 	.add-new {
 		height: calc(100% - 8px);
 		aspect-ratio: 1;
@@ -390,11 +332,6 @@
 
 		&:active {
 			background-color: hsl(0deg 0% 20%);
-		}
-
-		& :global(svg) {
-			width: 100%;
-			height: 100%;
 		}
 	}
 
