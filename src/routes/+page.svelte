@@ -37,23 +37,17 @@
 		const last = await historyRepository.getLast();
 
 		if (response && last?.content !== query) await addHistoryEntry(query);
+
+		if (response) responsePanelOpened = true;
 	}
 
 	let tables = $state.raw<Table[]>([]);
 	let history = $state.raw<HistoryEntry[]>([]);
 	let queries = $state.raw<Query[]>([]);
 
-	$effect(() => {
-		engine.getSchema().then((t) => {
-			tables = t;
-		});
-	});
-
-	$effect(() => {
-		historyRepository.getAll().then((entries) => {
-			history = entries;
-		});
-	});
+	$effect(() => void engine.getSchema().then((t) => (tables = t)));
+	$effect(() => void historyRepository.getAll().then((entries) => (history = entries)));
+	$effect(() => void queryRepository.getAll().then((q) => (queries = q)));
 
 	async function addHistoryEntry(query: string) {
 		try {
@@ -78,10 +72,6 @@
 		history = history.toSpliced(index, 1);
 	}
 
-	$effect(() => {
-		queryRepository.getAll().then((q) => (queries = q));
-	});
-
 	let saveQueryModal = $state<ReturnType<typeof SaveQueryModal>>();
 
 	async function handleKeyDown(event: KeyboardEvent) {
@@ -104,6 +94,10 @@
 	async function handleDeleteQuery(query: Query) {
 		await queryRepository.delete(query.id);
 		queries = queries.toSpliced(queries.indexOf(query), 1);
+
+		const index = tabs.findIndex((t) => t.query_id === query.id);
+		if (index !== -1)
+			tabs[index] = { ...tabs[index], query_id: undefined, name: tabs[index].name + ' (deleted)' };
 	}
 
 	function handleQueryOpen(query: Query) {
@@ -200,6 +194,8 @@
 	}
 
 	$effect(() => void saveTabs($state.snapshot(tabs), selectedTabIndex).catch(console.error));
+
+	let responsePanelOpened = $state(false);
 </script>
 
 <svelte:window onkeydown={handleKeyDown} bind:innerWidth={screenWidth} />
@@ -238,7 +234,14 @@
 			{/if}
 		{/snippet}
 		{#snippet b()}
-			<SplitPane type="vertical" min="20%" max="80%" --color="hsl(0deg 0% 12%)">
+			<SplitPane
+				type="vertical"
+				min="20%"
+				max={responsePanelOpened ? '80%' : '100%'}
+				pos={responsePanelOpened ? '65%' : '100%'}
+				disabled={!responsePanelOpened}
+				--color="hsl(0deg 0% 12%)"
+			>
 				{#snippet a()}
 					<div>
 						<nav class="navigation">
@@ -373,7 +376,7 @@
 	}
 
 	.screen {
-		height: 100vh;
-		width: 100vw;
+		height: 100%;
+		width: 100%;
 	}
 </style>
