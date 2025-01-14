@@ -6,36 +6,37 @@
 	import { SaveQueryModal } from '$lib/components/Queries';
 	import Result from '$lib/components/Result.svelte';
 	import SideBar from '$lib/components/SideBar.svelte';
+	import TabComponent from '$lib/components/Tab.svelte';
 	import { set_app_context } from '$lib/context';
 	import Bars3 from '$lib/icons/Bars3.svelte';
 	import Play from '$lib/icons/Play.svelte';
+	import Plus from '$lib/icons/Plus.svelte';
 	import Save from '$lib/icons/Save.svelte';
 	import type { Table } from '$lib/olap-engine';
 	import { engine, type OLAPResponse } from '$lib/olap-engine';
 	import { history_repository, type HistoryEntry } from '$lib/repositories/history';
 	import { query_repository, type Query } from '$lib/repositories/queries';
+	import { tab_repository, type Tab } from '$lib/repositories/tabs';
 	import { SplitPane } from '@rich_harris/svelte-split-pane';
+	import debounce from 'p-debounce';
 	import type { ComponentProps } from 'svelte';
 
 	let response = $state.raw<OLAPResponse>();
 
-	let query = $state('');
 	let loading = $state(false);
 
 	async function handleExec() {
+		const query = currentTab.contents;
 		if (loading || !query) {
 			return;
 		}
 
 		loading = true;
-		const query_to_execute = query;
-		response = await engine.exec(query_to_execute).finally(() => (loading = false));
+		response = await engine.exec(query).finally(() => (loading = false));
 
 		const last = await history_repository.getLast();
 
-		if (response && last?.content !== query_to_execute) {
-			await addHistoryEntry(query_to_execute);
-		}
+		if (response && last?.content !== query) await addHistoryEntry(query);
 	}
 
 	let tables = $state.raw<Table[]>([]);
@@ -64,7 +65,10 @@
 	}
 
 	function handleHistoryClick(entry: HistoryEntry) {
-		query = entry.content;
+		if (currentTab.contents) {
+			selectedTabIndex =
+				tabs.push({ id: crypto.randomUUID(), contents: entry.content, name: 'Untitled' }) - 1;
+		} else tabs[selectedTabIndex] = { ...currentTab, contents: entry.content };
 		if (is_mobile) open_drawer = false;
 	}
 
@@ -74,41 +78,72 @@
 
 	let save_query_modal = $state<ReturnType<typeof SaveQueryModal>>();
 
-	function handleKeyDown(event: KeyboardEvent) {
+	async function handleKeyDown(event: KeyboardEvent) {
 		if (event.key === 's' && event.metaKey) {
-			if (query) {
-				event.preventDefault();
-				save_query_modal?.show();
-			}
+			event.preventDefault();
+			handleSaveQuery();
 		}
+
+		if (event.key === 'Enter' && event.metaKey) handleExec();
 	}
 
 	async function handleCreateQuery({
 		name
 	}: Parameters<NonNullable<ComponentProps<typeof SaveQueryModal>['onCreate']>>['0']) {
-		const q = await query_repository.create(name, query);
+		const q = await query_repository.create(name, currentTab.contents);
 		queries = queries.concat(q);
+		tabs[selectedTabIndex] = { ...currentTab, name, query_id: q.id };
 	}
 
 	async function handleDeleteQuery(query: Query) {
 		await query_repository.delete(query.id);
-		const index = queries.indexOf(query);
-		queries = queries.slice(0, index).concat(queries.slice(index + 1));
+		queries = queries.toSpliced(queries.indexOf(query), 1);
 	}
 
-	function handleQueryOpen(_query: Query) {
-		query = _query.sql;
+	function handleQueryOpen(query: Query) {
+		const index = tabs.findIndex((t) => t.query_id === query.id);
+		if (index === -1) {
+			if (currentTab.contents) {
+				selectedTabIndex =
+					tabs.push({
+						id: crypto.randomUUID(),
+						contents: query.sql,
+						name: query.name,
+						query_id: query.id
+					}) - 1;
+			} else
+				tabs[selectedTabIndex] = {
+					...currentTab,
+					contents: query.sql,
+					name: query.name,
+					query_id: query.id
+				};
+		} else selectedTabIndex = index;
+
 		if (is_mobile) open_drawer = false;
 	}
 
 	async function handleQueryRename(query: Query) {
 		const updated = await query_repository.update(query);
 		const index = queries.findIndex((query) => query.id === updated.id);
+		if (index !== -1) queries = queries.with(index, updated);
+
+		const tab_index = tabs.findIndex((t) => t.query_id === updated.id);
+		if (tab_index !== -1) {
+			tabs[tab_index] = { ...tabs[tab_index], name: updated.name, contents: updated.sql };
+		}
+	}
+
+	async function handleSaveQuery() {
+		const { contents, query_id: query_id } = currentTab;
+		if (contents && !query_id) {
+			return save_query_modal?.show();
+		}
+
+		const index = queries.findIndex((q) => q.id === query_id);
 		if (index !== -1) {
-			queries = queries
-				.slice(0, index)
-				.concat(updated)
-				.concat(queries.slice(index + 1));
+			const updated = await query_repository.update({ ...queries[index], sql: contents });
+			queries = queries.with(index, updated);
 		}
 	}
 
@@ -122,6 +157,43 @@
 	$effect(() => {
 		if (!is_mobile) open_drawer = false;
 	});
+
+	let tabs = $state<Tab[]>([]);
+	$effect(
+		() =>
+			void tab_repository.get().then(([t, active]) => {
+				if (t.length) (tabs = t), (selectedTabIndex = active);
+				else tabs.push({ id: crypto.randomUUID(), contents: '', name: 'Untitled' });
+			})
+	);
+
+	const saveTabs = debounce(
+		(tabs: Tab[], activeIndex: number) => tab_repository.save(tabs, activeIndex),
+		2_000
+	);
+
+	let selectedTabIndex = $state(0);
+	const currentTab = $derived(tabs[selectedTabIndex]);
+	const canSave = $derived.by(() => {
+		if (!tabs.length) return false;
+		if (currentTab.query_id) {
+			const query = queries.find((q) => q.id === currentTab.query_id);
+			return query?.sql !== currentTab.contents;
+		}
+
+		return !!currentTab.contents;
+	});
+
+	function addNewTab() {
+		selectedTabIndex = tabs.push({ id: crypto.randomUUID(), name: 'Untitled', contents: '' }) - 1;
+	}
+
+	function closeTab(index: number) {
+		tabs.splice(index, 1);
+		selectedTabIndex = Math.max(0, selectedTabIndex - 1);
+	}
+
+	$effect(() => void saveTabs($state.snapshot(tabs), selectedTabIndex).catch(console.error));
 </script>
 
 <svelte:window onkeydown={handleKeyDown} bind:innerWidth={screen_width} />
@@ -162,24 +234,45 @@
 			<SplitPane type="vertical" min="20%" max="80%" --color="hsl(0deg 0% 12%)">
 				{#snippet a()}
 					<div>
-						<nav class="Tabs">
-							<div class="left">
+						<nav class="navigation">
+							<div class="tabs-container">
 								{#if is_mobile}
-									<button onclick={() => (open_drawer = true)}>
+									<button class="action" onclick={() => (open_drawer = true)}>
 										<Bars3 size="12" />
 									</button>
 								{/if}
+								{#each tabs as tab, i}
+									<TabComponent
+										close-hidden={tabs.length === 1}
+										active={i === selectedTabIndex}
+										label={tab.name}
+										onClose={() => closeTab(i)}
+										onSelect={() => (selectedTabIndex = i)}
+									/>
+								{/each}
+								<button
+									onclick={addNewTab}
+									class="add-new"
+									aria-label="Open new tab"
+									title="Open new tab"
+								>
+									<Plus size="14" />
+								</button>
 							</div>
-							<div class="right">
-								<button onclick={() => save_query_modal?.show()} disabled={!query}>
+							<div class="workspace-actions">
+								<button class="action" onclick={handleSaveQuery} disabled={!canSave}>
 									<Save size="12" />
 								</button>
-								<button onclick={handleExec} disabled={loading}><Play size="12" /></button>
+								<button class="action" onclick={handleExec} disabled={loading}>
+									<Play size="12" />
+								</button>
 							</div>
 						</nav>
-						<div>
-							<Editor bind:value={query} onExec={handleExec} {tables} />
-						</div>
+						{#each tabs as tab, i (tab.id)}
+							<div style:display={selectedTabIndex == i ? 'block' : 'none'}>
+								<Editor bind:value={tab.contents} {tables} />
+							</div>
+						{/each}
 					</div>
 				{/snippet}
 				{#snippet b()}
@@ -193,28 +286,70 @@
 <SaveQueryModal bind:this={save_query_modal} onCreate={handleCreateQuery} />
 
 <style>
-	.Tabs {
+	.navigation {
 		height: 28px;
 		display: flex;
-		border-bottom: 1px solid hsl(0deg 0% 20%);
 
-		& > .left {
-			flex: 1;
+		position: relative;
+
+		&::before {
+			content: '';
+			position: absolute;
+			width: 100%;
+			height: 1px;
+			bottom: 0px;
+			left: 0;
+			background-color: hsl(0deg 0% 20%);
+			z-index: 1;
 		}
 
-		& > .right {
+		& > .tabs-container {
+			flex: 1;
+			display: flex;
+			align-items: center;
+			height: 100%;
+			overflow-x: hidden;
+		}
+
+		& > .workspace-actions {
 			display: flex;
 			gap: 0px;
 		}
 
-		& button {
+		& button.action {
 			height: 100%;
+			aspect-ratio: 1;
 			background-color: transparent;
 			border-radius: 0;
+
+			&:is(:hover, :focus-within):not(:disabled) {
+				background: hsl(0deg 0% 10%);
+			}
 		}
 
 		& ~ div {
 			height: calc(100% - 28px);
+		}
+	}
+
+	.add-new {
+		height: calc(100% - 8px);
+		aspect-ratio: 1;
+		display: flex;
+		place-items: center;
+		justify-content: center;
+		padding: 0;
+		margin-left: 4px;
+		border-radius: 4px;
+		background-color: transparent;
+
+		&:hover {
+			cursor: pointer;
+			background-color: hsl(0deg 0% 17%);
+		}
+
+		&:active {
+			background-color: hsl(0deg 0% 20%);
 		}
 	}
 
@@ -224,13 +359,9 @@
 		border: none;
 		font-size: 10px;
 		font-weight: 500;
-		background-color: hsl(0deg 0% 9%);
-		padding: 4px 2;
-		border-radius: 3px;
 
 		&:is(:hover, :focus-within):not(:disabled) {
 			cursor: pointer;
-			background: hsl(0deg 0% 10%);
 		}
 	}
 

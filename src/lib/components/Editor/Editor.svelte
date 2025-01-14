@@ -2,7 +2,7 @@
 	import type { Table } from '$lib/olap-engine';
 	import { sql } from '@codemirror/lang-sql';
 	import { Compartment, EditorState } from '@codemirror/state';
-	import { EditorView, keymap, placeholder } from '@codemirror/view';
+	import { EditorView, placeholder } from '@codemirror/view';
 	import { untrack } from 'svelte';
 	import './codemirror.css';
 	import { default_extensions, default_keymaps } from './extensions';
@@ -11,11 +11,10 @@
 
 	type Props = {
 		value: string;
-		onExec?: () => unknown;
 		tables?: Table[];
 	};
 
-	let { value = $bindable(''), onExec, tables = [] }: Props = $props();
+	let { value = $bindable(''), tables = [] }: Props = $props();
 
 	let container: HTMLDivElement;
 	let editor_view: EditorView;
@@ -37,16 +36,7 @@
 						value = update.state.doc.toString();
 					}
 				}),
-				placeholder('Enter a query...'),
-				keymap.of([
-					{
-						key: 'Mod-Enter',
-						run: () => {
-							onExec?.();
-							return true;
-						}
-					}
-				])
+				placeholder('Type your query...')
 			]
 		});
 
@@ -78,7 +68,6 @@
 	div {
 		width: 100%;
 		height: 100%;
-		padding: 7px 2px;
 		background-color: hsl(0deg 0% 5%);
 	}
 </style>

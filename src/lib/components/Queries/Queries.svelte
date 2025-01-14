@@ -85,6 +85,10 @@
 					e.currentTarget.blur();
 				}
 			}}
+			ontouchend={async (e) => {
+				await onopen?.(query);
+				e.currentTarget.blur();
+			}}
 		>
 			<div>
 				{#if editing_id === query.id}
