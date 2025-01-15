@@ -22,6 +22,10 @@
 
 	let sortedBy = $state<string | null>(null);
 	let sortDirection = $state<'asc' | 'desc'>('asc');
+	let columnWidths = $state<Record<string, number>>({});
+	let isResizing = $state<string | null>(null);
+	let startX = $state<number>(0);
+	let startWidth = $state<number>(0);
 
 	$effect(() => {
 		sortedBy = null;
@@ -61,19 +65,40 @@
 			sortDirection = 'asc';
 		}
 	}
+
+	function startResize(e: MouseEvent, columnName: string) {
+		isResizing = columnName;
+		startX = e.pageX;
+		startWidth = columnWidths[columnName] || 100;
+		window.addEventListener('mousemove', handleResize);
+		window.addEventListener('mouseup', stopResize);
+	}
+
+	function handleResize(e: MouseEvent) {
+		if (!isResizing) return;
+		const width = startWidth + (e.pageX - startX);
+		columnWidths[isResizing] = Math.max(50, width);
+	}
+
+	function stopResize() {
+		isResizing = null;
+		window.removeEventListener('mousemove', handleResize);
+		window.removeEventListener('mouseup', stopResize);
+	}
 </script>
 
 <table>
 	<thead>
 		<tr>
 			{#each columns as { name, type }}
-				<th onclick={() => handleSort(name)}>
+				<th style="width: {columnWidths[name] || 100}px" on:click={() => handleSort(name)}>
 					<div class="th-content">
 						<span>{name} <i>({type.replace(/Nullable\((.*)\)/, '$1')})</i></span>
 						{#if sortedBy === name}
 							<span class="sort-arrow">{sortDirection === 'asc' ? '↑' : '↓'}</span>
 						{/if}
 					</div>
+					<div class="resize-handle" on:mousedown={(e) => startResize(e, name)} />
 				</th>
 			{/each}
 		</tr>
@@ -86,7 +111,10 @@
 					{@const isNumberType =
 						type.toLowerCase().includes('int') || type.toLowerCase().includes('float')}
 					{@const isDateType = type.toLowerCase().includes('date')}
-					<td class:text-right={isNumberType || isDateType}>
+					<td
+						class:text-right={isNumberType || isDateType}
+						style="width: {columnWidths[name] || 100}px"
+					>
 						<div class="td-content">
 							{formatValue(value)}
 						</div>
@@ -107,7 +135,7 @@
 		cursor: default;
 		position: relative;
 		white-space: nowrap;
-		overflow: auto;
+		overflow: hidden;
 	}
 
 	.text-right {
@@ -116,7 +144,7 @@
 
 	.th-content,
 	.td-content {
-		overflow: auto;
+		overflow: hidden;
 		white-space: nowrap;
 		color: hsl(0deg 0% 80%);
 		position: relative;
@@ -148,6 +176,21 @@
 		border-bottom: 1px solid hsl(0deg 0% 12%);
 		font-weight: 400;
 		cursor: pointer;
+		user-select: none;
+	}
+
+	.resize-handle {
+		position: absolute;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		width: 4px;
+		cursor: col-resize;
+		background-color: transparent;
+	}
+
+	.resize-handle:hover {
+		background-color: hsl(0deg 0% 30%);
 	}
 
 	table {
