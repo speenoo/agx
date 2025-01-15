@@ -13,6 +13,7 @@
 	import Play from '$lib/icons/Play.svelte';
 	import Plus from '$lib/icons/Plus.svelte';
 	import Save from '$lib/icons/Save.svelte';
+	import TreeView from '$lib/icons/TreeView.svelte';
 	import type { Table } from '$lib/olap-engine';
 	import { engine, type OLAPResponse } from '$lib/olap-engine';
 	import { historyRepository, type HistoryEntry } from '$lib/repositories/history';
@@ -39,7 +40,7 @@
 
 		if (response && last?.content !== query) await addHistoryEntry(query);
 
-		if (response) responsePanelOpened = true;
+		if (response) dataPanelOpened = true;
 	}
 
 	let tables = $state.raw<Table[]>([]);
@@ -196,7 +197,8 @@
 
 	$effect(() => void saveTabs($state.snapshot(tabs), selectedTabIndex).catch(console.error));
 
-	let responsePanelOpened = $state(false);
+	let dataPanelOpened = $state(false);
+	let itemListPanelOpened = $state(true);
 </script>
 
 <svelte:window onkeydown={handleKeyDown} bind:innerWidth={screenWidth} />
@@ -225,9 +227,9 @@
 		{/if}
 		<SplitPane
 			type="horizontal"
-			disabled={isMobile}
-			pos={isMobile ? '0px' : '242px'}
-			min={isMobile ? '0px' : '242px'}
+			disabled={!itemListPanelOpened || isMobile}
+			pos={!itemListPanelOpened || isMobile ? '0px' : '242px'}
+			min={!itemListPanelOpened || isMobile ? '0px' : '242px'}
 			max="40%"
 		>
 			{#snippet a()}
@@ -239,9 +241,9 @@
 				<SplitPane
 					type="vertical"
 					min="20%"
-					max={responsePanelOpened ? '80%' : '100%'}
-					pos={responsePanelOpened ? '65%' : '100%'}
-					disabled={!responsePanelOpened}
+					max={dataPanelOpened ? '80%' : '100%'}
+					pos={dataPanelOpened ? '65%' : '100%'}
+					disabled={!dataPanelOpened}
 					--color="hsl(0deg 0% 20%)"
 				>
 					{#snippet a()}
@@ -296,8 +298,20 @@
 	</div>
 	<footer>
 		<button
-			class:active={responsePanelOpened}
-			onclick={() => (responsePanelOpened = !responsePanelOpened)}
+			class:active={itemListPanelOpened}
+			onclick={() => (itemListPanelOpened = !itemListPanelOpened)}
+			style:margin-left="7px"
+		>
+			<TreeView size="12" />
+		</button>
+		<div class="spacer"></div>
+		{#if BUILD}
+			<span class="label">build {BUILD}</span>
+		{/if}
+		<button
+			class:active={dataPanelOpened}
+			onclick={() => (dataPanelOpened = !dataPanelOpened)}
+			style:margin-right="7px"
 		>
 			<CommandLine size="12" />
 		</button>
@@ -412,10 +426,24 @@
 		height: var(--footer-height);
 		width: 100%;
 		border-top: 1px solid hsl(0deg 0% 20%);
+		display: flex;
+		place-items: center;
+		gap: 0.4rem;
+
+		& > .spacer {
+			flex: 1;
+		}
+
+		& > .label {
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
 
 		& > button {
 			height: 100%;
 			aspect-ratio: 1;
+			flex-shrink: 0;
 			background-color: transparent;
 
 			&.active {
