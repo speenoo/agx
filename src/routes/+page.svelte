@@ -218,7 +218,7 @@
 	/>
 {/snippet}
 
-<section class="screen">
+<section class="screen" class:is-mobile={isMobile}>
 	<div class="workspace">
 		{#if isMobile}
 			<Drawer bind:open={drawerOpened} width={242}>
@@ -296,26 +296,28 @@
 			{/snippet}
 		</SplitPane>
 	</div>
-	<footer>
-		<button
-			class:active={itemListPanelOpened}
-			onclick={() => (itemListPanelOpened = !itemListPanelOpened)}
-			style:margin-left="7px"
-		>
-			<TreeView size="12" />
-		</button>
-		<div class="spacer"></div>
-		{#if BUILD}
-			<span class="label">build {BUILD}</span>
-		{/if}
-		<button
-			class:active={dataPanelOpened}
-			onclick={() => (dataPanelOpened = !dataPanelOpened)}
-			style:margin-right="7px"
-		>
-			<CommandLine size="12" />
-		</button>
-	</footer>
+	{#if !isMobile}
+		<footer>
+			<button
+				class:active={itemListPanelOpened}
+				onclick={() => (itemListPanelOpened = !itemListPanelOpened)}
+				style:margin-left="7px"
+			>
+				<TreeView size="12" />
+			</button>
+			<div class="spacer"></div>
+			{#if BUILD}
+				<span class="label">build {BUILD}</span>
+			{/if}
+			<button
+				class:active={dataPanelOpened}
+				onclick={() => (dataPanelOpened = !dataPanelOpened)}
+				style:margin-right="7px"
+			>
+				<CommandLine size="12" />
+			</button>
+		</footer>
+	{/if}
 </section>
 
 <SaveQueryModal bind:this={saveQueryModal} onCreate={handleCreateQuery} />
@@ -412,6 +414,10 @@
 
 		height: 100%;
 		width: 100%;
+
+		&.is-mobile {
+			--footer-height: 0;
+		}
 	}
 
 	.workspace {
