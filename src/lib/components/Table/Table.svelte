@@ -22,15 +22,12 @@
 
 	let sortedBy = $state<string | null>(null);
 	let sortDirection = $state<'asc' | 'desc'>('asc');
-	let columnWidths = $state<Record<string, number>>({});
 	let isResizing = $state<string | null>(null);
 	let startX = $state<number>(0);
-	let startWidth = $state<number>(0);
+	let columnSizes = $state<Record<string, number>>({});
 
 	$effect(() => {
-		sortedBy = null;
-		sortDirection = 'asc';
-		columnWidths = {};
+		columnSizes = columns.reduce((acc, col) => ({ ...acc, [col.name]: 200 }), {});
 	});
 
 	const sortedRows = $derived(
@@ -58,7 +55,11 @@
 		})
 	);
 
-	function handleSort(columnName: string) {
+	function handleSort(columnName: string, e: MouseEvent) {
+		if (isResizing) {
+			return;
+		}
+
 		if (sortedBy === columnName) {
 			sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
 		} else {
@@ -70,15 +71,15 @@
 	function startResize(e: MouseEvent, columnName: string) {
 		isResizing = columnName;
 		startX = e.pageX;
-		startWidth = columnWidths[columnName] || 100;
 		window.addEventListener('mousemove', handleResize);
 		window.addEventListener('mouseup', stopResize);
 	}
 
 	function handleResize(e: MouseEvent) {
 		if (!isResizing) return;
-		const width = startWidth + (e.pageX - startX);
-		columnWidths[isResizing] = Math.max(100, width);
+		const delta = e.pageX - startX;
+		startX = e.pageX;
+		columnSizes[isResizing] = Math.max(200, columnSizes[isResizing] + delta);
 	}
 
 	function stopResize() {
@@ -92,14 +93,19 @@
 	<thead>
 		<tr>
 			{#each columns as { name, type }}
-				<th style="width: {columnWidths[name] || 100}px" on:click={() => handleSort(name)}>
+				<th onmouseup={(e) => handleSort(name, e)} style="width: {columnSizes[name] || 200}px">
 					<div class="th-content">
 						<span>{name} <i>({type.replace(/Nullable\((.*)\)/, '$1')})</i></span>
 						{#if sortedBy === name}
 							<span class="sort-arrow">{sortDirection === 'asc' ? '↑' : '↓'}</span>
 						{/if}
 					</div>
-					<div class="resize-handle" on:mousedown={(e) => startResize(e, name)} />
+					<div
+						class="resize-handle"
+						role="separator"
+						data-column={name}
+						onmousedown={(e) => startResize(e, name)}
+					></div>
 				</th>
 			{/each}
 		</tr>
@@ -112,10 +118,7 @@
 					{@const isNumberType =
 						type.toLowerCase().includes('int') || type.toLowerCase().includes('float')}
 					{@const isDateType = type.toLowerCase().includes('date')}
-					<td
-						class:text-right={isNumberType || isDateType}
-						style="width: {columnWidths[name] || 100}px"
-					>
+					<td class:text-right={isNumberType || isDateType}>
 						<div class="td-content">
 							{formatValue(value)}
 						</div>
@@ -137,6 +140,8 @@
 		position: relative;
 		white-space: nowrap;
 		overflow: hidden;
+		width: max-content;
+		min-width: 200px;
 	}
 
 	.text-right {
