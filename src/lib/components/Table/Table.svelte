@@ -30,6 +30,7 @@
 	$effect(() => {
 		sortedBy = null;
 		sortDirection = 'asc';
+		columnWidths = {};
 	});
 
 	const sortedRows = $derived(
@@ -77,7 +78,7 @@
 	function handleResize(e: MouseEvent) {
 		if (!isResizing) return;
 		const width = startWidth + (e.pageX - startX);
-		columnWidths[isResizing] = Math.max(50, width);
+		columnWidths[isResizing] = Math.max(100, width);
 	}
 
 	function stopResize() {
@@ -194,7 +195,7 @@
 	}
 
 	table {
-		width: 100%;
+		width: min-content;
 		border-collapse: separate;
 		border-spacing: 0;
 		table-layout: fixed;
