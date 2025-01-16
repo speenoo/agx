@@ -10,7 +10,7 @@
 
 	let { response }: Props = $props();
 
-	let tab = $state<'table' | 'chart'>('table');
+	let tab = $state<'data' | 'chart'>('data');
 	let yAxis = $state<string>('');
 	let xAxis = $state<string>('');
 	let chartType = $state('line');
@@ -24,24 +24,24 @@
 </script>
 
 <section>
+	<nav>
+		<button aria-current={tab === 'data'} onclick={() => (tab = 'data')}>Data</button>
+		<button aria-current={tab === 'chart'} onclick={() => (tab = 'chart')}>Chart</button>
+	</nav>
 	<div>
 		{#if response}
-			{#if tab === 'table'}
+			{#if tab === 'data'}
 				<Table {response} />
 			{:else if tab === 'chart'}
 				<ChartContainer {response} bind:xAxis bind:yAxis bind:type={chartType} />
 			{/if}
 		{/if}
 	</div>
-	<nav>
-		<button aria-current={tab === 'table'} onclick={() => (tab = 'table')}> Data </button>
-		<button aria-current={tab === 'chart'} onclick={() => (tab = 'chart')}> Chart </button>
-	</nav>
 </section>
 
 <style>
 	section {
-		background: hsl(0deg 0% 0%);
+		background: hsl(0deg 0% 5%);
 		color: hsl(0deg 0% 96%);
 		display: flex;
 		flex-direction: column;
@@ -53,26 +53,42 @@
 
 		& > nav {
 			flex-shrink: 0;
-			padding: 7px 5px;
-			border-top: 1px solid hsl(0deg 0% 29%);
 			user-select: none;
 			-webkit-user-select: none;
+			height: 28px;
 
 			display: flex;
 			align-items: center;
-			gap: 2px;
+
+			position: relative;
+
+			&::before {
+				content: '';
+				position: absolute;
+				width: 100%;
+				height: 1px;
+				bottom: 0px;
+				left: 0;
+				background-color: hsl(0deg 0% 20%);
+				z-index: 1;
+			}
 
 			& > button {
+				height: 100%;
 				font-size: 10px;
 				font-weight: 500;
 				background-color: transparent;
-				padding: 4px 10px;
-				border-radius: 3px;
+				padding: 0 16px;
+				border-top: 1px solid hsl(0deg 0% 20%);
+				border-right: 1px solid hsl(0deg 0% 20%);
 
-				cursor: pointer;
+				&:is(:hover, :focus-within) {
+					cursor: pointer;
+				}
 
-				&:is(:hover, :focus-within, [aria-current='true']) {
-					background-color: hsl(0deg 0% 29%);
+				&:is([aria-current='true']) {
+					background-color: hsl(0deg 0% 5%);
+					z-index: 1;
 				}
 			}
 		}

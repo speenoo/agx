@@ -27,8 +27,13 @@
 		raf = null;
 	}
 
-	function format(n: number) {
-		return (n / 1000).toFixed(3) + 's';
+	function format(ms: number) {
+		const d = new Date(ms);
+
+		return `MM:ss.mmm`
+			.replace('MM', `${d.getUTCMinutes()}`.padStart(2, '0'))
+			.replace('ss', `${d.getUTCSeconds()}`.padStart(2, '0'))
+			.replace('mmm', `${d.getUTCMilliseconds()}`.padStart(3, '0'));
 	}
 </script>
 

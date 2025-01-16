@@ -315,7 +315,7 @@
 			<div class="spacer"></div>
 			<TimeCounter bind:this={counter} />
 			{#if BUILD}
-				<span class="label">build {BUILD}</span>
+				<span class="label">build-{BUILD}</span>
 			{/if}
 			<button
 				class:active={dataPanelOpened}

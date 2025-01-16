@@ -178,7 +178,7 @@
 		position: sticky;
 		top: 0;
 		z-index: 1;
-		border-top: 1px solid hsl(0deg 0% 20%);
+		/* border-top: 1px solid hsl(0deg 0% 20%); */
 		border-bottom: 1px solid hsl(0deg 0% 12%);
 		font-weight: 400;
 		cursor: pointer;
