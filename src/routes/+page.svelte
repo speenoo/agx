@@ -446,6 +446,8 @@
 		display: flex;
 		place-items: center;
 		gap: 8px;
+		font-family: monospace;
+		color: hsl(0deg 0% 70%);
 
 		& > .spacer {
 			flex: 1;
@@ -462,6 +464,7 @@
 			aspect-ratio: 1;
 			flex-shrink: 0;
 			background-color: transparent;
+			color: hsl(0deg 0% 100%);
 
 			&.active {
 				color: hsl(204deg 88% 65%);
