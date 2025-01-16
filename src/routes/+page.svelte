@@ -10,11 +10,11 @@
 	import TimeCounter from '$lib/components/TimeCounter.svelte';
 	import { setAppContext } from '$lib/context';
 	import Bars3 from '$lib/icons/Bars3.svelte';
-	import CommandLine from '$lib/icons/CommandLine.svelte';
+	import PanelBottom from '$lib/icons/PanelBottom.svelte';
+	import PanelLeft from '$lib/icons/PanelLeft.svelte';
 	import Play from '$lib/icons/Play.svelte';
 	import Plus from '$lib/icons/Plus.svelte';
 	import Save from '$lib/icons/Save.svelte';
-	import TreeView from '$lib/icons/TreeView.svelte';
 	import type { Table } from '$lib/olap-engine';
 	import { engine, type OLAPResponse } from '$lib/olap-engine';
 	import { PanelState } from '$lib/PanelState.svelte';
@@ -46,7 +46,7 @@
 
 		if (response && last?.content !== query) await addHistoryEntry(query);
 
-		if (response) dataPanel.open = true;
+		if (response) bottomPanel.open = true;
 	}
 
 	let tables = $state.raw<Table[]>([]);
@@ -164,7 +164,7 @@
 
 	$effect(() => {
 		if (!isMobile) drawerOpened = false;
-		else itemPanel.open = false;
+		else leftPanel.open = false;
 	});
 
 	let tabs = $state<Tab[]>([]);
@@ -206,8 +206,8 @@
 
 	$effect(() => void saveTabs($state.snapshot(tabs), selectedTabIndex).catch(console.error));
 
-	const dataPanel = new PanelState('65%', false, '100%');
-	const itemPanel = new PanelState('242px', true);
+	const bottomPanel = new PanelState('65%', false, '100%');
+	const leftPanel = new PanelState('242px', true);
 </script>
 
 <svelte:window onkeydown={handleKeyDown} bind:innerWidth={screenWidth} />
@@ -236,9 +236,9 @@
 		{/if}
 		<SplitPane
 			type="horizontal"
-			disabled={!itemPanel.open || isMobile}
-			bind:pos={itemPanel.position}
-			min={!itemPanel.open || isMobile ? '0px' : '242px'}
+			disabled={!leftPanel.open || isMobile}
+			bind:pos={leftPanel.position}
+			min={!leftPanel.open || isMobile ? '0px' : '242px'}
 			max="40%"
 		>
 			{#snippet a()}
@@ -250,9 +250,9 @@
 				<SplitPane
 					type="vertical"
 					min="20%"
-					max={dataPanel.open ? '80%' : '100%'}
-					bind:pos={dataPanel.position}
-					disabled={!dataPanel.open}
+					max={bottomPanel.open ? '80%' : '100%'}
+					bind:pos={bottomPanel.position}
+					disabled={!bottomPanel.open}
 					--color="hsl(0deg 0% 20%)"
 				>
 					{#snippet a()}
@@ -308,11 +308,11 @@
 	{#if !isMobile}
 		<footer>
 			<button
-				class:active={itemPanel.open}
-				onclick={() => (itemPanel.open = !itemPanel.open)}
+				class:active={leftPanel.open}
+				onclick={() => (leftPanel.open = !leftPanel.open)}
 				style:margin-left="7px"
 			>
-				<TreeView size="12" />
+				<PanelLeft size="12" />
 			</button>
 			<div class="spacer"></div>
 			<TimeCounter bind:this={counter} />
@@ -320,11 +320,11 @@
 				<span class="label">build-{BUILD}</span>
 			{/if}
 			<button
-				class:active={dataPanel.open}
-				onclick={() => (dataPanel.open = !dataPanel.open)}
+				class:active={bottomPanel.open}
+				onclick={() => (bottomPanel.open = !bottomPanel.open)}
 				style:margin-right="7px"
 			>
-				<CommandLine size="12" />
+				<PanelBottom size="12" />
 			</button>
 		</footer>
 	{/if}
@@ -450,6 +450,7 @@
 		gap: 8px;
 		font-family: monospace;
 		color: hsl(0deg 0% 70%);
+		font-size: 9px;
 
 		& > .spacer {
 			flex: 1;
@@ -466,7 +467,7 @@
 			aspect-ratio: 1;
 			flex-shrink: 0;
 			background-color: transparent;
-			color: hsl(0deg 0% 100%);
+			color: inherit;
 
 			&.active {
 				color: hsl(204deg 88% 65%);
