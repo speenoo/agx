@@ -22,7 +22,3 @@ export const SOURCE_TYPE_SHORT_NAME_MAP: Record<string, string> = {
 	S3: 'S3',
 	ReplacingMergeTree: 'MT'
 };
-
-export function remove_nullable(type: string) {
-	return type.replace(/Nullable\((.*)\)/, '$1');
-}

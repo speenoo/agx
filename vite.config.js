@@ -22,6 +22,9 @@ export default defineConfig(async () => ({
 		exclude: ['@sqlite.org/sqlite-wasm']
 	},
 	define: {
-		PLATFORM: JSON.stringify(process.env.PLATFORM || 'NATIVE')
+		PLATFORM: JSON.stringify(process.env.PLATFORM || 'NATIVE'),
+		BUILD: JSON.stringify(
+			(process.env.CF_PAGES_COMMIT_SHA || process.env.COMMIT_SHA || 'dev').slice(0, 7)
+		)
 	}
 }));

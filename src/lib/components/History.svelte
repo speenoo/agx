@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getAppContext } from '$lib/context';
 	import type { HistoryEntry } from '$lib/repositories/history';
 	import dayjs from 'dayjs';
 	import relativeTime from 'dayjs/plugin/relativeTime';
@@ -8,16 +9,19 @@
 
 	interface Props {
 		history: HistoryEntry[];
-		onHistoryClick?: (entry: HistoryEntry) => void;
+		onOpen?: (entry: HistoryEntry) => MaybePromise<void>;
+		onDelete?: (entry: HistoryEntry) => MaybePromise<void>;
 	}
 
-	let { history: entries, onHistoryClick }: Props = $props();
+	let { history: entries, onOpen, onDelete }: Props = $props();
 
 	let search = $state('');
 
 	let filtered = $derived(
 		search ? entries.filter((e) => e.content.toLowerCase().includes(search.toLowerCase())) : entries
 	);
+
+	const { contextmenu } = getAppContext();
 </script>
 
 <SearchBar bind:value={search} />
@@ -27,22 +31,34 @@
 			tabindex="-1"
 			oncontextmenu={(e) => {
 				e.preventDefault();
+				contextmenu.show({
+					items: [
+						{ label: 'Open', onClick: () => onOpen?.(entry), disabled: !onOpen },
+						{ is_separator: true },
+						{ label: 'Delete', onClick: () => onDelete?.(entry), disabled: !onDelete }
+					],
+					position: { x: e.clientX, y: e.clientY }
+				});
 			}}
 			role="menuitem"
-			onkeydown={(e) => {
+			onkeydown={async (e) => {
 				if (e.key === 'Enter') {
-					onHistoryClick?.(entry);
+					await onOpen?.(entry);
+					e.currentTarget.blur();
+				}
+				if (e.key === 'Backspace') {
+					await onDelete?.(entry);
 					e.currentTarget.blur();
 				}
 			}}
-			onclick={(e) => {
+			onclick={async (e) => {
 				if (e.detail >= 2) {
-					onHistoryClick?.(entry);
+					await onOpen?.(entry);
 					e.currentTarget.blur();
 				}
 			}}
-			ontouchend={(e) => {
-				onHistoryClick?.(entry);
+			ontouchend={async (e) => {
+				await onOpen?.(entry);
 				e.currentTarget.blur();
 			}}
 		>

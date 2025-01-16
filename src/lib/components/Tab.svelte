@@ -6,16 +6,16 @@
 		onSelect: () => void;
 		onClose: () => void;
 		active: boolean;
-		'close-hidden': boolean;
+		'hide-close': boolean;
 	}
 
-	let { active, label, onClose, onSelect, 'close-hidden': hide_close }: Props = $props();
+	let { active, label, onClose, onSelect, 'hide-close': hideClose }: Props = $props();
 </script>
 
 <div class="tab" class:active role="button" onclick={onSelect} tabindex="0" onkeyup={() => {}}>
 	<span>{label}</span>
 
-	{#if !hide_close}
+	{#if !hideClose}
 		<button
 			onclick={(e) => {
 				e.stopPropagation();

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { get_app_context } from '$lib/context';
+	import { getAppContext } from '$lib/context';
 	import type { Query } from '$lib/repositories/queries';
 	import dayjs from 'dayjs';
 	import relativeTime from 'dayjs/plugin/relativeTime';
@@ -10,21 +10,21 @@
 	interface Props {
 		queries?: Query[];
 
-		onopen?: (query: Query) => MaybePromise<void>;
-		ondelete?: (query: Query) => MaybePromise<void>;
-		onrename?: (query: Query) => MaybePromise<void>;
+		onOpen?: (query: Query) => MaybePromise<void>;
+		onDelete?: (query: Query) => MaybePromise<void>;
+		onRename?: (query: Query) => MaybePromise<void>;
 	}
 
-	let { queries = [], onopen, ondelete, onrename }: Props = $props();
+	let { queries = [], onOpen, onDelete, onRename }: Props = $props();
 
-	const { context_menu } = get_app_context();
+	const { contextmenu: context_menu } = getAppContext();
 
-	let editing_id = $state<Query['id']>();
+	let editingId = $state<Query['id']>();
 
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape') {
 			e.preventDefault();
-			editing_id = undefined;
+			editingId = undefined;
 		}
 	}
 
@@ -57,50 +57,59 @@
 					items: [
 						{
 							label: 'Open',
-							onClick: () => onopen?.(query)
+							onClick: () => onOpen?.(query),
+							disabled: !onOpen
 						},
 						{
 							label: 'Rename',
-							onClick: () => (editing_id = query.id)
+							onClick: () => (editingId = query.id),
+							disabled: !onRename
 						},
 						{ is_separator: true },
 						{
 							label: 'Delete',
-							onClick: () => ondelete?.(query)
+							onClick: () => onDelete?.(query),
+							disabled: !onDelete
 						}
 					],
 					position: { x: e.clientX, y: e.clientY }
 				});
 			}}
 			role="menuitem"
-			onkeydown={(e) => {
-				if (e.key === 'Enter' && !editing_id) {
+			onkeydown={async (e) => {
+				if (editingId) return;
+				if (e.key === 'Enter') {
 					e.preventDefault();
-					editing_id = query.id;
+					editingId = query.id;
+				}
+
+				if (e.key === 'Backspace') {
+					await onDelete?.(query);
+					e.currentTarget.blur();
 				}
 			}}
 			onclick={async (e) => {
 				if (e.detail >= 2) {
-					await onopen?.(query);
+					await onOpen?.(query);
 					e.currentTarget.blur();
 				}
 			}}
 			ontouchend={async (e) => {
-				await onopen?.(query);
+				await onOpen?.(query);
 				e.currentTarget.blur();
 			}}
 		>
 			<div>
-				{#if editing_id === query.id}
+				{#if editingId === query.id}
 					<form
 						onsubmit={async (e) => {
 							e.preventDefault();
 							const form_data = new FormData(e.currentTarget);
 							const name = form_data.get('name') as string;
 							if (name && name !== query.name) {
-								await onrename?.({ ...query, name });
+								await onRename?.({ ...query, name });
 							}
-							editing_id = undefined;
+							editingId = undefined;
 						}}
 					>
 						<input
@@ -109,7 +118,7 @@
 							name="name"
 							value={query.name}
 							onkeydown={handleKeydown}
-							onblur={() => (editing_id = undefined)}
+							onblur={() => (editingId = undefined)}
 							autocomplete="off"
 						/>
 					</form>

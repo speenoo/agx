@@ -52,4 +52,4 @@ function row_to_tab(row: Awaited<ReturnType<Database['exec']>>[number]): Tab {
 	};
 }
 
-export const tab_repository: TabRepository = new SQLiteTabRepository(db);
+export const tabRepository: TabRepository = new SQLiteTabRepository(db);

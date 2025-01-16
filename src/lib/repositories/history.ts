@@ -14,6 +14,7 @@ export interface HistoryRepository {
 	getAll(): Promise<HistoryEntry[]>;
 	add(content: string): Promise<HistoryEntry>;
 	getLast(): Promise<HistoryEntry | null>;
+	delete(id: HistoryEntry['id']): Promise<void>;
 }
 
 class SQLiteHistoryRepository implements HistoryRepository {
@@ -57,6 +58,10 @@ class SQLiteHistoryRepository implements HistoryRepository {
 				.toDate()
 		};
 	}
+
+	async delete(id: HistoryEntry['id']) {
+		await this.db.exec('DELETE FROM history WHERE id = ?', [id]);
+	}
 }
 
-export const history_repository: HistoryRepository = new SQLiteHistoryRepository(db);
+export const historyRepository: HistoryRepository = new SQLiteHistoryRepository(db);
