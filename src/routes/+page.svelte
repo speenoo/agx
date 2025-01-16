@@ -7,6 +7,7 @@
 	import Result from '$lib/components/Result.svelte';
 	import SideBar from '$lib/components/SideBar.svelte';
 	import TabComponent from '$lib/components/Tab.svelte';
+	import TimeCounter from '$lib/components/TimeCounter.svelte';
 	import { setAppContext } from '$lib/context';
 	import Bars3 from '$lib/icons/Bars3.svelte';
 	import CommandLine from '$lib/icons/CommandLine.svelte';
@@ -24,8 +25,8 @@
 	import type { ComponentProps } from 'svelte';
 
 	let response = $state.raw<OLAPResponse>();
-
 	let loading = $state(false);
+	let counter = $state<ReturnType<typeof TimeCounter>>();
 
 	async function handleExec() {
 		const query = currentTab.contents;
@@ -34,7 +35,11 @@
 		}
 
 		loading = true;
-		response = await engine.exec(query).finally(() => (loading = false));
+		counter?.start();
+		response = await engine.exec(query).finally(() => {
+			loading = false;
+			counter?.stop();
+		});
 
 		const last = await historyRepository.getLast();
 
@@ -306,6 +311,7 @@
 				<TreeView size="12" />
 			</button>
 			<div class="spacer"></div>
+			<TimeCounter bind:this={counter} />
 			{#if BUILD}
 				<span class="label">build {BUILD}</span>
 			{/if}
@@ -434,7 +440,7 @@
 		border-top: 1px solid hsl(0deg 0% 20%);
 		display: flex;
 		place-items: center;
-		gap: 0.4rem;
+		gap: 8px;
 
 		& > .spacer {
 			flex: 1;
