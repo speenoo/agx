@@ -17,6 +17,7 @@
 	import TreeView from '$lib/icons/TreeView.svelte';
 	import type { Table } from '$lib/olap-engine';
 	import { engine, type OLAPResponse } from '$lib/olap-engine';
+	import { PanelState } from '$lib/PanelState.svelte';
 	import { historyRepository, type HistoryEntry } from '$lib/repositories/history';
 	import { queryRepository, type Query } from '$lib/repositories/queries';
 	import { tabRepository, type Tab } from '$lib/repositories/tabs';
@@ -45,7 +46,7 @@
 
 		if (response && last?.content !== query) await addHistoryEntry(query);
 
-		if (response) dataPanelOpened = true;
+		if (response) dataPanel.open = true;
 	}
 
 	let tables = $state.raw<Table[]>([]);
@@ -163,6 +164,7 @@
 
 	$effect(() => {
 		if (!isMobile) drawerOpened = false;
+		else itemPanel.open = false;
 	});
 
 	let tabs = $state<Tab[]>([]);
@@ -204,8 +206,8 @@
 
 	$effect(() => void saveTabs($state.snapshot(tabs), selectedTabIndex).catch(console.error));
 
-	let dataPanelOpened = $state(false);
-	let itemListPanelOpened = $state(true);
+	const dataPanel = new PanelState('65%', false, '100%');
+	const itemPanel = new PanelState('242px', true);
 </script>
 
 <svelte:window onkeydown={handleKeyDown} bind:innerWidth={screenWidth} />
@@ -234,9 +236,9 @@
 		{/if}
 		<SplitPane
 			type="horizontal"
-			disabled={!itemListPanelOpened || isMobile}
-			pos={!itemListPanelOpened || isMobile ? '0px' : '242px'}
-			min={!itemListPanelOpened || isMobile ? '0px' : '242px'}
+			disabled={!itemPanel.open || isMobile}
+			bind:pos={itemPanel.position}
+			min={!itemPanel.open || isMobile ? '0px' : '242px'}
 			max="40%"
 		>
 			{#snippet a()}
@@ -248,9 +250,9 @@
 				<SplitPane
 					type="vertical"
 					min="20%"
-					max={dataPanelOpened ? '80%' : '100%'}
-					pos={dataPanelOpened ? '65%' : '100%'}
-					disabled={!dataPanelOpened}
+					max={dataPanel.open ? '80%' : '100%'}
+					bind:pos={dataPanel.position}
+					disabled={!dataPanel.open}
 					--color="hsl(0deg 0% 20%)"
 				>
 					{#snippet a()}
@@ -306,8 +308,8 @@
 	{#if !isMobile}
 		<footer>
 			<button
-				class:active={itemListPanelOpened}
-				onclick={() => (itemListPanelOpened = !itemListPanelOpened)}
+				class:active={itemPanel.open}
+				onclick={() => (itemPanel.open = !itemPanel.open)}
 				style:margin-left="7px"
 			>
 				<TreeView size="12" />
@@ -318,8 +320,8 @@
 				<span class="label">build-{BUILD}</span>
 			{/if}
 			<button
-				class:active={dataPanelOpened}
-				onclick={() => (dataPanelOpened = !dataPanelOpened)}
+				class:active={dataPanel.open}
+				onclick={() => (dataPanel.open = !dataPanel.open)}
 				style:margin-right="7px"
 			>
 				<CommandLine size="12" />
