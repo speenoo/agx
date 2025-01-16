@@ -22,7 +22,7 @@
 	import { tabRepository, type Tab } from '$lib/repositories/tabs';
 	import { SplitPane } from '@rich_harris/svelte-split-pane';
 	import debounce from 'p-debounce';
-	import type { ComponentProps } from 'svelte';
+	import { tick, type ComponentProps } from 'svelte';
 
 	let response = $state.raw<OLAPResponse>();
 	let loading = $state(false);
@@ -179,6 +179,7 @@
 		2_000
 	);
 
+	let tabContainer: HTMLDivElement;
 	let selectedTabIndex = $state(0);
 	const currentTab = $derived(tabs[selectedTabIndex]);
 	const canSave = $derived.by(() => {
@@ -193,6 +194,7 @@
 
 	function addNewTab() {
 		selectedTabIndex = tabs.push({ id: crypto.randomUUID(), name: 'Untitled', contents: '' }) - 1;
+		tick().then(() => tabContainer.scroll({ left: tabContainer.scrollWidth }));
 	}
 
 	function closeTab(index: number) {
@@ -254,7 +256,7 @@
 					{#snippet a()}
 						<div>
 							<nav class="navigation">
-								<div class="tabs-container">
+								<div class="tabs-container" bind:this={tabContainer}>
 									{#if isMobile}
 										<button class="action burger" onclick={() => (drawerOpened = true)}>
 											<Bars3 size="12" />
@@ -352,6 +354,9 @@
 			align-items: center;
 			height: 100%;
 			overflow-x: hidden;
+			white-space: nowrap;
+			overflow-x: auto;
+			overflow-y: hidden;
 		}
 
 		& > .workspace-actions {
