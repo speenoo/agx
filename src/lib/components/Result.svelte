@@ -3,14 +3,17 @@
 	import type { OLAPResponse } from '$lib/olap-engine';
 	import { untrack } from 'svelte';
 	import ChartContainer from './ChartContainer.svelte';
+	import Console, { type Log } from './Console.svelte';
 
 	interface Props {
 		response?: OLAPResponse;
+		logs?: Log[];
+		tab?: 'data' | 'chart' | 'logs';
+		onClearLogs?: () => void;
 	}
 
-	let { response }: Props = $props();
+	let { response, logs = [], tab = $bindable('data'), onClearLogs }: Props = $props();
 
-	let tab = $state<'data' | 'chart'>('data');
 	let yAxis = $state<string>('');
 	let xAxis = $state<string>('');
 	let chartType = $state('line');
@@ -27,6 +30,7 @@
 	<nav>
 		<button aria-current={tab === 'data'} onclick={() => (tab = 'data')}>Data</button>
 		<button aria-current={tab === 'chart'} onclick={() => (tab = 'chart')}>Chart</button>
+		<button aria-current={tab === 'logs'} onclick={() => (tab = 'logs')}>Logs</button>
 	</nav>
 	<div>
 		{#if response}
@@ -35,6 +39,10 @@
 			{:else if tab === 'chart'}
 				<ChartContainer {response} bind:xAxis bind:yAxis bind:type={chartType} />
 			{/if}
+		{/if}
+
+		{#if tab === 'logs'}
+			<Console {logs} onClear={onClearLogs} />
 		{/if}
 	</div>
 </section>

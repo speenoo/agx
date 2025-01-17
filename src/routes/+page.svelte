@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Log } from '$lib/components/Console.svelte';
 	import { ContextMenuState } from '$lib/components/ContextMenu';
 	import ContextMenu from '$lib/components/ContextMenu/ContextMenu.svelte';
 	import Drawer from '$lib/components/Drawer.svelte';
@@ -46,7 +47,10 @@
 
 		if (response && last?.content !== query) await addHistoryEntry(query);
 
-		if (response) bottomPanel.open = true;
+		if (response) {
+			bottomPanel.open = true;
+			bottomPanelTab = 'data';
+		}
 	}
 
 	let tables = $state.raw<Table[]>([]);
@@ -208,6 +212,16 @@
 
 	const bottomPanel = new PanelState('65%', false, '100%');
 	const leftPanel = new PanelState('242px', true);
+
+	let bottomPanelTab = $state<'data' | 'chart' | 'logs'>('data');
+	let errors = $state.raw<Log[]>([]);
+	engine.on('error', (e) => {
+		if (e instanceof Error) {
+			errors = errors.concat({ level: 'error', timestamp: new Date(), data: e.message });
+			bottomPanel.open = true;
+			bottomPanelTab = 'logs';
+		}
+	});
 </script>
 
 <svelte:window onkeydown={handleKeyDown} bind:innerWidth={screenWidth} />
@@ -299,7 +313,12 @@
 						</div>
 					{/snippet}
 					{#snippet b()}
-						<Result {response} />
+						<Result
+							{response}
+							logs={errors}
+							bind:tab={bottomPanelTab}
+							onClearLogs={() => (errors = [])}
+						/>
 					{/snippet}
 				</SplitPane>
 			{/snippet}
