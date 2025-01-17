@@ -36,6 +36,6 @@ export const theme = syntaxHighlighting(
 		{ tag: t.heading, fontWeight: 'bold', color: 'hsl(220deg 2% 90%)' },
 		{ tag: [t.atom, t.bool], color: 'hsl(45, 7%, 75%)' },
 		{ tag: [t.processingInstruction, t.string, t.inserted], color: 'hsl(41, 37%, 68%)' },
-		{ tag: t.invalid, color: '#ff008c' }
+		{ tag: t.invalid, color: 'hsl(327deg 100% 50%)' }
 	])
 );

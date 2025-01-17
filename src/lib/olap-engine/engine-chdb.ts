@@ -1,10 +1,11 @@
 import { invoke } from '@tauri-apps/api/core';
-import type { OLAPEngine, Table, OLAPResponse } from './index';
+import type { OLAPEngine, OLAPResponse, Table } from './index';
 
+import { Logger } from './Logger';
 import CLICKHOUSE_GET_SCHEMA from './queries/clickhouse_get_schema.sql?raw';
 import CLICKHOUSE_INIT_DB from './queries/clickhouse_init_db.sql?raw';
 
-export class CHDBEngine implements OLAPEngine {
+export class CHDBEngine extends Logger implements OLAPEngine {
 	async init() {
 		await this.exec(CLICKHOUSE_INIT_DB);
 	}
@@ -16,8 +17,9 @@ export class CHDBEngine implements OLAPEngine {
 
 			return JSON.parse(r) as OLAPResponse;
 		} catch (e) {
+			if (typeof e === 'string') e = new Error(e);
 			console.error(e);
-			return undefined;
+			this.log('error', e);
 		}
 	}
 

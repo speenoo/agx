@@ -1,9 +1,16 @@
 import { CHDBEngine } from './engine-chdb';
 import { RemoteEngine } from './engine-remote';
+import type { ILogger } from './Logger';
 
 export type OLAPResponse = {
 	meta: Array<ColumnDescriptor>;
 	data: Array<{ [key: string]: any }>;
+	rows: number;
+	statistics: {
+		bytes_read: number;
+		elapsed: number;
+		rows_read: number;
+	};
 };
 
 export interface ColumnDescriptor {
@@ -17,7 +24,7 @@ export interface Table {
 	columns: ColumnDescriptor[];
 }
 
-export interface OLAPEngine {
+export interface OLAPEngine extends ILogger {
 	init(): Promise<void>;
 	exec(query: string): Promise<OLAPResponse | undefined>;
 	getSchema(): Promise<Table[]>;
