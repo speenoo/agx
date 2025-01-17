@@ -49,7 +49,7 @@
 
 		if (response) {
 			bottomPanel.open = true;
-			bottomPanelTab = 'data';
+			if (bottomPanelTab === 'logs') bottomPanelTab = 'data';
 		}
 	}
 

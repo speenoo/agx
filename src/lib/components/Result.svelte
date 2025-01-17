@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Table } from '$lib/components/Table';
+	import Trash from '$lib/icons/Trash.svelte';
 	import type { OLAPResponse } from '$lib/olap-engine';
 	import { untrack } from 'svelte';
 	import ChartContainer from './ChartContainer.svelte';
@@ -31,6 +32,10 @@
 		<button aria-current={tab === 'data'} onclick={() => (tab = 'data')}>Data</button>
 		<button aria-current={tab === 'chart'} onclick={() => (tab = 'chart')}>Chart</button>
 		<button aria-current={tab === 'logs'} onclick={() => (tab = 'logs')}>Logs</button>
+		{#if tab === 'logs'}
+			<div class="spacer"></div>
+			<button class="action" onclick={() => onClearLogs?.()}><Trash size="12" /></button>
+		{/if}
 	</nav>
 	<div>
 		{#if response}
@@ -42,7 +47,7 @@
 		{/if}
 
 		{#if tab === 'logs'}
-			<Console {logs} onClear={onClearLogs} />
+			<Console {logs} />
 		{/if}
 	</div>
 </section>
@@ -97,6 +102,29 @@
 				&:is([aria-current='true']) {
 					background-color: hsl(0deg 0% 5%);
 					z-index: 1;
+				}
+			}
+
+			& .spacer {
+				flex: 1;
+			}
+
+			& .action {
+				height: 100%;
+				aspect-ratio: 1;
+				padding: 0px;
+
+				display: flex;
+				align-items: center;
+				justify-content: center;
+
+				&:is(:hover):not(:disabled) {
+					background-color: hsl(0deg 0% 10%);
+					cursor: pointer;
+
+					&:active {
+						background-color: hsl(0deg 0% 13%);
+					}
 				}
 			}
 		}
