@@ -1,6 +1,6 @@
 import { SQLDialect } from '@codemirror/lang-sql';
 
-const keywords = [
+const ClickHouseKeywords = [
 	'after',
 	'alias',
 	'all',
@@ -87,7 +87,7 @@ const keywords = [
 	'index',
 	'injective',
 	'inner',
-	// 'insert',
+	'insert',
 	'interval',
 	'into',
 	'is',
@@ -150,7 +150,7 @@ const keywords = [
 	'select',
 	'semi',
 	'sends',
-	// 'set',
+	'set',
 	'settings',
 	'show',
 	'source',
@@ -168,7 +168,7 @@ const keywords = [
 	'then',
 	'ties',
 	'timeout',
-	// 'timestamp',
+	'timestamp',
 	'totals',
 	'trailing',
 	'trim',
@@ -180,7 +180,7 @@ const keywords = [
 
 	'unbounded',
 	'union',
-	// 'update',
+	'update',
 	'use',
 	'using',
 	'uuid',
@@ -195,7 +195,7 @@ const keywords = [
 	'string_agg'
 ];
 
-const functions = [
+const ClickHouseFunctions = [
 	// Arithmetic Functions
 	'plus',
 	'minus',
@@ -1006,15 +1006,6 @@ const functions = [
 	'lead',
 	'lagInFrame',
 	'leadInFrame'
-
-	// Agnostic functions
-	// 'token_name',
-	// 'token_symbol',
-	// 'token_decimals',
-	// 'token_unit_amount',
-	// 'token_usd_amount',
-	// 'token_usd_amount_or_default',
-	// 'token_usd_amount_or_null'
 ];
 
 const builtin = [
@@ -1035,12 +1026,60 @@ const builtin = [
 	'year'
 ];
 
-export const ProxyDialect = SQLDialect.define({
+// Table functions for ClickHouse
+const ClickHouseTableFunctions = [
+	// Data Generating Functions
+	'numbers', // Generates a sequence of numbers.
+	'numbers_mt', // Multithreaded version of `numbers`.
+	'zeros', // Generates a sequence of zeros.
+	'zeros_mt', // Multithreaded version of `zeros`.
+
+	// File-Based Table Functions
+	'file', // Reads data from a file.
+	'url', // Reads data from a URL.
+	's3', // Reads data from an S3-compatible object storage.
+	'hdfs', // Reads data from an HDFS-compatible storage.
+
+	// Input/Output Functions
+	'input', // Allows for programmatically inserting data.
+	'output', // Outputs the result to an external source.
+
+	// Data Replication and Distribution
+	'remote', // Queries data from a remote ClickHouse server or cluster.
+	'remoteSecure', // Similar to `remote`, but with TLS encryption.
+
+	// System Table Functions
+	'system', // Accesses system tables for diagnostic purposes.
+
+	// Aggregated Data Functions
+	'merge', // Reads and merges parts of data for a MergeTree table.
+	'mergeStorage', // Used for distributed tables.
+	'null', // Acts as a data sink, discarding input.
+	'replicatedMergeTree', // Works with replicated MergeTree tables.
+
+	// Temporary Table and Data Construction
+	'values', // Allows inserting constant data.
+	'generateRandom', // Produces a random dataset for testing.
+
+	// Miscellaneous Functions
+	'mysql', // Reads data from a MySQL database.
+	'postgresql', // Reads data from a PostgreSQL database.
+	'odbc', // Reads data via an ODBC connection.
+	'jdbc', // Reads data via a JDBC connection.
+	'mongo', // Reads data from MongoDB.
+	'kafka', // Reads data from a Kafka topic.
+	'rabbitmq', // Reads data from a RabbitMQ queue.
+	'poco' // Runs Poco-style table functions.
+];
+
+export const ClickHouseDialect = SQLDialect.define({
 	charSetCasts: true,
 	doubleDollarQuotedStrings: true,
 	operatorChars: '+-*/<>=~!@#%^&|`?',
 	specialVar: '',
-	keywords: Array.from(new Set([...keywords, ...functions])).join(' '),
+	keywords: Array.from(
+		new Set([...ClickHouseKeywords, ...ClickHouseFunctions, ...ClickHouseTableFunctions])
+	).join(' '),
 	builtin: builtin.join(' '),
 	types: ''
 });
