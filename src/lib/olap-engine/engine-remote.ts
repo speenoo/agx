@@ -2,6 +2,7 @@ import type { OLAPEngine, OLAPResponse, Table } from './index';
 import { Logger } from './Logger';
 
 import CLICKHOUSE_GET_SCHEMA from './queries/clickhouse_get_schema.sql?raw';
+import CLICKHOUSE_GET_UDFS from './queries/clickhouse_get_udfs.sql?raw';
 
 export class RemoteEngine extends Logger implements OLAPEngine {
 	async init() {}
@@ -32,6 +33,13 @@ export class RemoteEngine extends Logger implements OLAPEngine {
 		const response = await this.exec(CLICKHOUSE_GET_SCHEMA);
 		if (!response) return [];
 		return response.data as Table[];
+	}
+
+	async getUDFs() {
+		const response = await this.exec(CLICKHOUSE_GET_UDFS);
+		if (!response) return [];
+
+		return response.data.map((row) => row.name as string);
 	}
 }
 

@@ -28,6 +28,7 @@ export interface OLAPEngine extends ILogger {
 	init(): Promise<void>;
 	exec(query: string): Promise<OLAPResponse | undefined>;
 	getSchema(): Promise<Table[]>;
+	getUDFs(): Promise<string[]>;
 }
 
 export const engine: OLAPEngine = PLATFORM === 'WEB' ? new RemoteEngine() : new CHDBEngine();

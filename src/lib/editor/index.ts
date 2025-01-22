@@ -1,2 +1,2 @@
 export { ClickHouseDialect } from './SQLDialect';
-export { tablesToSQLNamespace } from './utils';
+export { extendsDialect, tablesToSQLNamespace } from './utils';

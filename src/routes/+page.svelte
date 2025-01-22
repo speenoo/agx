@@ -9,7 +9,7 @@
 	import TabComponent from '$lib/components/Tab.svelte';
 	import TimeCounter from '$lib/components/TimeCounter.svelte';
 	import { setAppContext } from '$lib/context';
-	import { ClickHouseDialect, tablesToSQLNamespace } from '$lib/editor';
+	import { ClickHouseDialect, extendsDialect, tablesToSQLNamespace } from '$lib/editor';
 	import Bars3 from '$lib/icons/Bars3.svelte';
 	import PanelBottom from '$lib/icons/PanelBottom.svelte';
 	import PanelLeft from '$lib/icons/PanelLeft.svelte';
@@ -26,10 +26,13 @@
 	import { SplitPane } from '@rich_harris/svelte-split-pane';
 	import debounce from 'p-debounce';
 	import { tick, type ComponentProps } from 'svelte';
+	import type { PageData } from './$types';
 
 	let response = $state.raw<OLAPResponse>();
 	let loading = $state(false);
 	let counter = $state<ReturnType<typeof TimeCounter>>();
+
+	let { data }: { data: PageData } = $props();
 
 	async function handleExec() {
 		const query = currentTab.contents;
@@ -311,7 +314,7 @@
 									<Editor
 										bind:value={tab.contents}
 										schema={tablesToSQLNamespace(tables)}
-										dialect={ClickHouseDialect}
+										dialect={extendsDialect(ClickHouseDialect, data.udfs)}
 										placeholder="Type your query..."
 									/>
 								</div>
