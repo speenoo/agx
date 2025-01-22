@@ -16,7 +16,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"@agnosticeng/cache": "^0.0.3",
-		"@agnosticeng/editor": "^0.0.2",
+		"@agnosticeng/editor": "^0.0.3",
 		"@agnosticeng/migrate": "^0.0.2",
 		"@agnosticeng/sqlite": "^0.0.5",
 		"@codemirror/autocomplete": "^6.18.4",
