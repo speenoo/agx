@@ -1,0 +1,1 @@
+export { tablesToSQLNamespace } from './utils';

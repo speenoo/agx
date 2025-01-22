@@ -3,13 +3,13 @@
 	import { ContextMenuState } from '$lib/components/ContextMenu';
 	import ContextMenu from '$lib/components/ContextMenu/ContextMenu.svelte';
 	import Drawer from '$lib/components/Drawer.svelte';
-	import { Editor } from '$lib/components/Editor';
 	import { SaveQueryModal } from '$lib/components/Queries';
 	import Result from '$lib/components/Result.svelte';
 	import SideBar from '$lib/components/SideBar.svelte';
 	import TabComponent from '$lib/components/Tab.svelte';
 	import TimeCounter from '$lib/components/TimeCounter.svelte';
 	import { setAppContext } from '$lib/context';
+	import { tablesToSQLNamespace } from '$lib/editor';
 	import Bars3 from '$lib/icons/Bars3.svelte';
 	import PanelBottom from '$lib/icons/PanelBottom.svelte';
 	import PanelLeft from '$lib/icons/PanelLeft.svelte';
@@ -22,13 +22,18 @@
 	import { historyRepository, type HistoryEntry } from '$lib/repositories/history';
 	import { queryRepository, type Query } from '$lib/repositories/queries';
 	import { tabRepository, type Tab } from '$lib/repositories/tabs';
+	import { Editor } from '@agnosticeng/editor';
+	import { ClickHouseDialect, extendsDialectKeywords } from '@agnosticeng/editor/dialect';
 	import { SplitPane } from '@rich_harris/svelte-split-pane';
 	import debounce from 'p-debounce';
 	import { tick, type ComponentProps } from 'svelte';
+	import type { PageData } from './$types';
 
 	let response = $state.raw<OLAPResponse>();
 	let loading = $state(false);
 	let counter = $state<ReturnType<typeof TimeCounter>>();
+
+	let { data }: { data: PageData } = $props();
 
 	async function handleExec() {
 		const query = currentTab.contents;
@@ -307,7 +312,12 @@
 							</nav>
 							{#each tabs as tab, i (tab.id)}
 								<div style:display={selectedTabIndex == i ? 'block' : 'none'}>
-									<Editor bind:value={tab.contents} {tables} />
+									<Editor
+										bind:value={tab.contents}
+										schema={tablesToSQLNamespace(tables)}
+										dialect={extendsDialectKeywords(ClickHouseDialect, data.udfs)}
+										placeholder="Type your query..."
+									/>
 								</div>
 							{/each}
 						</div>
