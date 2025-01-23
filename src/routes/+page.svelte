@@ -11,6 +11,9 @@
 	import { setAppContext } from '$lib/context';
 	import { tablesToSQLNamespace } from '$lib/editor';
 	import Bars3 from '$lib/icons/Bars3.svelte';
+	import ClipboardText from '$lib/icons/ClipboardText.svelte';
+	import Copy from '$lib/icons/Copy.svelte';
+	import MagicWand from '$lib/icons/MagicWand.svelte';
 	import PanelBottom from '$lib/icons/PanelBottom.svelte';
 	import PanelLeft from '$lib/icons/PanelLeft.svelte';
 	import Play from '$lib/icons/Play.svelte';
@@ -26,6 +29,7 @@
 	import { ClickHouseDialect, extendsDialectKeywords } from '@agnosticeng/editor/dialect';
 	import { SplitPane } from '@rich_harris/svelte-split-pane';
 	import debounce from 'p-debounce';
+	import { format } from 'sql-formatter';
 	import { tick, type ComponentProps } from 'svelte';
 	import type { PageData } from './$types';
 
@@ -98,6 +102,7 @@
 		}
 
 		if (event.key === 'Enter' && event.metaKey) handleExec();
+		if (event.key === 'i' && event.metaKey) handleFormat();
 	}
 
 	async function handleCreateQuery({
@@ -227,6 +232,18 @@
 			bottomPanelTab = 'logs';
 		}
 	});
+
+	function handleFormat() {
+		if (!currentTab.contents) return;
+
+		currentTab.contents = format(currentTab.contents, {
+			keywordCase: 'lower',
+			tabWidth: 2,
+			useTabs: true,
+			expressionWidth: 80,
+			language: 'postgresql'
+		});
+	}
 </script>
 
 <svelte:window onkeydown={handleKeyDown} bind:innerWidth={screenWidth} />
@@ -302,6 +319,22 @@
 									</button>
 								</div>
 								<div class="workspace-actions">
+									<button
+										class="action"
+										onclick={() =>
+											navigator.clipboard.readText().then((t) => (currentTab.contents = t))}
+									>
+										<ClipboardText size="12" />
+									</button>
+									<button
+										class="action"
+										onclick={() => navigator.clipboard.writeText(currentTab.contents)}
+									>
+										<Copy size="12" />
+									</button>
+									<button class="action" onclick={handleFormat}>
+										<MagicWand size="12" />
+									</button>
 									<button class="action" onclick={handleSaveQuery} disabled={!canSave}>
 										<Save size="12" />
 									</button>
