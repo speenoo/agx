@@ -321,6 +321,7 @@
 								<div class="workspace-actions">
 									<button
 										class="action"
+										title="Paste"
 										onclick={() =>
 											navigator.clipboard.readText().then((t) => (currentTab.contents = t))}
 									>
@@ -328,17 +329,18 @@
 									</button>
 									<button
 										class="action"
+										title="Copy"
 										onclick={() => navigator.clipboard.writeText(currentTab.contents)}
 									>
 										<Copy size="12" />
 									</button>
-									<button class="action" onclick={handleFormat}>
+									<button class="action" title="Format" onclick={handleFormat}>
 										<MagicWand size="12" />
 									</button>
-									<button class="action" onclick={handleSaveQuery} disabled={!canSave}>
+									<button class="action" title="Save" onclick={handleSaveQuery} disabled={!canSave}>
 										<Save size="12" />
 									</button>
-									<button class="action" onclick={handleExec} disabled={loading}>
+									<button class="action" title="Run" onclick={handleExec} disabled={loading}>
 										<Play size="12" />
 									</button>
 								</div>
