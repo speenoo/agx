@@ -11,7 +11,6 @@
 	import { setAppContext } from '$lib/context';
 	import { tablesToSQLNamespace } from '$lib/editor';
 	import Bars3 from '$lib/icons/Bars3.svelte';
-	import ClipboardText from '$lib/icons/ClipboardText.svelte';
 	import Copy from '$lib/icons/Copy.svelte';
 	import MagicWand from '$lib/icons/MagicWand.svelte';
 	import PanelBottom from '$lib/icons/PanelBottom.svelte';
@@ -319,14 +318,6 @@
 									</button>
 								</div>
 								<div class="workspace-actions">
-									<button
-										class="action"
-										title="Paste"
-										onclick={() =>
-											navigator.clipboard.readText().then((t) => (currentTab.contents = t))}
-									>
-										<ClipboardText size="12" />
-									</button>
 									<button
 										class="action"
 										title="Copy"
