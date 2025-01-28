@@ -204,6 +204,7 @@
 		border-collapse: separate;
 		border-spacing: 0;
 		table-layout: fixed;
+		font-size: 11px;
 	}
 
 	tr:hover td {

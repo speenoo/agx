@@ -3,25 +3,29 @@
 	import * as d3 from 'd3';
 	import type { ChartSettingsType } from './types';
 	import type { ColumnDescriptor } from '$lib/olap-engine';
+	import Settings from './Settings.svelte';
 
 	let {
 		data,
-		columns,
-		settings = $bindable()
+		columns
 	}: {
 		data: Array<{ [key: string]: any }>;
 		columns: Array<ColumnDescriptor>;
-		settings: ChartSettingsType;
 	} = $props();
 
-	let showChartSettings = $state(false);
+	let settings = $state<ChartSettingsType>({
+		chartType: 'line',
+		xAxis: { series: [] },
+		yAxis: { series: [] }
+	});
 
 	let div: HTMLElement | undefined = $state();
 
-	const hasCandleKeys = () => {
-		const candleKeys = ['open', 'close', 'low', 'high'];
-		return candleKeys.every((key) => columns.some((col) => col.name.toLowerCase() === key));
-	};
+	const candleKeys = ['open', 'close', 'low', 'high'];
+
+	let hasCandleKeys = candleKeys.every((key) =>
+		columns.some((col) => col.name.toLowerCase() === key)
+	);
 
 	const createPlot = () => {
 		div?.firstChild?.remove();
@@ -33,22 +37,26 @@
 
 		const timeData = data.map((d) => ({
 			...d,
-			[xAxisSeries]: new Date(d[xAxisSeries])
+			[xAxisSeries]: new Date(d[xAxisSeries]),
+			...Object.fromEntries(yAxisSeries.map((s) => [s, Number(d[s])]))
 		}));
+
+		const colors = d3.schemeCategory10;
 
 		switch (settings.chartType) {
 			case 'line':
-				yAxisSeries.forEach((ySeries) => {
+				yAxisSeries.forEach((ySeries, index) => {
 					marks.push(
 						Plot.line(timeData, {
 							x: xAxisSeries ?? '',
-							y: ySeries ?? ''
+							y: ySeries ?? '',
+							stroke: colors[index % colors.length]
 						})
 					);
 				});
 				break;
 			case 'candle':
-				if (hasCandleKeys()) {
+				if (hasCandleKeys) {
 					marks.push(
 						Plot.ruleX(timeData, {
 							x: xAxisSeries,
@@ -83,6 +91,10 @@
 					label: null,
 					labelArrow: false,
 					tickFormat: d3.format('.2s')
+				},
+				x: {
+					label: null,
+					labelArrow: false
 				}
 			})
 		);
@@ -105,8 +117,10 @@
 				const xAxis = columns.find((col) => col.type.toLowerCase().includes('date'))?.name;
 				const yAxis = columns.find((col) => !col.type.toLowerCase().includes('date'))?.name;
 
-				settings.xAxis.series = xAxis ? [xAxis] : [];
-				settings.yAxis.series = yAxis ? [yAxis] : [];
+				if (xAxis && yAxis) {
+					settings.xAxis.series = [xAxis];
+					settings.yAxis.series = [yAxis];
+				}
 			}
 		}
 
@@ -128,137 +142,15 @@
 			}
 		};
 	});
-
-	const toggleChartSettings = () => {
-		showChartSettings = !showChartSettings;
-	};
-
-	const handleChartTypeChange = (event: Event) => {
-		const select = event.target as HTMLSelectElement;
-		settings.chartType = select.value as 'candle' | 'line';
-		if (select.value === 'candle' && hasCandleKeys()) {
-			settings.yAxis.series = ['low', 'high', 'open', 'close'];
-		}
-	};
-
-	const handleXAxisChange = (event: Event) => {
-		const select = event.target as HTMLSelectElement;
-		const selectedOptions = Array.from(select.selectedOptions).map((option) => option.value);
-		settings.xAxis.series = selectedOptions;
-	};
-
-	const handleYAxisChange = (event: Event) => {
-		const select = event.target as HTMLSelectElement;
-		const selectedOptions = Array.from(select.selectedOptions).map((option) => option.value);
-		settings.yAxis.series = selectedOptions;
-	};
 </script>
 
 <div class="chart" bind:this={div} role="img"></div>
 
-{#if showChartSettings}
-	<section class="chart-settings">
-		<form>
-			<div class="setting">
-				<span>type</span>
-				<select multiple value={settings.chartType} onchange={handleChartTypeChange} size={2}>
-					<option value="line">line</option>
-					<option value="candle">candle</option>
-				</select>
-			</div>
-			<div class="setting">
-				<span>x-axis</span>
-				<select multiple value={settings.xAxis.series} onchange={handleXAxisChange} size={4}>
-					{#each columns as column}
-						<option value={column.name}>{column.name}</option>
-					{/each}
-				</select>
-			</div>
-
-			<div class="setting">
-				<span>y-axis</span>
-				<div style="display: flex; gap: 5px;">
-					<select
-						multiple
-						value={settings.yAxis.series}
-						onchange={handleYAxisChange}
-						size={4}
-						disabled={settings.chartType === 'candle'}
-					>
-						{#each columns as column}
-							<option value={column.name}>{column.name}</option>
-						{/each}
-					</select>
-				</div>
-			</div>
-		</form>
-	</section>
-{/if}
-
-<svelte:window
-	on:click={(e) => {
-		const target = e.target as HTMLElement;
-
-		const isTargetWithinSettings = target?.closest('.chart-settings');
-		const isTargetWithinChartSettingsButton = target?.closest(
-			'[data-action="toggle-chart-settings"]'
-		);
-		if (isTargetWithinChartSettingsButton || (!isTargetWithinSettings && showChartSettings)) {
-			toggleChartSettings();
-		}
-	}}
-/>
+<Settings bind:settings {columns} {hasCandleKeys} />
 
 <style>
 	.chart {
 		width: 100%;
 		height: 100%;
-	}
-
-	.chart-settings {
-		font-family: monospace;
-		font-size: 10px;
-		position: absolute;
-		top: 10px;
-		right: 10px;
-		height: 170px;
-		width: 200px;
-		background: hsla(0, 0%, 5%, 0.8);
-		border: 1px solid hsl(0deg 0% 20%);
-		padding: 10px;
-	}
-
-	.chart-settings select {
-		width: 80px;
-		border: none;
-		background: transparent;
-		color: white;
-		outline: none;
-		color: grey;
-
-		&:disabled,
-		&:disabled option {
-			opacity: 1;
-			color: grey;
-			& option:checked {
-				color: white;
-			}
-		}
-
-		& option:checked,
-		& option:active {
-			background: none;
-		}
-	}
-
-	.chart-settings .setting {
-		display: flex;
-		justify-content: space-between;
-		padding-bottom: 2px;
-		margin-bottom: 5px;
-	}
-
-	select::-webkit-scrollbar {
-		display: none;
 	}
 </style>

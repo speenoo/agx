@@ -17,10 +17,10 @@
 
 	let { response, logs = [], tab = $bindable('data'), onClearLogs }: Props = $props();
 
-	let settings = $state<ChartSettingsType>({
-		chartType: 'line',
-		xAxis: { series: [] },
-		yAxis: { series: [] }
+	let displayChart = $state(false);
+
+	$effect(() => {
+		displayChart = (response?.data?.length ?? 0) > 1;
 	});
 </script>
 
@@ -35,7 +35,7 @@
 		{/if}
 		{#if tab === 'chart'}
 			<div class="spacer"></div>
-			{#if response}
+			{#if displayChart}
 				<button class="action" data-action="toggle-chart-settings"><Settings size="12" /></button>
 			{/if}
 		{/if}
@@ -48,8 +48,8 @@
 		{/if}
 
 		{#if tab === 'chart'}
-			{#if response}
-				<Chart data={response?.data ?? []} columns={response?.meta ?? []} bind:settings />
+			{#if displayChart}
+				<Chart data={response?.data ?? []} columns={response?.meta ?? []} />
 			{/if}
 		{/if}
 
