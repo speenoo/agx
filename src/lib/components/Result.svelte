@@ -3,8 +3,10 @@
 	import Trash from '$lib/icons/Trash.svelte';
 	import type { OLAPResponse } from '$lib/olap-engine';
 	import { untrack } from 'svelte';
-	import ChartContainer from './ChartContainer.svelte';
 	import Console, { type Log } from './Console.svelte';
+	import Settings from '$lib/icons/Settings.svelte';
+	import Chart from './Chart/Chart.svelte';
+	import type { ChartSettingsType } from './Chart/types';
 
 	interface Props {
 		response?: OLAPResponse;
@@ -15,15 +17,10 @@
 
 	let { response, logs = [], tab = $bindable('data'), onClearLogs }: Props = $props();
 
-	let yAxis = $state<string>('');
-	let xAxis = $state<string>('');
-	let chartType = $state('line');
-
-	$effect(() => {
-		const names = response?.meta.map((m) => m.name);
-
-		if (!names?.includes(untrack(() => yAxis))) yAxis = '';
-		if (!names?.includes(untrack(() => xAxis))) xAxis = '';
+	let settings = $state<ChartSettingsType>({
+		chartType: 'line',
+		xAxis: { series: [] },
+		yAxis: { series: [] }
 	});
 </script>
 
@@ -36,13 +33,23 @@
 			<div class="spacer"></div>
 			<button class="action" onclick={() => onClearLogs?.()}><Trash size="12" /></button>
 		{/if}
+		{#if tab === 'chart'}
+			<div class="spacer"></div>
+			{#if response}
+				<button class="action" data-action="toggle-chart-settings"><Settings size="12" /></button>
+			{/if}
+		{/if}
 	</nav>
 	<div>
-		{#if response}
-			{#if tab === 'data'}
+		{#if tab === 'data'}
+			{#if response}
 				<Table {response} />
-			{:else if tab === 'chart'}
-				<ChartContainer {response} bind:xAxis bind:yAxis bind:type={chartType} />
+			{/if}
+		{/if}
+
+		{#if tab === 'chart'}
+			{#if response}
+				<Chart data={response?.data ?? []} columns={response?.meta ?? []} bind:settings />
 			{/if}
 		{/if}
 
@@ -60,6 +67,7 @@
 		flex-direction: column;
 
 		& > div {
+			position: relative;
 			flex: 1;
 			overflow: auto;
 		}
