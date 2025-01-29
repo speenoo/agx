@@ -1,26 +1,22 @@
 import * as Plot from '@observablehq/plot';
 import * as d3 from 'd3';
 import type { ChartSettingsType } from './_types';
-import type { ColumnDescriptor } from '$lib/olap-engine';
 
 export const renderChart = (
 	inputDiv: HTMLElement,
 	inputData: Array<{ [key: string]: any }>,
-	columns: Array<ColumnDescriptor>,
-	inputSettings: ChartSettingsType
+	settings: ChartSettingsType
 ) => {
-	const candleKeys = ['open', 'close', 'low', 'high'];
-
-	const hasCandleKeys = candleKeys.every((key) =>
-		columns.some((col) => col.name.toLowerCase() === key)
-	);
-
 	inputDiv?.firstChild?.remove();
+
+	if (settings.xAxis.series.length == 0 || settings.yAxis.series.length == 0) {
+		return;
+	}
 
 	const marks = [];
 
-	const xAxisSeries = inputSettings.xAxis.series[0];
-	const yAxisSeries = inputSettings.yAxis.series;
+	const xAxisSeries = settings.xAxis.series[0];
+	const yAxisSeries = settings.yAxis.series;
 
 	const timeData = inputData.map((d) => ({
 		...d,
@@ -30,7 +26,7 @@ export const renderChart = (
 
 	const colors = d3.schemeCategory10;
 
-	switch (inputSettings.chartType) {
+	switch (settings.chartType) {
 		case 'line':
 			yAxisSeries.forEach((ySeries, index) => {
 				marks.push(
@@ -43,23 +39,21 @@ export const renderChart = (
 			});
 			break;
 		case 'candle':
-			if (hasCandleKeys) {
-				marks.push(
-					Plot.ruleX(timeData, {
-						x: xAxisSeries,
-						y1: 'low',
-						y2: 'high'
-					}),
-					Plot.ruleX(timeData, {
-						x: xAxisSeries,
-						y1: 'open',
-						y2: 'close',
-						stroke: (d: { [key: string]: any }) => (d['close'] > d['open'] ? '#4daf4a' : '#e41a1c'),
-						strokeWidth: 4,
-						strokeLinecap: 'round'
-					})
-				);
-			}
+			marks.push(
+				Plot.ruleX(timeData, {
+					x: xAxisSeries,
+					y1: 'low',
+					y2: 'high'
+				}),
+				Plot.ruleX(timeData, {
+					x: xAxisSeries,
+					y1: 'open',
+					y2: 'close',
+					stroke: (d: { [key: string]: any }) => (d['close'] > d['open'] ? '#4daf4a' : '#e41a1c'),
+					strokeWidth: 4,
+					strokeLinecap: 'round'
+				})
+			);
 			break;
 	}
 
