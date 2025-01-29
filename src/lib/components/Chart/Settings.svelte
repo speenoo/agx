@@ -4,12 +4,10 @@
 
 	let {
 		columns,
-		settings = $bindable(),
-		hasCandleKeys
+		settings = $bindable()
 	}: {
 		settings: ChartSettingsType;
 		columns: Array<ColumnDescriptor>;
-		hasCandleKeys: boolean;
 	} = $props();
 
 	let showChartSettings = $state(false);
@@ -21,9 +19,6 @@
 	const handleChartTypeChange = (event: Event) => {
 		const select = event.target as HTMLSelectElement;
 		settings.chartType = select.value as 'candle' | 'line';
-		if (select.value === 'candle' && hasCandleKeys) {
-			settings.yAxis.series = ['low', 'high', 'open', 'close'];
-		}
 	};
 
 	const handleXAxisChange = (event: Event) => {

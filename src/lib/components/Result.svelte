@@ -16,12 +16,6 @@
 	}
 
 	let { response, logs = [], tab = $bindable('data'), onClearLogs }: Props = $props();
-
-	let displayChart = $state(false);
-
-	$effect(() => {
-		displayChart = (response?.data?.length ?? 0) > 1;
-	});
 </script>
 
 <section>
@@ -35,31 +29,34 @@
 		{/if}
 		{#if tab === 'chart'}
 			<div class="spacer"></div>
-			{#if displayChart}
-				<button class="action" data-action="toggle-chart-settings"><Settings size="12" /></button>
-			{/if}
+			<button class="action" data-action="toggle-chart-settings"><Settings size="12" /></button>
 		{/if}
 	</nav>
 	<div>
-		{#if tab === 'data'}
+		<div class="tab-content" style:visibility={tab === 'data' ? 'visible' : 'hidden'}>
 			{#if response}
 				<Table {response} />
 			{/if}
-		{/if}
+		</div>
 
-		{#if tab === 'chart'}
-			{#if displayChart}
-				<Chart data={response?.data ?? []} columns={response?.meta ?? []} />
-			{/if}
-		{/if}
+		<div class="tab-content" style:visibility={tab === 'chart' ? 'visible' : 'hidden'}>
+			<Chart data={response?.data ?? []} columns={response?.meta ?? []} />
+		</div>
 
-		{#if tab === 'logs'}
+		<div class="tab-content" style:visibility={tab === 'logs' ? 'visible' : 'hidden'}>
 			<Console {logs} />
-		{/if}
+		</div>
 	</div>
 </section>
 
 <style>
+	.tab-content {
+		position: absolute;
+		height: 100%;
+		width: 100%;
+		overflow: auto;
+	}
+
 	section {
 		background: hsl(0deg 0% 5%);
 		color: hsl(0deg 0% 96%);
@@ -68,8 +65,8 @@
 
 		& > div {
 			position: relative;
-			flex: 1;
-			overflow: auto;
+			height: 100%;
+			overflow: hidden;
 		}
 
 		& > nav {
