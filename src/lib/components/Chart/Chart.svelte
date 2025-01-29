@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { ChartSettingsType } from './types';
+	import type { ChartSettingsType } from './_types';
 	import type { ColumnDescriptor } from '$lib/olap-engine';
 	import Settings from './Settings.svelte';
-	import { renderChart } from './render';
+	import { renderChart } from './_render';
 
 	let {
 		data,
@@ -78,8 +78,5 @@
 	.chart {
 		width: 100%;
 		height: 100%;
-		margin: 0;
-		padding: 0;
-		overflow: hidden;
 	}
 </style>

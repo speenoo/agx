@@ -1,6 +1,6 @@
 import * as Plot from '@observablehq/plot';
 import * as d3 from 'd3';
-import type { ChartSettingsType } from './types';
+import type { ChartSettingsType } from './_types';
 import type { ColumnDescriptor } from '$lib/olap-engine';
 
 export const renderChart = (

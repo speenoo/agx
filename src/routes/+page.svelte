@@ -34,8 +34,6 @@
 	let loading = $state(false);
 	let counter = $state<ReturnType<typeof TimeCounter>>();
 
-	let { data }: { data: PageData } = $props();
-
 	async function handleExec() {
 		const query = currentTab.content;
 		if (loading || !query) {
@@ -174,8 +172,12 @@
 	let drawerOpened = $state(false);
 
 	$effect(() => {
-		if (!isMobile) drawerOpened = false;
-		else leftPanel.open = false;
+		if (isMobile) {
+			leftPanel.open = false;
+			bottomPanel.open = true;
+		} else {
+			leftPanel.open = true;
+		}
 	});
 
 	let tabs = $state<Tab[]>([]);
@@ -471,26 +473,24 @@
 	}
 
 	.screen {
-		--footer-height: 22px;
-
 		height: 100%;
 		width: 100%;
-
-		&.is-mobile {
-			--footer-height: 0;
-		}
 	}
 
 	.workspace {
-		height: calc(100% - var(--footer-height));
+		height: calc(100% - 22px);
 
 		& :global(svelte-split-pane-divider.disabled) {
 			display: none;
 		}
 	}
 
+	.is-mobile .workspace {
+		height: 100%;
+	}
+
 	footer {
-		height: var(--footer-height);
+		height: 22px;
 		width: 100%;
 		border-top: 1px solid hsl(0deg 0% 20%);
 		display: flex;

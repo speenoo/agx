@@ -6,7 +6,7 @@
 	import Console, { type Log } from './Console.svelte';
 	import Settings from '$lib/icons/Settings.svelte';
 	import Chart from './Chart/Chart.svelte';
-	import type { ChartSettingsType } from './Chart/types';
+	import type { ChartSettingsType } from './Chart/_types';
 
 	interface Props {
 		response?: OLAPResponse;
