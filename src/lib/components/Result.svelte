@@ -3,8 +3,10 @@
 	import Trash from '$lib/icons/Trash.svelte';
 	import type { OLAPResponse } from '$lib/olap-engine';
 	import { untrack } from 'svelte';
-	import ChartContainer from './ChartContainer.svelte';
 	import Console, { type Log } from './Console.svelte';
+	import Settings from '$lib/icons/Settings.svelte';
+	import Chart from './Chart/Chart.svelte';
+	import type { ChartSettingsType } from './Chart/_types';
 
 	interface Props {
 		response?: OLAPResponse;
@@ -14,17 +16,6 @@
 	}
 
 	let { response, logs = [], tab = $bindable('data'), onClearLogs }: Props = $props();
-
-	let yAxis = $state<string>('');
-	let xAxis = $state<string>('');
-	let chartType = $state('line');
-
-	$effect(() => {
-		const names = response?.meta.map((m) => m.name);
-
-		if (!names?.includes(untrack(() => yAxis))) yAxis = '';
-		if (!names?.includes(untrack(() => xAxis))) xAxis = '';
-	});
 </script>
 
 <section>
@@ -36,23 +27,36 @@
 			<div class="spacer"></div>
 			<button class="action" onclick={() => onClearLogs?.()}><Trash size="12" /></button>
 		{/if}
+		{#if tab === 'chart'}
+			<div class="spacer"></div>
+			<button class="action" data-action="toggle-chart-settings"><Settings size="12" /></button>
+		{/if}
 	</nav>
 	<div>
-		{#if response}
-			{#if tab === 'data'}
+		<div class="tab-content" style:visibility={tab === 'data' ? 'visible' : 'hidden'}>
+			{#if response}
 				<Table {response} />
-			{:else if tab === 'chart'}
-				<ChartContainer {response} bind:xAxis bind:yAxis bind:type={chartType} />
 			{/if}
-		{/if}
+		</div>
 
-		{#if tab === 'logs'}
+		<div class="tab-content" style:visibility={tab === 'chart' ? 'visible' : 'hidden'}>
+			<Chart data={response?.data ?? []} columns={response?.meta ?? []} />
+		</div>
+
+		<div class="tab-content" style:visibility={tab === 'logs' ? 'visible' : 'hidden'}>
 			<Console {logs} />
-		{/if}
+		</div>
 	</div>
 </section>
 
 <style>
+	.tab-content {
+		position: absolute;
+		height: 100%;
+		width: 100%;
+		overflow: auto;
+	}
+
 	section {
 		background: hsl(0deg 0% 5%);
 		color: hsl(0deg 0% 96%);
@@ -60,8 +64,9 @@
 		flex-direction: column;
 
 		& > div {
-			flex: 1;
-			overflow: auto;
+			position: relative;
+			height: 100%;
+			overflow: hidden;
 		}
 
 		& > nav {

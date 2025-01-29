@@ -21,7 +21,7 @@
 		<details open={i === 0}>
 			<summary>
 				{#if Object.keys(SOURCE_TYPE_SHORT_NAME_MAP).includes(source.engine)}
-					<span class="Tag" style:background-color={SOURCE_TYPE_COLOR_MAP[source.engine]}>
+					<span class="Tag" style:color={SOURCE_TYPE_COLOR_MAP[source.engine]}>
 						{SOURCE_TYPE_SHORT_NAME_MAP[source.engine]}
 					</span>
 				{:else}
@@ -43,6 +43,8 @@
 
 <style>
 	article {
+		font-family: monospace;
+		font-size: 10px;
 		flex: 1;
 		overflow-y: auto;
 	}
@@ -85,18 +87,18 @@
 	}
 
 	h3 {
-		font-size: 1rem;
+		color: hsl(0deg 0% 85%);
+		font-size: 11px;
 		font-weight: 500;
 		margin: 0;
 	}
 
 	.Tag {
-		display: block;
-		font-size: 8px;
-		font-weight: 500;
-		padding: 3px;
+		font-size: 9px;
+		font-weight: 600;
 		border-radius: 3px;
-		min-width: 16px;
+		background: hsl(0deg 0% 10%);
+		padding: 3px;
 	}
 
 	ul {
@@ -112,7 +114,7 @@
 
 		/* Custom style */
 		padding: 12px 0;
-		color: hsl(0deg 0% 90%);
+		color: hsl(0deg 0% 75%);
 
 		& > li {
 			display: flex;
@@ -127,11 +129,9 @@
 				font-weight: 500;
 				padding: 2px;
 				border-radius: 3px;
-				background-color: hsl(0deg 0% 15%);
-				color: hsl(0deg 0% 70%);
+				background-color: hsl(0deg 0% 10%);
+				color: hsl(0deg 0% 55%);
 				text-align: center;
-				font-family: 'Fira Mono', monospace;
-
 				flex-shrink: 1;
 
 				text-overflow: ellipsis;

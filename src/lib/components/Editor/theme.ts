@@ -1,0 +1,53 @@
+import * as monaco from 'monaco-editor';
+
+monaco.editor.defineTheme('agnostic', {
+	base: 'vs-dark',
+	inherit: true,
+	rules: [
+		{ token: 'comment', foreground: '666666' },
+		{ token: 'keyword', foreground: '569CD6' },
+		{ token: 'string', foreground: 'CE9178' },
+		{ token: 'number', foreground: 'B5CEA8' },
+		{ token: 'operator', foreground: 'D4D4D4' },
+		{ token: 'variable', foreground: '9CDCFE' },
+		{ token: 'function', foreground: '569CD0' },
+		{ token: 'type', foreground: '4EC9B0' },
+		{ token: 'class', foreground: '4EC9B0' },
+		{ token: 'interface', foreground: '4EC9B0' },
+		{ token: 'enum', foreground: '4EC9B0' },
+		{ token: 'typeParameter', foreground: '9CDCFE' },
+		{ token: 'parameter', foreground: '9CDCFE' },
+		{ token: 'property', foreground: '9CDCFE' },
+		{ token: 'method', foreground: 'DCDCAA' },
+		{ token: 'regexp', foreground: 'D16969' },
+		{ token: 'macro', foreground: 'C586C0' },
+		{ token: 'decorator', foreground: 'DCDCAA' }
+	],
+	colors: {
+		'editor.background': '#090909',
+		'editor.foreground': '#D4D4D4',
+		'editorLineNumber.foreground': '#858585',
+		'editor.selectionBackground': '#264F78',
+		'editor.lineHighlightBackground': '#222222',
+		'editor.lineHighlightBorder': '#222222',
+		'editorGutter.background': '#090909',
+		'editor.selectionHighlightBackground': '#2D2D2D',
+		'editor.wordHighlightBackground': '#575757',
+		'editor.wordHighlightStrongBackground': '#004972',
+		'editor.findMatchBackground': '#515C6A',
+		'editor.findMatchHighlightBackground': '#EA5C00',
+		'editor.findRangeHighlightBackground': '#3A3D41',
+		'editor.hoverHighlightBackground': '#264F78',
+		'editorLink.activeForeground': '#4EC9B0',
+		'editorIndentGuide.background': '#404040',
+		'editorIndentGuide.activeBackground': '#707070',
+		'editorRuler.foreground': '#5A5A5A',
+		'editorCodeLens.foreground': '#999999',
+		'editorBracketMatch.background': '#0064001A',
+		'editorBracketMatch.border': '#888888',
+		'editorOverviewRuler.border': '#7F7F7F4D',
+		'editorGutter.modifiedBackground': '#1B81A8',
+		'editorGutter.addedBackground': '#487E02',
+		'editorGutter.deletedBackground': '#F14C4C'
+	}
+});

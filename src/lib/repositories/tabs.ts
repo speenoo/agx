@@ -3,7 +3,7 @@ import { db, type Database } from '$lib/database';
 export interface Tab {
 	id: string;
 	name: string;
-	contents: string;
+	content: string;
 	query_id?: number;
 }
 
@@ -26,14 +26,14 @@ class SQLiteTabRepository implements TabRepository {
 
 		await this.db.exec(
 			`DELETE FROM tabs;
-INSERT INTO tabs (id, name, contents, query_id, tab_index, active)
+INSERT INTO tabs (id, name, content, query_id, tab_index, active)
 VALUES ${Array.from({ length: rows.length }).fill('(?,?,?,?,?, ?)').join(',\n')}
 `,
 			rows
 				.map((r) => [
 					r.id,
 					r.name,
-					r.contents,
+					r.content,
 					r.query_id ?? null,
 					r.tab_index,
 					r.tab_index === activeIndex || null
@@ -46,7 +46,7 @@ VALUES ${Array.from({ length: rows.length }).fill('(?,?,?,?,?, ?)').join(',\n')}
 function row_to_tab(row: Awaited<ReturnType<Database['exec']>>[number]): Tab {
 	return {
 		id: row.id as string,
-		contents: row.contents as string,
+		content: row.content as string,
 		name: row.name as string,
 		query_id: row.query_id as number | undefined
 	};

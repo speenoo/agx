@@ -9,7 +9,6 @@
 	import TabComponent from '$lib/components/Tab.svelte';
 	import TimeCounter from '$lib/components/TimeCounter.svelte';
 	import { setAppContext } from '$lib/context';
-	import { tablesToSQLNamespace } from '$lib/editor';
 	import Bars3 from '$lib/icons/Bars3.svelte';
 	import Copy from '$lib/icons/Copy.svelte';
 	import MagicWand from '$lib/icons/MagicWand.svelte';
@@ -24,8 +23,7 @@
 	import { historyRepository, type HistoryEntry } from '$lib/repositories/history';
 	import { queryRepository, type Query } from '$lib/repositories/queries';
 	import { tabRepository, type Tab } from '$lib/repositories/tabs';
-	import { Editor } from '@agnosticeng/editor';
-	import { ClickHouseDialect, extendsDialectKeywords } from '@agnosticeng/editor/dialect';
+	import Editor from '$lib/components/Editor/Editor.svelte';
 	import { SplitPane } from '@rich_harris/svelte-split-pane';
 	import debounce from 'p-debounce';
 	import { format } from 'sql-formatter';
@@ -36,10 +34,8 @@
 	let loading = $state(false);
 	let counter = $state<ReturnType<typeof TimeCounter>>();
 
-	let { data }: { data: PageData } = $props();
-
 	async function handleExec() {
-		const query = currentTab.contents;
+		const query = currentTab.content;
 		if (loading || !query) {
 			return;
 		}
@@ -79,10 +75,10 @@
 	}
 
 	function handleHistoryOpen(entry: HistoryEntry) {
-		if (currentTab.contents) {
+		if (currentTab.content) {
 			selectedTabIndex =
-				tabs.push({ id: crypto.randomUUID(), contents: entry.content, name: 'Untitled' }) - 1;
-		} else tabs[selectedTabIndex] = { ...currentTab, contents: entry.content };
+				tabs.push({ id: crypto.randomUUID(), content: entry.content, name: 'Untitled' }) - 1;
+		} else tabs[selectedTabIndex] = { ...currentTab, content: entry.content };
 		if (isMobile) drawerOpened = false;
 	}
 
@@ -107,7 +103,7 @@
 	async function handleCreateQuery({
 		name
 	}: Parameters<NonNullable<ComponentProps<typeof SaveQueryModal>['onCreate']>>['0']) {
-		const q = await queryRepository.create(name, currentTab.contents);
+		const q = await queryRepository.create(name, currentTab.content);
 		queries = queries.concat(q);
 		tabs[selectedTabIndex] = { ...currentTab, name, query_id: q.id };
 	}
@@ -124,18 +120,18 @@
 	function handleQueryOpen(query: Query) {
 		const index = tabs.findIndex((t) => t.query_id === query.id);
 		if (index === -1) {
-			if (currentTab.contents) {
+			if (currentTab.content) {
 				selectedTabIndex =
 					tabs.push({
 						id: crypto.randomUUID(),
-						contents: query.sql,
+						content: query.sql,
 						name: query.name,
 						query_id: query.id
 					}) - 1;
 			} else
 				tabs[selectedTabIndex] = {
 					...currentTab,
-					contents: query.sql,
+					content: query.sql,
 					name: query.name,
 					query_id: query.id
 				};
@@ -151,19 +147,19 @@
 
 		const tab_index = tabs.findIndex((t) => t.query_id === updated.id);
 		if (tab_index !== -1) {
-			tabs[tab_index] = { ...tabs[tab_index], name: updated.name, contents: updated.sql };
+			tabs[tab_index] = { ...tabs[tab_index], name: updated.name, content: updated.sql };
 		}
 	}
 
 	async function handleSaveQuery() {
-		const { contents, query_id: query_id } = currentTab;
-		if (contents && !query_id) {
+		const { content, query_id: query_id } = currentTab;
+		if (content && !query_id) {
 			return saveQueryModal?.show();
 		}
 
 		const index = queries.findIndex((q) => q.id === query_id);
 		if (index !== -1) {
-			const updated = await queryRepository.update({ ...queries[index], sql: contents });
+			const updated = await queryRepository.update({ ...queries[index], sql: content });
 			queries = queries.with(index, updated);
 		}
 	}
@@ -176,8 +172,12 @@
 	let drawerOpened = $state(false);
 
 	$effect(() => {
-		if (!isMobile) drawerOpened = false;
-		else leftPanel.open = false;
+		if (isMobile) {
+			leftPanel.open = false;
+			bottomPanel.open = true;
+		} else {
+			leftPanel.open = true;
+		}
 	});
 
 	let tabs = $state<Tab[]>([]);
@@ -185,7 +185,7 @@
 		() =>
 			void tabRepository.get().then(([t, active]) => {
 				if (t.length) (tabs = t), (selectedTabIndex = active);
-				else tabs.push({ id: crypto.randomUUID(), contents: '', name: 'Untitled' });
+				else tabs.push({ id: crypto.randomUUID(), content: '', name: 'Untitled' });
 			})
 	);
 
@@ -201,14 +201,14 @@
 		if (!tabs.length) return false;
 		if (currentTab.query_id) {
 			const query = queries.find((q) => q.id === currentTab.query_id);
-			return query?.sql !== currentTab.contents;
+			return query?.sql !== currentTab.content;
 		}
 
-		return !!currentTab.contents;
+		return !!currentTab.content;
 	});
 
 	function addNewTab() {
-		selectedTabIndex = tabs.push({ id: crypto.randomUUID(), name: 'Untitled', contents: '' }) - 1;
+		selectedTabIndex = tabs.push({ id: crypto.randomUUID(), name: 'Untitled', content: '' }) - 1;
 		tick().then(() => tabContainer.scroll({ left: tabContainer.scrollWidth }));
 	}
 
@@ -219,7 +219,7 @@
 
 	$effect(() => void saveTabs($state.snapshot(tabs), selectedTabIndex).catch(console.error));
 
-	const bottomPanel = new PanelState('65%', false, '100%');
+	const bottomPanel = new PanelState('50%', false, '100%');
 	const leftPanel = new PanelState('242px', true);
 
 	let bottomPanelTab = $state<'data' | 'chart' | 'logs'>('data');
@@ -233,9 +233,9 @@
 	});
 
 	function handleFormat() {
-		if (!currentTab.contents) return;
+		if (!currentTab.content) return;
 
-		currentTab.contents = format(currentTab.contents, {
+		currentTab.content = format(currentTab.content, {
 			keywordCase: 'lower',
 			tabWidth: 2,
 			useTabs: true,
@@ -321,7 +321,7 @@
 									<button
 										class="action"
 										title="Copy"
-										onclick={() => navigator.clipboard.writeText(currentTab.contents)}
+										onclick={() => navigator.clipboard.writeText(currentTab.content)}
 									>
 										<Copy size="12" />
 									</button>
@@ -338,12 +338,7 @@
 							</nav>
 							{#each tabs as tab, i (tab.id)}
 								<div style:display={selectedTabIndex == i ? 'block' : 'none'}>
-									<Editor
-										bind:value={tab.contents}
-										schema={tablesToSQLNamespace(tables)}
-										dialect={extendsDialectKeywords(ClickHouseDialect, data.udfs)}
-										placeholder="Type your query..."
-									/>
+									<Editor bind:value={tab.content} />
 								</div>
 							{/each}
 						</div>
@@ -478,26 +473,24 @@
 	}
 
 	.screen {
-		--footer-height: 22px;
-
 		height: 100%;
 		width: 100%;
-
-		&.is-mobile {
-			--footer-height: 0;
-		}
 	}
 
 	.workspace {
-		height: calc(100% - var(--footer-height));
+		height: calc(100% - 22px);
 
 		& :global(svelte-split-pane-divider.disabled) {
 			display: none;
 		}
 	}
 
+	.is-mobile .workspace {
+		height: 100%;
+	}
+
 	footer {
-		height: var(--footer-height);
+		height: 22px;
 		width: 100%;
 		border-top: 1px solid hsl(0deg 0% 20%);
 		display: flex;
