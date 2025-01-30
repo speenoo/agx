@@ -13,10 +13,6 @@
 		if (value === null) return 'NULL';
 		if (value === undefined) return 'UNDEFINED';
 		if (Array.isArray(value)) return JSON.stringify(value);
-		if (typeof value === 'object') return JSON.stringify(value);
-		if (typeof value === 'string' && !Number.isNaN(Number(value))) {
-			return Number(value).toLocaleString('en-US');
-		}
 		return value;
 	}
 

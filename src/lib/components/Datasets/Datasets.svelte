@@ -3,7 +3,7 @@
 
 	import SearchBar from '$lib/components/SearchBar.svelte';
 	import TableC from '$lib/icons/Table.svelte';
-	import { filter, SOURCE_TYPE_COLOR_MAP, SOURCE_TYPE_SHORT_NAME_MAP } from './utils';
+	import { filter } from './utils';
 
 	type Props = {
 		tables?: Table[];
@@ -20,13 +20,7 @@
 	{#each filtered as source, i (source.name)}
 		<details open={i === 0}>
 			<summary>
-				{#if Object.keys(SOURCE_TYPE_SHORT_NAME_MAP).includes(source.engine)}
-					<span class="Tag" style:color={SOURCE_TYPE_COLOR_MAP[source.engine]}>
-						{SOURCE_TYPE_SHORT_NAME_MAP[source.engine]}
-					</span>
-				{:else}
-					<TableC size="15" />
-				{/if}
+				<TableC size={15} stroke="#ccc" />
 				<h3>{source.name}</h3>
 			</summary>
 			<ul>
@@ -72,11 +66,6 @@
 			display: none;
 		}
 
-		& > :global(svg),
-		& > span {
-			flex-shrink: 0;
-		}
-
 		& > h3 {
 			flex-shrink: 1;
 
@@ -91,14 +80,6 @@
 		font-size: 11px;
 		font-weight: 500;
 		margin: 0;
-	}
-
-	.Tag {
-		font-size: 9px;
-		font-weight: 600;
-		border-radius: 3px;
-		background: hsl(0deg 0% 10%);
-		padding: 3px;
 	}
 
 	ul {
@@ -130,7 +111,7 @@
 				padding: 2px;
 				border-radius: 3px;
 				background-color: hsl(0deg 0% 10%);
-				color: hsl(0deg 0% 55%);
+				color: hsl(0deg 0% 75%);
 				text-align: center;
 				flex-shrink: 1;
 

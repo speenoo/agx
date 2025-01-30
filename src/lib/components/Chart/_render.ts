@@ -18,11 +18,13 @@ export const renderChart = (
 	const xAxisSeries = settings.xAxis.series[0];
 	const yAxisSeries = settings.yAxis.series;
 
-	const timeData = inputData.map((d) => ({
-		...d,
-		[xAxisSeries]: new Date(d[xAxisSeries]),
-		...Object.fromEntries(yAxisSeries.map((s) => [s, Number(d[s])]))
-	}));
+	const timeData = inputData
+		.map((d) => ({
+			...d,
+			[xAxisSeries]: new Date(d[xAxisSeries]),
+			...Object.fromEntries(yAxisSeries.map((s) => [s, Number(d[s])]))
+		}))
+		.sort((a, b) => a[xAxisSeries] - b[xAxisSeries]);
 
 	const colors = d3.schemeCategory10;
 

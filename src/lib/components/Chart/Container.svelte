@@ -17,7 +17,9 @@
 		const candleColumns = ['open', 'close', 'low', 'high'];
 
 		const dateColumn = columns.find((col) => col.type.toLowerCase().includes('date'))?.name;
-		const otherColumn = columns.find((col) => !col.type.toLowerCase().includes('date'))?.name;
+		const otherColumns = columns
+			.filter((col) => !col.type.toLowerCase().includes('date'))
+			.map((col) => col.name);
 
 		const hasCandleColumns = candleColumns.some((col) =>
 			columns.some((column) => column.name.toLowerCase() === col)
@@ -30,10 +32,10 @@
 			return;
 		}
 
-		if (dateColumn && otherColumn) {
+		if (dateColumn && otherColumns.length > 0) {
 			settings.chartType = 'line';
 			settings.xAxis.series = [dateColumn];
-			settings.yAxis.series = [otherColumn];
+			settings.yAxis.series = otherColumns;
 			return;
 		}
 	}
@@ -42,6 +44,12 @@
 		chartType: 'line',
 		xAxis: { series: [] },
 		yAxis: { series: [] }
+	});
+
+	$effect(() => {
+		if (columns) {
+			setDefaultSettings();
+		}
 	});
 
 	$effect(() => {
