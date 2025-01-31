@@ -20,7 +20,7 @@
 	{#each filtered as source, i (source.name)}
 		<details open={i === 0}>
 			<summary>
-				<TableC size={15} stroke="#ccc" />
+				<TableC size={15} stroke="#ccc" style="flex-shrink: 0;" />
 				<h3>{source.name}</h3>
 			</summary>
 			<ul>
@@ -76,7 +76,7 @@
 	}
 
 	h3 {
-		color: hsl(0deg 0% 85%);
+		color: hsl(0deg 0% 90%);
 		font-size: 11px;
 		font-weight: 500;
 		margin: 0;

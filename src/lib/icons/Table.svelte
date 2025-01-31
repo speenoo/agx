@@ -16,6 +16,7 @@
 	stroke-width="1.5"
 	{stroke}
 	width={size}
+	{...rest}
 >
 	<path
 		stroke-linecap="round"
