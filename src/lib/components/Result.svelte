@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { Table } from '$lib/components/Table';
+	import Table from '$lib/components/Table.svelte';
 	import Trash from '$lib/icons/Trash.svelte';
 	import type { OLAPResponse } from '$lib/olap-engine';
 	import { untrack } from 'svelte';
 	import Console, { type Log } from './Console.svelte';
 	import Settings from '$lib/icons/Settings.svelte';
-	import Chart from './Chart/Chart.svelte';
-	import type { ChartSettingsType } from './Chart/_types';
+	import Chart from './Chart/Container.svelte';
 
 	interface Props {
 		response?: OLAPResponse;
@@ -20,9 +19,10 @@
 
 <section>
 	<nav>
-		<button aria-current={tab === 'data'} onclick={() => (tab = 'data')}>Data</button>
-		<button aria-current={tab === 'chart'} onclick={() => (tab = 'chart')}>Chart</button>
-		<button aria-current={tab === 'logs'} onclick={() => (tab = 'logs')}>Logs</button>
+		<button class="tab" aria-current={tab === 'data'} onclick={() => (tab = 'data')}>Data</button>
+		<button class="tab" aria-current={tab === 'chart'} onclick={() => (tab = 'chart')}>Chart</button
+		>
+		<button class="tab" aria-current={tab === 'logs'} onclick={() => (tab = 'logs')}>Logs</button>
 		{#if tab === 'logs'}
 			<div class="spacer"></div>
 			<button class="action" onclick={() => onClearLogs?.()}><Trash size="12" /></button>
@@ -91,6 +91,10 @@
 				z-index: 1;
 			}
 
+			& > button.tab {
+				border-right: 1px solid hsl(0deg 0% 20%);
+			}
+
 			& > button {
 				height: 100%;
 				font-size: 10px;
@@ -98,7 +102,6 @@
 				background-color: transparent;
 				padding: 0 16px;
 				border-top: 1px solid hsl(0deg 0% 20%);
-				border-right: 1px solid hsl(0deg 0% 20%);
 
 				&:is(:hover, :focus-within) {
 					cursor: pointer;

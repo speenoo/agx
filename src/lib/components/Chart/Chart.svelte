@@ -1,65 +1,26 @@
 <script lang="ts">
 	import type { ChartSettingsType } from './_types';
-	import type { ColumnDescriptor } from '$lib/olap-engine';
-	import Settings from './Settings.svelte';
 	import { renderChart } from './_render';
 
 	let {
 		data,
-		columns
+		settings
 	}: {
 		data: Array<{ [key: string]: any }>;
-		columns: Array<ColumnDescriptor>;
+		settings: ChartSettingsType;
 	} = $props();
 
 	let div: HTMLElement;
 	let resizeObserver: ResizeObserver;
 
-	const render = () => renderChart(div, data, columns, settings);
-
-	function setDefaultSettings() {
-		const candleColumns = ['open', 'close', 'low', 'high'];
-
-		const dateColumn = columns.find((col) => col.type.toLowerCase().includes('date'))?.name;
-		const otherColumn = columns.find((col) => !col.type.toLowerCase().includes('date'))?.name;
-
-		const hasCandleColumns = candleColumns.some((col) =>
-			columns.some((column) => column.name.toLowerCase() === col)
-		);
-
-		if (dateColumn && hasCandleColumns) {
-			settings.chartType = 'candle';
-			settings.xAxis.series = [dateColumn];
-			settings.yAxis.series = candleColumns;
-			return;
-		}
-
-		if (dateColumn && otherColumn) {
-			settings.chartType = 'line';
-			settings.xAxis.series = [dateColumn];
-			settings.yAxis.series = [otherColumn];
-			return;
-		}
-	}
-
-	let settings = $state<ChartSettingsType>({
-		chartType: 'line',
-		xAxis: { series: [] },
-		yAxis: { series: [] }
-	});
+	const render = () => renderChart(div, data, settings);
 
 	$effect(() => {
 		render();
 
-		if (settings.xAxis.series.length === 0 && settings.yAxis.series.length === 0) {
-			setDefaultSettings();
-		}
-	});
-
-	$effect(() => {
 		if (div) {
 			resizeObserver = new ResizeObserver(() => {
-				render();
+				settings && render();
 			});
 			resizeObserver.observe(div);
 
@@ -71,8 +32,6 @@
 </script>
 
 <div class="chart" bind:this={div} role="img"></div>
-
-<Settings bind:settings {columns} />
 
 <style>
 	.chart {

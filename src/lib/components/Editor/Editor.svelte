@@ -1,13 +1,12 @@
 <script lang="ts">
 	import * as monaco from 'monaco-editor';
 
-	import './theme.ts';
-	import './completion';
+	import './theme';
+	import './language';
 
 	let { value = $bindable() } = $props();
 	let editorElement: HTMLElement;
 	let editor: any;
-	let completionProvider: monaco.IDisposable;
 
 	function initMonaco() {
 		if (editorElement) {
@@ -34,6 +33,11 @@
 					autoFindInSelection: 'never',
 					seedSearchStringFromSelection: 'never'
 				}
+			});
+
+			editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+				window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', metaKey: true }));
+				return false;
 			});
 
 			editor.onDidChangeModelContent(() => {

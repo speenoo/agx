@@ -28,7 +28,6 @@
 	import debounce from 'p-debounce';
 	import { format } from 'sql-formatter';
 	import { tick, type ComponentProps } from 'svelte';
-	import type { PageData } from './$types';
 
 	let response = $state.raw<OLAPResponse>();
 	let loading = $state(false);

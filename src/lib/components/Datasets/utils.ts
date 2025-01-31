@@ -10,16 +10,3 @@ export function filter(sources: Table[], search: string) {
 			s.columns?.some((c) => c.name.toLowerCase().includes(search_))
 	);
 }
-
-export const SOURCE_TYPE_COLOR_MAP: Record<string, string> = {
-	FILE: 'hsl(58deg 37% 28%)',
-	S3: 'hsl(32deg 77% 44%)',
-	ReplacingMergeTree: 'hsl(199deg 37% 28%)'
-};
-
-export const SOURCE_TYPE_SHORT_NAME_MAP: Record<string, string> = {
-	FILE: 'FILE',
-	S3: 'S3',
-	ReplacingMergeTree: 'MT',
-	MergeTree: 'MT'
-};
