@@ -133,6 +133,8 @@
 
 <style>
 	ol {
+		color: hsl(0deg 0% 90%);
+
 		list-style: none;
 		margin: 0;
 		padding: 0;
