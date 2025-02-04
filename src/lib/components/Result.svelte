@@ -1,8 +1,7 @@
 <script lang="ts">
-	import Table from '$lib/components/Table.svelte';
+	import { Table } from '@agnosticeng/dv';
 	import Trash from '$lib/icons/Trash.svelte';
 	import type { OLAPResponse } from '$lib/olap-engine';
-	import { untrack } from 'svelte';
 	import Console, { type Log } from './Console.svelte';
 	import Settings from '$lib/icons/Settings.svelte';
 	import Chart from './Chart/Container.svelte';
@@ -35,7 +34,7 @@
 	<div>
 		<div class="tab-content" style:visibility={tab === 'data' ? 'visible' : 'hidden'}>
 			{#if response}
-				<Table {response} />
+				<Table data={response.data} columns={response.meta} />
 			{/if}
 		</div>
 

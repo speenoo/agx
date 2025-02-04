@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { ColumnDescriptor } from '$lib/olap-engine';
-	import type { ChartSettingsType } from './_types';
+	import type { ChartSettingsType } from '@agnosticeng/dv';
 
-	import Chart from './Chart.svelte';
+	import { Chart } from '@agnosticeng/dv';
 	import Settings from './Settings.svelte';
 
 	let {

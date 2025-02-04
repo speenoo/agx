@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { ColumnDescriptor } from '$lib/olap-engine';
-	import type { ChartSettingsType } from './_types';
+	import type { ChartSettingsType } from '@agnosticeng/dv';
 
 	let {
 		columns,
