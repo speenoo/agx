@@ -60,7 +60,7 @@
 		height: 100%;
 		width: 100%;
 
-		padding: 14px 25px 0;
+		padding: 14px 20px 0;
 		background-color: hsl(0deg 0% 5%);
 		display: flex;
 		flex-direction: column;

@@ -37,8 +37,8 @@
     "windows": [
       {
         "title": "agx",
-        "width": 1024,
-        "height": 768,
+        "width": 1250,
+        "height": 900,
         "theme": "Dark",
         "useHttpsScheme": true
       }
