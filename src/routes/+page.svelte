@@ -28,6 +28,8 @@
 	import debounce from 'p-debounce';
 	import { format } from 'sql-formatter';
 	import { tick, type ComponentProps } from 'svelte';
+	import { setupLanguage } from '$lib/components/Editor/language';
+	import { keywords, functions, operators, types } from '$lib/components/Editor/clickhouse';
 
 	let response = $state.raw<OLAPResponse>();
 	let loading = $state(false);
@@ -60,7 +62,21 @@
 	let history = $state.raw<HistoryEntry[]>([]);
 	let queries = $state.raw<Query[]>([]);
 
-	$effect(() => void engine.getSchema().then((t) => (tables = t)));
+	$effect(
+		() =>
+			void engine.getSchema().then((t) => {
+				tables = t;
+
+				setupLanguage(
+					'clickhouse',
+					keywords,
+					functions,
+					tables.map((t) => t.name),
+					types,
+					operators
+				);
+			})
+	);
 	$effect(() => void historyRepository.getAll().then((entries) => (history = entries)));
 	$effect(() => void queryRepository.getAll().then((q) => (queries = q)));
 
