@@ -4,9 +4,10 @@ export function setupLanguage(
 	id: string,
 	keywords: string[] = [],
 	functions: string[] = [],
-	tables: string[] = [],
 	types: string[] = [],
-	operators: string[] = []
+	operators: string[] = [],
+	tables: string[] = [],
+	columns: string[] = []
 ) {
 	monaco.languages.register({ id });
 	monaco.languages.setMonarchTokensProvider(id, {
@@ -16,6 +17,7 @@ export function setupLanguage(
 		tables: tables,
 		typeKeywords: types,
 		operators: operators,
+		columns: columns,
 
 		symbols: /[=><!~?:&|+\-*\/\^%]+/,
 
@@ -29,6 +31,7 @@ export function setupLanguage(
 							'@functions': 'function',
 							'@tables': 'identifier',
 							'@typeKeywords': 'type',
+							'@columns': 'identifier',
 							'@default': 'identifier'
 						}
 					}
@@ -72,7 +75,7 @@ export function setupLanguage(
 				endColumn: word.endColumn
 			};
 
-			const allItems = [...keywords, ...functions, ...tables];
+			const allItems = [...keywords, ...functions, ...tables, ...columns];
 			const uniqueItems = [...new Set(allItems)];
 
 			return {
@@ -82,7 +85,9 @@ export function setupLanguage(
 						? monaco.languages.CompletionItemKind.Keyword
 						: functions.includes(item)
 							? monaco.languages.CompletionItemKind.Function
-							: monaco.languages.CompletionItemKind.Class,
+							: columns.includes(item)
+								? monaco.languages.CompletionItemKind.Field
+								: monaco.languages.CompletionItemKind.Class,
 					insertText: item,
 					range: range
 				}))

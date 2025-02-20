@@ -70,9 +70,10 @@
 			'clickhouse',
 			keywords,
 			[...functions, ...udfs],
-			tables.map((t) => t.name),
 			types,
-			operators
+			operators,
+			tables.map((t) => t.name),
+			tables.map((t) => t.columns.map((c) => c.name)).flat()
 		);
 	}
 
@@ -236,7 +237,7 @@
 	$effect(() => void saveTabs($state.snapshot(tabs), selectedTabIndex).catch(console.error));
 
 	const bottomPanel = new PanelState('50%', false, '100%');
-	const leftPanel = new PanelState('242px', true);
+	const leftPanel = new PanelState('260px', true);
 
 	let bottomPanelTab = $state<'data' | 'chart' | 'logs'>('data');
 	let errors = $state.raw<Log[]>([]);
