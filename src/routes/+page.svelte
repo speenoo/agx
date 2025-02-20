@@ -62,21 +62,22 @@
 	let history = $state.raw<HistoryEntry[]>([]);
 	let queries = $state.raw<Query[]>([]);
 
-	$effect(
-		() =>
-			void engine.getSchema().then((t) => {
-				tables = t;
+	async function setupEditor() {
+		const [t, udfs] = await Promise.all([engine.getSchema(), engine.getUDFs()]);
+		tables = t;
 
-				setupLanguage(
-					'clickhouse',
-					keywords,
-					functions,
-					tables.map((t) => t.name),
-					types,
-					operators
-				);
-			})
-	);
+		setupLanguage(
+			'clickhouse',
+			keywords,
+			[...functions, ...udfs],
+			tables.map((t) => t.name),
+			types,
+			operators
+		);
+	}
+
+	setupEditor();
+
 	$effect(() => void historyRepository.getAll().then((entries) => (history = entries)));
 	$effect(() => void queryRepository.getAll().then((q) => (queries = q)));
 

@@ -9,7 +9,7 @@ export function setupLanguage(
 	operators: string[] = []
 ) {
 	monaco.languages.register({ id });
-	monaco.languages.setMonarchTokensProvider('clickhouse', {
+	monaco.languages.setMonarchTokensProvider(id, {
 		ignoreCase: true,
 		keywords: keywords.map((k) => k.split(' ')[0]),
 		functions: functions,
@@ -90,5 +90,5 @@ export function setupLanguage(
 		}
 	};
 
-	monaco.languages.registerCompletionItemProvider('clickhouse', sql);
+	monaco.languages.registerCompletionItemProvider(id, sql);
 }
