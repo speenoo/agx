@@ -58,7 +58,7 @@
 <style>
 	* {
 		font-family: monospace;
-		font-size: 10px;
+		font-size: 11px;
 		color: lightgray;
 	}
 

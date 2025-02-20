@@ -25,6 +25,7 @@
 	li {
 		display: flex;
 		justify-content: space-between;
+		align-items: center;
 		white-space: nowrap;
 	}
 
@@ -41,5 +42,7 @@
 		white-space: nowrap;
 		max-width: 50%;
 		padding: 0 2px;
+		color: #777;
+		font-size: 9px;
 	}
 </style>

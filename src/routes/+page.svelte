@@ -28,6 +28,8 @@
 	import debounce from 'p-debounce';
 	import { format } from 'sql-formatter';
 	import { tick, type ComponentProps } from 'svelte';
+	import { setupLanguage } from '$lib/components/Editor/language';
+	import { keywords, functions, operators, types } from '$lib/components/Editor/clickhouse';
 
 	let response = $state.raw<OLAPResponse>();
 	let loading = $state(false);
@@ -60,7 +62,23 @@
 	let history = $state.raw<HistoryEntry[]>([]);
 	let queries = $state.raw<Query[]>([]);
 
-	$effect(() => void engine.getSchema().then((t) => (tables = t)));
+	async function setupEditor() {
+		const [t, udfs] = await Promise.all([engine.getSchema(), engine.getUDFs()]);
+		tables = t;
+
+		setupLanguage(
+			'clickhouse',
+			keywords,
+			[...functions, ...udfs],
+			types,
+			operators,
+			tables.map((t) => t.name),
+			tables.map((t) => t.columns.map((c) => c.name)).flat()
+		);
+	}
+
+	setupEditor();
+
 	$effect(() => void historyRepository.getAll().then((entries) => (history = entries)));
 	$effect(() => void queryRepository.getAll().then((q) => (queries = q)));
 
@@ -219,7 +237,7 @@
 	$effect(() => void saveTabs($state.snapshot(tabs), selectedTabIndex).catch(console.error));
 
 	const bottomPanel = new PanelState('50%', false, '100%');
-	const leftPanel = new PanelState('242px', true);
+	const leftPanel = new PanelState('260px', true);
 
 	let bottomPanelTab = $state<'data' | 'chart' | 'logs'>('data');
 	let errors = $state.raw<Log[]>([]);
