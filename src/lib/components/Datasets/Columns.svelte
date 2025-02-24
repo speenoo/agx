@@ -14,11 +14,9 @@
 <style>
 	ul {
 		margin: 0;
-		list-style: none;
 		padding: 0;
+		list-style: none;
 		font-family: monospace;
-		padding-bottom: 3px;
-		padding-left: 5px;
 		color: lightgray;
 	}
 
