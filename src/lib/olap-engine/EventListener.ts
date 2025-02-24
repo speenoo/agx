@@ -2,12 +2,11 @@ type Callback = (...param: any[]) => void;
 
 type OptionalRecord<K extends keyof any, T> = { [P in K]?: T };
 
-export interface IEventEmitter<Events extends string> {
+export interface IListener<Events extends string> {
 	on(event: Events, fn: Callback): () => any;
-	emit(event: Events, param: any): void;
 }
 
-export abstract class EventEmitter<Events extends string> implements IEventEmitter<Events> {
+export abstract class InternalEventEmitter<Events extends string> implements IListener<Events> {
 	#listeners: OptionalRecord<Events, Set<Callback>> = {};
 
 	on(event: Events, fn: Callback) {
@@ -17,7 +16,7 @@ export abstract class EventEmitter<Events extends string> implements IEventEmitt
 		return () => this.#listeners[event]?.delete(fn);
 	}
 
-	emit(event: Events, ...param: any[]) {
+	protected emit(event: Events, ...param: any[]) {
 		if (!this.#listeners[event]?.size) return;
 
 		queueMicrotask(() => {

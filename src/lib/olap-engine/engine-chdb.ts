@@ -1,12 +1,12 @@
 import { invoke } from '@tauri-apps/api/core';
-import { EventEmitter } from './EventEmitter';
+import { InternalEventEmitter } from './EventListener';
 import type { Events, OLAPEngine, OLAPResponse, Table } from './index';
 
 import CLICKHOUSE_GET_SCHEMA from './queries/clickhouse_get_schema.sql?raw';
 import CLICKHOUSE_GET_UDFS from './queries/clickhouse_get_udfs.sql?raw';
 import CLICKHOUSE_INIT_DB from './queries/clickhouse_init_db.sql?raw';
 
-export class CHDBEngine extends EventEmitter<Events> implements OLAPEngine {
+export class CHDBEngine extends InternalEventEmitter<Events> implements OLAPEngine {
 	async init() {
 		await this.exec(CLICKHOUSE_INIT_DB);
 	}

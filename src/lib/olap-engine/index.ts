@@ -1,6 +1,6 @@
 import { CHDBEngine } from './engine-chdb';
 import { RemoteEngine } from './engine-remote';
-import type { IEventEmitter } from './EventEmitter';
+import type { IListener } from './EventListener';
 
 export type OLAPResponse = {
 	meta: Array<ColumnDescriptor>;
@@ -26,7 +26,7 @@ export interface Table {
 
 export type Events = 'error' | 'success';
 
-export interface OLAPEngine extends IEventEmitter<Events> {
+export interface OLAPEngine extends IListener<Events> {
 	init(): Promise<void>;
 	exec(query: string): Promise<OLAPResponse | undefined>;
 	getSchema(): Promise<Table[]>;
