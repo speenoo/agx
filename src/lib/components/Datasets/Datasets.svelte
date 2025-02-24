@@ -18,6 +18,8 @@
 
 <SearchBar bind:value={search} />
 
-{#each tree as node}
-	<Tree {node} />
-{/each}
+<div>
+	{#each tree as node}
+		<Tree {node} />
+	{/each}
+</div>

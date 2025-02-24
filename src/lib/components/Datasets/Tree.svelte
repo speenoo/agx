@@ -13,7 +13,7 @@
 	}
 </script>
 
-<div class="node">
+<div class="node" style:opacity={expanded ? 1 : 0.7 + level}>
 	<button
 		type="button"
 		class:folder={node.type === 'group'}
@@ -40,13 +40,9 @@
 		{/if}
 	</button>
 	{#if node.type === 'group' && node.children && expanded}
-		<div class="children">
-			{#each node.children as child}
-				<div class="tree-line">
-					<Tree node={child} level={level + 1} />
-				</div>
-			{/each}
-		</div>
+		{#each node.children as child}
+			<Tree node={child} level={level + 1} />
+		{/each}
 	{/if}
 	{#if node.type === 'dataset' && expanded}
 		<div class="dataset">
@@ -62,6 +58,10 @@
 		color: lightgray;
 	}
 
+	.node {
+		margin-left: 4px;
+	}
+
 	button {
 		background: transparent;
 		border: none;
@@ -69,7 +69,7 @@
 	}
 
 	.folder.name {
-		margin-bottom: 5px;
+		margin-top: 1px;
 	}
 
 	.name {
@@ -79,14 +79,5 @@
 
 	.name span {
 		margin-left: 3px;
-	}
-
-	.tree-line {
-		border-left: 1px solid #333;
-		padding-left: 3px;
-	}
-
-	.children {
-		margin-left: 4px;
 	}
 </style>
