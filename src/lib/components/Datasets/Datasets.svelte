@@ -23,3 +23,10 @@
 		<Tree {node} />
 	{/each}
 </div>
+
+<style>
+	div {
+		flex: 1;
+		overflow-y: scroll;
+	}
+</style>
