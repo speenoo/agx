@@ -12,6 +12,7 @@
 	import TabComponent from '$lib/components/Tab.svelte';
 	import TimeCounter from '$lib/components/TimeCounter.svelte';
 	import { setAppContext } from '$lib/context';
+	import { FileDropEventManager } from '$lib/FileDropEventManager';
 	import Bars3 from '$lib/icons/Bars3.svelte';
 	import Copy from '$lib/icons/Copy.svelte';
 	import MagicWand from '$lib/icons/MagicWand.svelte';
@@ -267,6 +268,39 @@
 			expressionWidth: 80,
 			language: 'postgresql'
 		});
+	}
+
+	const fileManager = new FileDropEventManager();
+
+	fileManager.on('drop', async (file) => {
+		switch (file.type) {
+			case 'sql':
+				openNewTabIfNeeded(await file.content());
+				break;
+			case 'csv':
+				openNewTabIfNeeded(queryForFile(file.path, 'CSV'));
+				break;
+			case 'parquet':
+				openNewTabIfNeeded(queryForFile(file.path, 'Parquet'));
+				break;
+			default:
+				console.warn('Unsupported file');
+				break;
+		}
+	});
+
+	$effect(() => () => fileManager.unlisten());
+
+	function queryForFile(path: string, filetype: string) {
+		return `SELECT *
+FROM file('${path}', '${filetype}')
+LIMIT 100;`;
+	}
+
+	function openNewTabIfNeeded(content: string) {
+		if (currentTab.content)
+			selectedTabIndex = tabs.push({ id: crypto.randomUUID(), content, name: 'Untitled' }) - 1;
+		else currentTab.content = content;
 	}
 </script>
 
