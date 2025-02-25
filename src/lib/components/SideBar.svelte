@@ -73,7 +73,7 @@
 		justify-content: space-between;
 
 		& > button {
-			font-size: 10px;
+			font-size: 11px;
 			font-weight: 500;
 			background-color: transparent;
 			padding: 4px 10px;

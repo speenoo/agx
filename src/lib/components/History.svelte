@@ -81,7 +81,7 @@
 	}
 
 	.time {
-		font-size: 10px;
+		font-size: 11px;
 		color: hsl(0deg 0% 70%);
 	}
 
@@ -92,7 +92,6 @@
 		cursor: default;
 		user-select: none;
 		-webkit-user-select: none;
-		font-weight: 500;
 
 		&:is(:focus-within) {
 			outline: none;
@@ -103,6 +102,7 @@
 	.content {
 		height: 18px;
 		font-weight: 500;
+		font-size: 13px;
 		padding: 3px 0;
 		line-height: 1.15;
 

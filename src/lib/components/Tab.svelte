@@ -30,7 +30,7 @@
 <style>
 	div {
 		height: 100%;
-		font-size: 11px;
+		font-size: 12px;
 		border-right: 1px solid hsl(0deg 0% 20%);
 		padding: 0 16px;
 		display: inline-flex;

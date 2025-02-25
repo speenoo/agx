@@ -181,6 +181,7 @@
 			& > span.name {
 				display: block;
 				height: 18px;
+				font-size: 13px;
 				font-weight: 600;
 				padding: 3px 0;
 				line-height: 1.15;
@@ -191,7 +192,7 @@
 			}
 
 			& > span.time {
-				font-size: 10px;
+				font-size: 11px;
 				color: hsl(0deg 0% 60%);
 			}
 		}

@@ -96,7 +96,7 @@
 
 			& > button {
 				height: 100%;
-				font-size: 10px;
+				font-size: 11px;
 				font-weight: 500;
 				background-color: transparent;
 				padding: 0 16px;
