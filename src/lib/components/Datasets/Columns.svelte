@@ -14,10 +14,13 @@
 <style>
 	ul {
 		margin: 0;
+		margin-top: 2px;
+		margin-bottom: 2px;
 		padding: 0;
 		list-style: none;
 		font-family: monospace;
-		color: lightgray;
+		color: #bbb;
+		font-size: 11px;
 	}
 
 	li {

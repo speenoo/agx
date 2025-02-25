@@ -54,7 +54,7 @@
 <style>
 	* {
 		font-family: monospace;
-		font-size: 11px;
+		font-size: 12px;
 		color: lightgray;
 	}
 
@@ -68,13 +68,10 @@
 		padding: 0;
 	}
 
-	.folder.name {
-		margin-top: 1px;
-	}
-
 	.name {
 		display: flex;
 		align-items: center;
+		margin-top: 3px;
 	}
 
 	.name span {
