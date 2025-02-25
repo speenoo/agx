@@ -9,8 +9,7 @@ export class RemoteEngine extends InternalEventEmitter<Events> implements OLAPEn
 
 	async exec(query: string, _emit = true) {
 		try {
-			const proxy =
-				new URLSearchParams(window.location.search).get('proxy') ?? 'https://proxy.agx.app/query';
+			const proxy = new URLSearchParams(window.location.search).get('proxy') ?? CLICKHOUSE_URL;
 			const response = await fetch(proxy, { method: 'POST', body: query });
 
 			const r = await response.text();
