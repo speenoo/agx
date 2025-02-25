@@ -38,7 +38,7 @@ cd agx
 docker compose up
 ```
 
-3. Access the application via https://localhost:8080
+3. Access the application via http://localhost:8080
 
 ### → Native
 
