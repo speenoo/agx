@@ -19,6 +19,29 @@
 
 ## Getting Started
 
+### → Live
+
+https://agx.app
+
+### → Local
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/agnosticeng/agx
+cd agx
+```
+
+2. Run with docker compose:
+
+```bash
+docker compose up
+```
+
+3. Access the application via https://localhost:8080
+
+### → Native
+
 1. Clone the repository:
 
 ```bash

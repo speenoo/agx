@@ -35,3 +35,6 @@ out/
 
 # Tauri
 src-tauri/
+
+#Clickhouse
+conf/

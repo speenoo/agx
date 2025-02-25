@@ -22,6 +22,7 @@ export default defineConfig(async () => ({
 		exclude: ['@sqlite.org/sqlite-wasm']
 	},
 	define: {
+		CLICKHOUSE_URL: JSON.stringify(process.env.CLICKHOUSE_URL || 'https://proxy.agx.app/query'),
 		PLATFORM: JSON.stringify(process.env.PLATFORM || 'NATIVE'),
 		BUILD: JSON.stringify(
 			(process.env.CF_PAGES_COMMIT_SHA || process.env.COMMIT_SHA || 'dev').slice(0, 7)
