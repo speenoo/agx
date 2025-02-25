@@ -13,8 +13,6 @@ export class RemoteEngine extends InternalEventEmitter<Events> implements OLAPEn
 				new URLSearchParams(window.location.search).get('proxy') ?? 'https://proxy.agx.app/query';
 			const response = await fetch(proxy, { method: 'POST', body: query });
 
-			if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-
 			const r = await response.text();
 			if (!r) throw new Error(`Empty Response`);
 
