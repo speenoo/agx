@@ -419,7 +419,7 @@ LIMIT 100;`;
 									</button>
 									<button
 										class="action"
-										title="Run without cache"
+										title="Force run"
 										onclick={() => handleExec(true)}
 										disabled={loading}
 									>
