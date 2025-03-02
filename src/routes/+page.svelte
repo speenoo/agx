@@ -60,8 +60,8 @@
 				}
 			}
 
-			response = await engine.exec(query);
 			cached = false;
+			response = await engine.exec(query);
 			await cache.set(query, response);
 		} finally {
 			loading = false;
