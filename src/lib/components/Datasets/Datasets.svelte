@@ -2,8 +2,8 @@
 	import type { Table } from '$lib/olap-engine';
 
 	import SearchBar from '$lib/components/SearchBar.svelte';
-	import { buildTree, filter } from './utils';
 	import Tree from './Tree.svelte';
+	import { buildTree, filter } from './utils';
 
 	type Props = {
 		tables?: Table[];
@@ -20,7 +20,7 @@
 
 <div>
 	{#each tree as node}
-		<Tree {node} />
+		<Tree {node} expanded={!!search} />
 	{/each}
 </div>
 
