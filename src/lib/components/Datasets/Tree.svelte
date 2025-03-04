@@ -1,12 +1,16 @@
 <script lang="ts">
-	import FolderOpen from '$lib/icons/FolderOpen.svelte';
 	import Folder from '$lib/icons/Folder.svelte';
+	import FolderOpen from '$lib/icons/FolderOpen.svelte';
 	import Table from '$lib/icons/Table.svelte';
 	import Columns from './Columns.svelte';
 	import Tree from './Tree.svelte';
 
-	let { node = {}, level = 0 } = $props();
+	let { node = {}, level = 0, expanded: forceExpanded = false } = $props();
 	let expanded = $state(false);
+
+	$effect(() => {
+		expanded = forceExpanded;
+	});
 
 	function toggleExpanded() {
 		expanded = !expanded;
@@ -41,7 +45,7 @@
 	</button>
 	{#if node.type === 'group' && node.children && expanded}
 		{#each node.children as child}
-			<Tree node={child} level={level + 1} />
+			<Tree node={child} level={level + 1} expanded={forceExpanded} />
 		{/each}
 	{/if}
 	{#if node.type === 'dataset' && expanded}
