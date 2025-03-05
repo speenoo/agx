@@ -61,3 +61,9 @@
 
 <Chart {data} {settings} />
 <Settings bind:settings {columns} />
+
+<style>
+	:global(.chart [aria-label='tip']) {
+		--plot-background: hsl(0deg 0%, 5%);
+	}
+</style>
