@@ -18,8 +18,8 @@
 
 	const handleChartTypeChange = (event: Event) => {
 		const select = event.target as HTMLSelectElement;
-		settings.type = select.value as 'candle' | 'line' | 'bar';
-		if (settings.type !== 'bar') {
+		settings.type = select.value as 'candle' | 'line' | 'bar' | 'h-bar';
+		if (settings.type === 'candle') {
 			settings.z = undefined;
 		}
 	};
@@ -49,10 +49,11 @@
 		<form>
 			<div class="setting">
 				<span>type</span>
-				<select multiple value={settings.type} onchange={handleChartTypeChange} size={3}>
+				<select value={settings.type} onchange={handleChartTypeChange} size={4}>
 					<option value="line">line</option>
 					<option value="candle">candle</option>
 					<option value="bar">bar</option>
+					<option value="h-bar">h-bar</option>
 				</select>
 			</div>
 
@@ -82,22 +83,19 @@
 				</div>
 			</div>
 
-			<div class="setting">
-				<span>z-axis</span>
-				<div style="display: flex; gap: 5px;">
-					<select
-						value={settings.z}
-						onchange={handleZAxisChange}
-						size={columns.length + 1}
-						disabled={settings.type !== 'bar'}
-					>
-						<option value="">none</option>
-						{#each columns as column}
-							<option value={column.name}>{column.name}</option>
-						{/each}
-					</select>
+			{#if settings.type !== 'candle'}
+				<div class="setting">
+					<span>z-axis</span>
+					<div style="display: flex; gap: 5px;">
+						<select value={settings.z} onchange={handleZAxisChange} size={columns.length + 1}>
+							<option value="">none</option>
+							{#each columns as column}
+								<option value={column.name}>{column.name}</option>
+							{/each}
+						</select>
+					</div>
 				</div>
-			</div>
+			{/if}
 		</form>
 	</section>
 {/if}
