@@ -64,6 +64,6 @@
 
 <style>
 	:global(.chart [aria-label='tip']) {
-		--plot-background: hsl(0deg 0%, 5%);
+		--plot-background: hsl(0deg 0% 5%);
 	}
 </style>
