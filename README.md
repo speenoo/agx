@@ -2,6 +2,10 @@
 
 **_agx_** is a desktop application built with Tauri and SvelteKit that provides a modern interface for exploring and querying data using ClickHouse's embedded database engine (chdb).
 
+## Preview
+
+![Preview](.github/img/screenshot.png)
+
 ## Features
 
 - Native desktop application performance with web technologies
