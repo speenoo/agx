@@ -12,7 +12,7 @@
 	import TabComponent from '$lib/components/Tab.svelte';
 	import TimeCounter from '$lib/components/TimeCounter.svelte';
 	import { setAppContext } from '$lib/context';
-	import { Database } from '$lib/database';
+	import { store } from '$lib/store';
 	import { FileDropEventManager } from '$lib/FileDropEventManager';
 	import Bars3 from '$lib/icons/Bars3.svelte';
 	import Bold from '$lib/icons/Bold.svelte';
@@ -43,10 +43,9 @@
 	import { format } from 'sql-formatter';
 	import { tick, type ComponentProps } from 'svelte';
 
-	const db = new Database();
-	const historyRepository: HistoryRepository = new SQLiteHistoryRepository(db);
-	const queryRepository: QueryRepository = new SQLiteQueryRepository(db);
-	const tabRepository: TabRepository = new SQLiteTabRepository(db);
+	const historyRepository: HistoryRepository = new SQLiteHistoryRepository(store);
+	const queryRepository: QueryRepository = new SQLiteQueryRepository(store);
+	const tabRepository: TabRepository = new SQLiteTabRepository(store);
 
 	let response = $state.raw<OLAPResponse>();
 	let loading = $state(false);

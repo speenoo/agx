@@ -1,4 +1,4 @@
-import type { Database } from '$lib/database';
+import type { Database } from '$lib/store/database';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 

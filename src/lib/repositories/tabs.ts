@@ -1,4 +1,4 @@
-import type { Database } from '$lib/database';
+import type { Database } from '$lib/store/database';
 
 export interface Tab {
 	id: string;
