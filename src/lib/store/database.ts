@@ -1,7 +1,5 @@
-import { dev } from '$app/environment';
 import { MIGRATIONS } from '$lib/migrations';
 import { IndexedDBCache } from '@agnosticeng/cache';
-import { MigrationManager } from '@agnosticeng/migrate';
 import { SQLite } from '@agnosticeng/sqlite';
 import type { BindingSpec } from '@sqlite.org/sqlite-wasm';
 import debounce from 'p-debounce';
@@ -10,10 +8,9 @@ const DB_NAME = 'sqlite-storage';
 const STORE_NAME = 'sqlite-data';
 const CACHE_KEY = 'db';
 
-class Database {
+export class Database {
 	private db = new SQLite();
 	private cache = new IndexedDBCache({ dbName: DB_NAME, storeName: STORE_NAME });
-	private migration = new MigrationManager(this.db);
 
 	private init_promise: Promise<void>;
 
@@ -26,8 +23,6 @@ class Database {
 		if (snapshot) await this.db.load_db(snapshot);
 
 		this.db.on('exec', debounce(this.snapshot.bind(this), 1000));
-
-		await this.migration.migrate(MIGRATIONS);
 	}
 
 	private async snapshot() {
@@ -38,12 +33,4 @@ class Database {
 		await this.init_promise;
 		return this.db.exec(sql, bind);
 	}
-}
-
-export type { Database };
-export const db = new Database();
-
-if (dev) {
-	// @ts-ignore
-	window.db = db;
 }

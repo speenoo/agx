@@ -12,6 +12,7 @@
 	import TabComponent from '$lib/components/Tab.svelte';
 	import TimeCounter from '$lib/components/TimeCounter.svelte';
 	import { setAppContext } from '$lib/context';
+	import { store } from '$lib/store';
 	import { FileDropEventManager } from '$lib/FileDropEventManager';
 	import Bars3 from '$lib/icons/Bars3.svelte';
 	import Bold from '$lib/icons/Bold.svelte';
@@ -25,14 +26,26 @@
 	import type { Table } from '$lib/olap-engine';
 	import { engine, type OLAPResponse } from '$lib/olap-engine';
 	import { PanelState } from '$lib/PanelState.svelte';
-	import { historyRepository, type HistoryEntry } from '$lib/repositories/history';
-	import { queryRepository, type Query } from '$lib/repositories/queries';
-	import { tabRepository, type Tab } from '$lib/repositories/tabs';
+	import {
+		SQLiteHistoryRepository,
+		type HistoryEntry,
+		type HistoryRepository
+	} from '$lib/repositories/history';
+	import {
+		SQLiteQueryRepository,
+		type Query,
+		type QueryRepository
+	} from '$lib/repositories/queries';
+	import { SQLiteTabRepository, type Tab, type TabRepository } from '$lib/repositories/tabs';
 	import { IndexedDBCache } from '@agnosticeng/cache';
 	import { SplitPane } from '@rich_harris/svelte-split-pane';
 	import debounce from 'p-debounce';
 	import { format } from 'sql-formatter';
 	import { tick, type ComponentProps } from 'svelte';
+
+	const historyRepository: HistoryRepository = new SQLiteHistoryRepository(store);
+	const queryRepository: QueryRepository = new SQLiteQueryRepository(store);
+	const tabRepository: TabRepository = new SQLiteTabRepository(store);
 
 	let response = $state.raw<OLAPResponse>();
 	let loading = $state(false);
