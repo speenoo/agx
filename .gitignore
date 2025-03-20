@@ -9,5 +9,5 @@ node_modules
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-src-tauri/libchdb.so
+src-tauri/libchdb.so*
 src-tauri/chdb.h

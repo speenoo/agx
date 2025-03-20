@@ -1,6 +1,6 @@
 # agx
 
-**_agx_** is a desktop application built with Tauri and SvelteKit that provides a modern interface for exploring and querying data using ClickHouse's embedded database engine (chdb).
+**_agx_** is a desktop application that lets you explore and query data through a modern interface. It's built with [Tauri](https://tauri.app/), [SvelteKit](https://kit.svelte.dev/) and [Plot](https://observablehq.com/@observablehq/plot), and can work in two ways: as a native desktop app using ClickHouse's embedded database ([chdb](https://github.com/chdb-io/chdb)), or as a web interface connected to a [Clickhouse](https://clickhouse.com/) server instance.
 
 ## Preview
 
@@ -23,17 +23,20 @@
 
 ## Getting Started
 
-### → Live
+### → Native ([chdb](https://github.com/chdb-io/chdb))
+
+Get the latest release from [GitHub](https://github.com/agnosticeng/agx/releases).
+
+### → Live ([clickhouse](https://github.com/ClickHouse/ClickHouse))
 
 https://agx.app
 
-### → Local
+### → Local ([clickhouse](https://github.com/ClickHouse/ClickHouse))
 
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/agnosticeng/agx
-cd agx
+git clone https://github.com/agnosticeng/agx && cd agx
 ```
 
 2. Run with docker compose:
@@ -43,39 +46,6 @@ docker compose up
 ```
 
 3. Access the application via http://localhost:8080
-
-### → Native
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/agnosticeng/agx
-cd agx
-```
-
-2. Download and setup chdb library:
-
-```bash
-./src-tauri/update_libchdb.sh
-```
-
-3. Install dependencies:
-
-```bash
-npm install
-```
-
-4. Run in development mode:
-
-```bash
-npm run tauri dev
-```
-
-5. Build for production:
-
-```bash
-npm run tauri build
-```
 
 ## Project Structure
 
