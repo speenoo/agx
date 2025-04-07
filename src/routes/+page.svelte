@@ -341,13 +341,12 @@ LIMIT 100;`;
 		else currentTab.content = content;
 	}
 
-	let messages = $state.raw<ChatInput['messages']>([
-		{
-			role: 'system',
-			content:
-				"You are a ClickHouse expert specializing in OLAP databases, SQL format, and functions. You can produce SQL queries using knowledge of ClickHouse's architecture, data modeling, performance optimization, query execution, and advanced analytical functions."
-		}
-	]);
+	let messages = $state.raw<ChatInput['messages']>([]);
+
+	let aiSelectedTable = $state.raw<Table>();
+	$effect(() => {
+		aiSelectedTable ??= tables.at(0);
+	});
 </script>
 
 <svelte:window onkeydown={handleKeyDown} bind:innerWidth={screenWidth} />
@@ -368,7 +367,12 @@ LIMIT 100;`;
 {/snippet}
 
 {#snippet ai()}
-	<Chat bind:messages />
+	<Chat
+		bind:messages
+		onClearConversation={() => (messages = [])}
+		datasets={tables}
+		bind:dataset={aiSelectedTable}
+	/>
 {/snippet}
 
 <section class="screen" class:is-mobile={isMobile}>
@@ -520,7 +524,7 @@ LIMIT 100;`;
 			</button>
 			<div class="spacer"></div>
 			{#if cached}
-				<span>from cache</span>
+				<span class="label">from cache</span>
 			{/if}
 			<TimeCounter bind:this={counter} />
 			{#if BUILD}
@@ -658,7 +662,7 @@ LIMIT 100;`;
 		border-top: 1px solid hsl(0deg 0% 20%);
 		display: flex;
 		place-items: center;
-		gap: 8px;
+		gap: 4px;
 		font-family: monospace;
 		color: hsl(0deg 0% 70%);
 		font-size: 9px;
@@ -675,6 +679,7 @@ LIMIT 100;`;
 
 		& > button {
 			height: 100%;
+			padding: 0;
 			aspect-ratio: 1;
 			flex-shrink: 0;
 			background-color: transparent;

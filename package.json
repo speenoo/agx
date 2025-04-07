@@ -19,6 +19,7 @@
 		"@agnosticeng/dv": "^0.0.9",
 		"@agnosticeng/migrate": "^0.0.2",
 		"@agnosticeng/sqlite": "^0.0.5",
+		"@floating-ui/dom": "^1.6.13",
 		"@observablehq/plot": "^0.6.16",
 		"@rich_harris/svelte-split-pane": "^2.0.0",
 		"@tauri-apps/api": "^2.2.0",

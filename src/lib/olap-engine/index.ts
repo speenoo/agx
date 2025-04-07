@@ -21,6 +21,8 @@ export interface ColumnDescriptor {
 export interface Table {
 	name: string;
 	engine: string;
+	short: string;
+	url: string;
 	columns: ColumnDescriptor[];
 }
 
