@@ -1,8 +1,10 @@
+import { tick } from 'svelte';
 import type { Action } from 'svelte/action';
 import { on } from 'svelte/events';
 
 export const autoresize = ((tx) => {
-	function onInput() {
+	async function onInput() {
+		await tick();
 		tx.style.height = '0px';
 		tx.style.height = `${tx.scrollHeight}px`;
 	}

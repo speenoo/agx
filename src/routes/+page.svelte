@@ -282,9 +282,9 @@
 
 	$effect(() => void saveTabs($state.snapshot(tabs), selectedTabIndex).catch(console.error));
 
-	const bottomPanel = new PanelState('50%', false, '100%');
+	const bottomPanel = new PanelState('-50%', false);
 	const leftPanel = new PanelState('260px', true);
-	const rightPanel = new PanelState('-300px', false);
+	const rightPanel = new PanelState('-300px', true);
 
 	let bottomPanelTab = $state<'data' | 'chart' | 'logs'>('data');
 	let errors = $state.raw<Log[]>([]);
@@ -408,8 +408,8 @@ LIMIT 100;`;
 					{#snippet a()}
 						<SplitPane
 							type="vertical"
-							min="20%"
-							max={bottomPanel.open ? '80%' : '100%'}
+							max="-20%"
+							min={bottomPanel.open ? '-80%' : '100%'}
 							bind:pos={bottomPanel.position}
 							disabled={!bottomPanel.open}
 							--color="hsl(0deg 0% 20%)"

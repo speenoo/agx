@@ -3,11 +3,10 @@
 	import { scroll_to_bottom } from '$lib/actions/scrollToBottom.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import CircleStack from '$lib/icons/CircleStack.svelte';
-	import PaperClip from '$lib/icons/PaperClip.svelte';
+	import CircleStopSolid from '$lib/icons/CircleStopSolid.svelte';
+	import Plus from '$lib/icons/Plus.svelte';
 	import Send from '$lib/icons/Send.svelte';
-	import Sparkles from '$lib/icons/Sparkles.svelte';
 	import Trash from '$lib/icons/Trash.svelte';
-	import UserCircle from '$lib/icons/UserCircle.svelte';
 	import { transform } from '$lib/markdown';
 	import type { Table } from '$lib/olap-engine';
 	import DatasetsBox from './DatasetsBox.svelte';
@@ -33,6 +32,8 @@
 	let message = $state('');
 	let select = $state<ReturnType<typeof Select>>();
 	let textarea = $state<HTMLTextAreaElement>();
+	let abortController: AbortController | undefined;
+	let chatMessages = $derived(messages.filter((m) => m.role === 'user' || m.role === 'assistant'));
 
 	function getContextFromTable(table: Table): string {
 		const columns = table.columns.map((col) => `- ${col.name} (${col.type})`).join('\n');
@@ -55,6 +56,7 @@
 		loading = true;
 
 		try {
+			abortController = new AbortController();
 			const response = await fetch(event.currentTarget.action, {
 				method: event.currentTarget.method,
 				headers: { 'Content-type': 'application/json' },
@@ -63,7 +65,8 @@
 						? [{ role: 'user', content: getContextFromTable(dataset) }, ...messages]
 						: messages,
 					stream: false
-				})
+				}),
+				signal: abortController.signal
 			});
 
 			if (!response.ok) {
@@ -73,8 +76,18 @@
 
 			const output: ChatOutput = await response.json();
 			messages = messages.concat(output.message);
+		} catch (e) {
+			if (e === 'Canceled by user') {
+				const last = messages.at(-1);
+				messages = messages.slice(0, -1);
+				if (last?.content) {
+					message = last.content;
+					textarea?.dispatchEvent(new InputEvent('input'));
+				}
+			}
 		} finally {
 			loading = false;
+			abortController = undefined;
 		}
 	}
 </script>
@@ -82,7 +95,10 @@
 <div class="container">
 	<nav>
 		<span class="spacer"></span>
-		<button title="Clear conversation" onclick={() => onClearConversation?.()}>
+		<button
+			title="Clear conversation"
+			onclick={() => (abortController?.abort('Chat cleared'), onClearConversation?.())}
+		>
 			<Trash size="12" />
 		</button>
 	</nav>
@@ -90,19 +106,20 @@
 		class="conversation"
 		use:scroll_to_bottom
 		role="presentation"
-		onclick={(e) => {
-			if (e.target === e.currentTarget) textarea?.focus();
-		}}
+		onclick={(e) => e.target === e.currentTarget && textarea?.focus()}
 	>
-		{#each messages.filter((m) => m.role === 'user' || m.role === 'assistant') as { role, content }}
+		{#each chatMessages as { role, content }, index}
 			<article data-role={role}>
 				<h2>
 					{#if role === 'user'}
-						<UserCircle size="18" /> You
+						You
 					{:else if role === 'assistant'}
-						<Sparkles size="18" /> Assistant
+						Assistant
 					{/if}
 				</h2>
+				{#if index === 0 && dataset}
+					<h3><CircleStack size="12" /><span>{dataset.name}</span></h3>
+				{/if}
 				<p class="markdown">
 					{@html transform(content)}
 				</p>
@@ -110,12 +127,15 @@
 		{/each}
 		{#if loading}
 			<article>
-				<h2><Sparkles size="18" /> Assistant</h2>
+				<h2>Assistant</h2>
 				<Loader />
 			</article>
 		{:else}
 			<article>
-				<h2><UserCircle size="18" /> You</h2>
+				<h2>You</h2>
+				{#if chatMessages.length === 0 && dataset}
+					<h3><CircleStack size="12" /> <span>{dataset.name}</span></h3>
+				{/if}
 				<form
 					id="user-message"
 					action="https://ai.agx.app/api/chat"
@@ -133,7 +153,7 @@
 						bind:this={textarea}
 						onkeydown={(e) => {
 							e.stopPropagation();
-							if (e.code === 'Enter' && !e.shiftKey) {
+							if (e.code === 'Enter' && e.metaKey) {
 								e.preventDefault();
 								submitter?.click();
 							}
@@ -143,37 +163,44 @@
 			</article>
 		{/if}
 	</section>
+
 	<div class="submitter">
-		{#if dataset}
-			<div class="context">
-				<CircleStack size="16" />
-				<span title={dataset.name}>{dataset.name}</span>
-			</div>
-		{/if}
-		<div class="actions">
-			<button type="button" onclick={(e) => select?.open(e.currentTarget)}>
-				<PaperClip size="16" />
+		<button type="button" onclick={(e) => select?.open(e.currentTarget)}>
+			<Plus size="16" />
+		</button>
+		<span class="separator"></span>
+		<Select bind:this={select} placement="top-start">
+			<DatasetsBox
+				{datasets}
+				onSelect={() => (
+					select?.close(), abortController?.abort('Context changed'), onClearConversation?.()
+				)}
+				bind:dataset
+			/>
+		</Select>
+		<select>
+			<option selected>Agnostic Ai (alpha)</option>
+		</select>
+		<span class="spacer"></span>
+		{#if loading}
+			<button
+				type="button"
+				title="Cancel"
+				onclick={() => abortController?.abort('Canceled by user')}
+			>
+				<CircleStopSolid size="16" />
 			</button>
-			<Select bind:this={select} placement="top-start">
-				<DatasetsBox
-					{datasets}
-					onSelect={() => (select?.close(), onClearConversation?.())}
-					bind:dataset
-				/>
-			</Select>
-			<select>
-				<option selected>Agnostic Ai (alpha)</option>
-			</select>
-			<span class="spacer"></span>
+		{:else}
 			<button
 				form="user-message"
 				type="submit"
-				disabled={!message.trim() || loading}
+				disabled={!message.trim()}
 				bind:this={submitter}
+				title="Send ⌘⏎"
 			>
 				<Send size="16" />
 			</button>
-		</div>
+		{/if}
 	</div>
 </div>
 
@@ -216,48 +243,52 @@
 	.conversation {
 		overflow-y: auto;
 		padding-bottom: 36px;
-		padding: 8px 20px 0;
+		padding: 15px 20px 0;
 	}
 
 	.conversation > article {
-		margin-bottom: 18px;
-		padding-bottom: 8px;
-
-		&:not(:last-child) {
-			border-bottom: 1px solid hsl(0deg 0% 20%);
+		& ~ article {
+			border-top: 1px solid hsl(0deg 0% 20%);
+			padding-top: 18px;
 		}
 
-		& h2 {
+		&:last-child {
+			padding-bottom: 18px;
+		}
+
+		& :is(h2, h3) {
 			margin: 0;
-			font-size: 13px;
+			margin-bottom: 12px;
+
+			font-size: 12px;
+			font-weight: 500;
+			padding: 3px 5px;
+			border-radius: 4px;
+			background-color: hsl(0deg 0% 17%);
+
 			display: flex;
 			align-items: center;
-			gap: 8px;
+			gap: 4px;
+			max-width: fit-content;
+			overflow: hidden;
+
+			& > :global(svg) {
+				flex-shrink: 0;
+			}
+
+			& > span {
+				flex: 1;
+				min-width: 0;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
 		}
-	}
 
-	.submitter {
-		border-top: 1px solid hsl(0deg 0% 20%);
-		padding: 10px 20px;
-		width: 100%;
-		overflow: hidden;
-	}
-
-	.context {
-		display: flex;
-		flex-wrap: nowrap;
-		align-items: center;
-		gap: 4px;
-		overflow: hidden;
-		margin-bottom: 8px;
-	}
-
-	.context > span {
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		flex: 1;
-		min-width: 0;
+		& > p {
+			margin: 0;
+			margin-bottom: 18px;
+		}
 	}
 
 	textarea {
@@ -276,18 +307,28 @@
 		outline: none;
 	}
 
-	.actions {
+	.submitter {
+		border-top: 1px solid hsl(0deg 0% 20%);
+		padding: 8px;
+		width: 100%;
+		overflow: hidden;
+
 		display: flex;
 		align-items: center;
 		gap: 4px;
-		margin-top: 8px;
+
+		& > span.separator {
+			height: 100%;
+			width: 1px;
+			background-color: hsl(0deg 0% 20%);
+		}
 
 		& > span.spacer {
 			flex: 1;
 		}
 	}
 
-	.actions > select {
+	.submitter > select {
 		cursor: pointer;
 		border: none;
 		outline: none;
@@ -295,14 +336,14 @@
 		color: hsl(0deg 0% 65%);
 		font-size: 11px;
 		border-radius: 4px;
-		padding: 4px;
+		padding: 2px;
 
 		&:hover {
 			background-color: hsl(0deg 0% 10%);
 		}
 	}
 
-	.actions > button {
+	.submitter > button {
 		display: grid;
 		place-items: center;
 		aspect-ratio: 1;
