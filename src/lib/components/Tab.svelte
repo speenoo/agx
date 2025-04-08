@@ -6,13 +6,13 @@
 		onSelect: () => void;
 		onClose: () => void;
 		active: boolean;
-		'hide-close': boolean;
+		'hide-close'?: boolean;
 	}
 
-	let { active, label, onClose, onSelect, 'hide-close': hideClose }: Props = $props();
+	let { active, label, onClose, onSelect, 'hide-close': hideClose = false }: Props = $props();
 </script>
 
-<div class="tab" class:active role="button" onclick={onSelect} tabindex="0" onkeyup={() => {}}>
+<div class:active role="tab" onclick={onSelect} tabindex="0" onkeyup={() => {}}>
 	<span>{label}</span>
 
 	{#if !hideClose}

@@ -1,4 +1,3 @@
-import { MIGRATIONS } from '$lib/migrations';
 import { IndexedDBCache } from '@agnosticeng/cache';
 import { SQLite } from '@agnosticeng/sqlite';
 import type { BindingSpec } from '@sqlite.org/sqlite-wasm';

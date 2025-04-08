@@ -17,11 +17,19 @@
 <div>
 	<ul role="listbox">
 		{#each filtered as d (d.name)}
+			{@const name = d.name.split('__').pop()}
 			<li role="option" aria-selected={dataset?.name === d.name}>
-				<button title={d.name} type="button" onclick={() => onSelect?.((dataset = d))}>
-					<span class="name">{d.name}</span>
-					<span class="description">{[d.engine, d.short || d.url].filter(Boolean).join(' • ')}</span
-					>
+				<button
+					title={[name, d.short].filter(Boolean).join(' • ')}
+					type="button"
+					onclick={() => onSelect?.((dataset = d))}
+				>
+					<span class="name">{name}</span>
+					<span class="description">
+						{#each d.name.split('__').slice(0, -1) as tag}
+							<span class="tag">{tag}</span>
+						{/each}
+					</span>
 				</button>
 			</li>
 		{/each}
@@ -104,6 +112,14 @@
 			background-color: hsl(0deg 0% 20%);
 			color: hsl(0deg 0% 90%);
 		}
+	}
+
+	span.tag {
+		display: inline-block;
+		padding: 2px 4px;
+		border-radius: 4px;
+		background-color: hsl(0deg 0% 17%);
+		margin-right: 4px;
 	}
 
 	button {

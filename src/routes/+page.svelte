@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { Chat } from '$lib/components/Ai';
-	import type { ChatInput } from '$lib/components/Ai/types';
+	import { AiPanel, type Chat } from '$lib/components/Ai';
 	import type { Log } from '$lib/components/Console.svelte';
 	import { ContextMenuState } from '$lib/components/ContextMenu';
 	import ContextMenu from '$lib/components/ContextMenu/ContextMenu.svelte';
@@ -29,6 +28,7 @@
 	import type { Table } from '$lib/olap-engine';
 	import { engine, type OLAPResponse } from '$lib/olap-engine';
 	import { PanelState } from '$lib/PanelState.svelte';
+	import { SQLiteChatsRepository, type ChatsRepository } from '$lib/repositories/chats';
 	import {
 		SQLiteHistoryRepository,
 		type HistoryEntry,
@@ -50,6 +50,7 @@
 	const historyRepository: HistoryRepository = new SQLiteHistoryRepository(store);
 	const queryRepository: QueryRepository = new SQLiteQueryRepository(store);
 	const tabRepository: TabRepository = new SQLiteTabRepository(store);
+	const chatsRepository: ChatsRepository = new SQLiteChatsRepository(store);
 
 	let response = $state.raw<OLAPResponse>();
 	let loading = $state(false);
@@ -341,12 +342,26 @@ LIMIT 100;`;
 		else currentTab.content = content;
 	}
 
-	let messages = $state.raw<ChatInput['messages']>([]);
+	let chats = $state<Chat[]>([]);
+	let focusedChat = $state(0);
+	function onRightPanelOpen() {
+		if (chats.length === 0) {
+			chats = [{ id: crypto.randomUUID(), messages: [], name: 'New Chat', dataset: tables.at(0) }];
+		}
+	}
 
-	let aiSelectedTable = $state.raw<Table>();
-	$effect(() => {
-		aiSelectedTable ??= tables.at(0);
-	});
+	const saveChat = debounce(
+		(chats: Chat[], active: number) => chatsRepository.save(chats, active),
+		2_000
+	);
+	$effect(() => void saveChat($state.snapshot(chats), focusedChat).catch(console.error));
+	$effect(
+		() =>
+			void chatsRepository.list().then(([c, active]) => {
+				if (c.length) (chats = c), (focusedChat = active);
+				else onRightPanelOpen();
+			})
+	);
 </script>
 
 <svelte:window onkeydown={handleKeyDown} bind:innerWidth={screenWidth} />
@@ -367,11 +382,14 @@ LIMIT 100;`;
 {/snippet}
 
 {#snippet ai()}
-	<Chat
-		bind:messages
-		onClearConversation={() => (messages = [])}
+	<AiPanel
+		bind:chats
+		bind:focused={focusedChat}
 		datasets={tables}
-		bind:dataset={aiSelectedTable}
+		onCloseAllTab={() => {
+			if (isMobile) rightDrawerOpened = false;
+			else rightPanel.open = false;
+		}}
 	/>
 {/snippet}
 
@@ -480,7 +498,10 @@ LIMIT 100;`;
 												<button
 													class="action"
 													title="Toggle AI chat"
-													onclick={() => (rightDrawerOpened = true)}
+													onclick={() => {
+														rightDrawerOpened = true;
+														onRightPanelOpen();
+													}}
 												>
 													<Sparkles size="12" />
 												</button>
@@ -538,7 +559,10 @@ LIMIT 100;`;
 			</button>
 			<button
 				class:active={rightPanel.open}
-				onclick={() => (rightPanel.open = !rightPanel.open)}
+				onclick={() => {
+					rightPanel.open = !rightPanel.open;
+					onRightPanelOpen();
+				}}
 				style:margin-right="7px"
 			>
 				<PanelRight size="12" />
@@ -572,7 +596,6 @@ LIMIT 100;`;
 			display: flex;
 			align-items: center;
 			height: 100%;
-			overflow-x: hidden;
 			white-space: nowrap;
 			overflow-x: auto;
 			overflow-y: hidden;

@@ -5,8 +5,6 @@
 	import CircleStack from '$lib/icons/CircleStack.svelte';
 	import CircleStopSolid from '$lib/icons/CircleStopSolid.svelte';
 	import Plus from '$lib/icons/Plus.svelte';
-	import Send from '$lib/icons/Send.svelte';
-	import Trash from '$lib/icons/Trash.svelte';
 	import { transform } from '$lib/markdown';
 	import type { Table } from '$lib/olap-engine';
 	import DatasetsBox from './DatasetsBox.svelte';
@@ -39,6 +37,10 @@
 		const columns = table.columns.map((col) => `- ${col.name} (${col.type})`).join('\n');
 		return `## Table schema:\n${table.name}\nColumns:\n${columns}`;
 	}
+
+	$effect(() => {
+		dataset ??= datasets?.at(0);
+	});
 
 	async function handleSubmit(
 		event: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement }
@@ -92,16 +94,11 @@
 	}
 </script>
 
-<div class="container">
-	<nav>
-		<span class="spacer"></span>
-		<button
-			title="Clear conversation"
-			onclick={() => (abortController?.abort('Chat cleared'), onClearConversation?.())}
-		>
-			<Trash size="12" />
-		</button>
-	</nav>
+{#snippet context(dataset: Table)}
+	<h3><CircleStack size="12" /><span>{dataset.name.split('__').pop()}</span></h3>
+{/snippet}
+
+<div class="chat-container">
 	<section
 		class="conversation"
 		use:scroll_to_bottom
@@ -117,9 +114,7 @@
 						Assistant
 					{/if}
 				</h2>
-				{#if index === 0 && dataset}
-					<h3><CircleStack size="12" /><span>{dataset.name}</span></h3>
-				{/if}
+				{#if index === 0 && dataset}{@render context(dataset)}{/if}
 				<p class="markdown">
 					{@html transform(content)}
 				</p>
@@ -133,9 +128,7 @@
 		{:else}
 			<article>
 				<h2>You</h2>
-				{#if chatMessages.length === 0 && dataset}
-					<h3><CircleStack size="12" /> <span>{dataset.name}</span></h3>
-				{/if}
+				{#if chatMessages.length === 0 && dataset}{@render context(dataset)}{/if}
 				<form
 					id="user-message"
 					action="https://ai.agx.app/api/chat"
@@ -146,7 +139,7 @@
 						name="message"
 						tabindex="0"
 						rows="1"
-						placeholder="Ask Agnostic Ai"
+						placeholder="Ask Agnostic AI"
 						disabled={loading}
 						use:autoresize
 						bind:value={message}
@@ -165,8 +158,8 @@
 	</section>
 
 	<div class="submitter">
-		<button type="button" onclick={(e) => select?.open(e.currentTarget)}>
-			<Plus size="16" />
+		<button type="button" title="Add context" onclick={(e) => select?.open(e.currentTarget)}>
+			<Plus size="12" />
 		</button>
 		<span class="separator"></span>
 		<Select bind:this={select} placement="top-start">
@@ -178,8 +171,8 @@
 				bind:dataset
 			/>
 		</Select>
-		<select>
-			<option selected>Agnostic Ai (alpha)</option>
+		<select disabled>
+			<option selected>Agnostic AI (v0)</option>
 		</select>
 		<span class="spacer"></span>
 		{#if loading}
@@ -188,56 +181,22 @@
 				title="Cancel"
 				onclick={() => abortController?.abort('Canceled by user')}
 			>
-				<CircleStopSolid size="16" />
+				<CircleStopSolid size="12" />
 			</button>
 		{:else}
-			<button
-				form="user-message"
-				type="submit"
-				disabled={!message.trim()}
-				bind:this={submitter}
-				title="Send ⌘⏎"
-			>
-				<Send size="16" />
+			<button form="user-message" type="submit" bind:this={submitter} title="Send ⌘⏎">
+				Send ⌘⏎
 			</button>
 		{/if}
 	</div>
 </div>
 
 <style>
-	.container {
-		background-color: hsl(0deg 0% 5%);
-		border-left: 1px solid hsl(0deg 0% 20%);
-
+	.chat-container {
 		height: 100%;
 		width: 100%;
 		display: grid;
-		grid-template-rows: 28px 1fr minmax(0px, auto);
-		position: relative;
-	}
-
-	nav {
-		background-color: black;
-		display: flex;
-
-		& > span.spacer {
-			flex: 1;
-		}
-
-		& > button {
-			height: 100%;
-			aspect-ratio: 1;
-			background-color: transparent;
-			border-radius: 0;
-			color: hsl(0deg 0% 80%);
-			display: grid;
-			place-items: center;
-
-			&:is(:hover, :focus-within):not(:disabled) {
-				background-color: hsl(0deg 0% 10%);
-				color: hsl(0deg 0% 90%);
-			}
-		}
+		grid-template-rows: 1fr minmax(0, auto);
 	}
 
 	.conversation {
@@ -248,7 +207,6 @@
 
 	.conversation > article {
 		& ~ article {
-			border-top: 1px solid hsl(0deg 0% 20%);
 			padding-top: 18px;
 		}
 
@@ -287,7 +245,6 @@
 
 		& > p {
 			margin: 0;
-			margin-bottom: 18px;
 		}
 	}
 
@@ -297,7 +254,7 @@
 		background-color: transparent;
 		border-radius: 0;
 		border: none;
-		padding: 8px 0;
+		padding: 0;
 		width: 100%;
 		display: block;
 		overflow: visible;
@@ -309,7 +266,7 @@
 
 	.submitter {
 		border-top: 1px solid hsl(0deg 0% 20%);
-		padding: 8px;
+		padding: 6px 4px;
 		width: 100%;
 		overflow: hidden;
 
@@ -329,16 +286,20 @@
 	}
 
 	.submitter > select {
-		cursor: pointer;
 		border: none;
 		outline: none;
 		background-color: transparent;
 		color: hsl(0deg 0% 65%);
 		font-size: 11px;
 		border-radius: 4px;
-		padding: 2px;
+		padding: 2px 0;
 
-		&:hover {
+		&:disabled {
+			appearance: none;
+		}
+
+		&:not(:disabled):hover {
+			cursor: pointer;
 			background-color: hsl(0deg 0% 10%);
 		}
 	}
@@ -347,8 +308,8 @@
 		display: grid;
 		place-items: center;
 		aspect-ratio: 1;
-		height: 22px;
-		border-radius: 4px;
+		height: 18px;
+		border-radius: 3px;
 		background-color: transparent;
 		color: hsl(0deg 0% 80%);
 		border: none;
@@ -360,6 +321,18 @@
 		&:not(:disabled):hover {
 			color: hsl(0deg 0% 90%);
 			background-color: hsl(0deg 0% 10%);
+		}
+
+		&[type='submit'] {
+			aspect-ratio: initial;
+			font-size: 11px;
+			padding: 0 4px;
+			background-color: hsl(0deg 0% 10%);
+
+			&:not(:disabled):hover {
+				color: hsl(0deg 0% 90%);
+				background-color: transparent;
+			}
 		}
 	}
 
