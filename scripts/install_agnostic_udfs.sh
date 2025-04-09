@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Constants
-REPO="agnosticeng/agnostic-clickhouse-udf"
+REPO="agnosticeng/clickhouse-evm"
 API_URL="https://api.github.com/repos/$REPO/releases/latest"
 OS_ARCH="$(uname | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')"
 USER_PATH="$HOME"
@@ -18,7 +18,7 @@ if [ -z "$RELEASE_TAG" ] || [ -z "$MATCHING_URL" ]; then
 fi
 
 # Setup directories
-TMP_DIR="/tmp/agnostic-clickhouse-udf-${RELEASE_TAG}"
+TMP_DIR="/tmp/clickhouse-evm-${RELEASE_TAG}"
 mkdir -p "$TMP_DIR" "$DEST/user_defined" "$DEST/bin"
 
 # Download and extract
@@ -31,10 +31,10 @@ tar -xzf "$ARCHIVE_PATH" -C "$TMP_DIR" || { echo "Failed to extract archive."; e
 SRC="$TMP_DIR"
 cp "$SRC/etc/clickhouse-server/"*.xml "$DEST/user_defined/" || { echo "Failed to copy XML files."; exit 1; }
 cp "$SRC/var/lib/clickhouse/user_defined/"*.sql "$DEST/user_defined/" || { echo "Failed to copy SQL files."; exit 1; }
-cp "$SRC/var/lib/clickhouse/user_scripts/agnostic-clickhouse-udf" "$DEST/bin/" || { echo "Failed to copy script."; exit 1; }
+cp "$SRC/var/lib/clickhouse/user_scripts/clickhouse-evm" "$DEST/bin/" || { echo "Failed to copy script."; exit 1; }
 
 # Set permissions and clean up
-chmod +x "$DEST/bin/agnostic-clickhouse-udf"
+chmod +x "$DEST/bin/clickhouse-evm"
 rm -rf "$TMP_DIR"
 
 echo "Module successfully extracted and set up in: $DEST"
