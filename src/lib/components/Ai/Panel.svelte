@@ -11,9 +11,16 @@
 		chats?: Chat[];
 		focused?: number;
 		onCloseAllTab?: () => void;
+		onOpenInEditor?: (sql: string) => void;
 	}
 
-	let { chats = $bindable([]), focused = $bindable(0), datasets, onCloseAllTab }: Props = $props();
+	let {
+		chats = $bindable([]),
+		focused = $bindable(0),
+		datasets,
+		onCloseAllTab,
+		onOpenInEditor
+	}: Props = $props();
 
 	const current = $derived(chats.at(focused));
 	let scrollContainer = $state<HTMLElement>();
@@ -53,6 +60,7 @@
 				{datasets}
 				bind:messages={current.messages}
 				onClearConversation={() => (current.messages = [])}
+				{onOpenInEditor}
 			/>
 		{/if}
 	</div>

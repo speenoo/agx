@@ -390,6 +390,7 @@ LIMIT 100;`;
 			if (isMobile) rightDrawerOpened = false;
 			else rightPanel.open = false;
 		}}
+		onOpenInEditor={openNewTabIfNeeded}
 	/>
 {/snippet}
 

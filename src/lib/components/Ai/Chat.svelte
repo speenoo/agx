@@ -5,7 +5,7 @@
 	import CircleStack from '$lib/icons/CircleStack.svelte';
 	import CircleStopSolid from '$lib/icons/CircleStopSolid.svelte';
 	import Plus from '$lib/icons/Plus.svelte';
-	import { transform } from '$lib/markdown';
+	import { getTextFromElement, transform } from '$lib/markdown';
 	import type { Table } from '$lib/olap-engine';
 	import DatasetsBox from './DatasetsBox.svelte';
 	import Loader from './Loader.svelte';
@@ -16,13 +16,15 @@
 		onClearConversation?: () => void;
 		datasets: Table[];
 		dataset?: Table;
+		onOpenInEditor?: (sql: string) => void;
 	}
 
 	let {
 		messages = $bindable([]),
 		onClearConversation,
 		datasets,
-		dataset = $bindable()
+		dataset = $bindable(),
+		onOpenInEditor
 	}: Props = $props();
 
 	let loading = $state(false);
@@ -92,6 +94,32 @@
 			abortController = undefined;
 		}
 	}
+
+	async function handleClick(e: Event) {
+		if ((e.target as HTMLButtonElement).classList.contains('copy')) {
+			const parent = e
+				.composedPath()
+				.find((node) => (node as HTMLElement).classList.contains('code-block')) as HTMLElement;
+			if (!parent) return;
+
+			const code = parent.querySelector('pre code') as HTMLElement;
+			if (!code) return;
+
+			navigator.clipboard.writeText(getTextFromElement(code));
+		}
+
+		if ((e.target as HTMLButtonElement).classList.contains('open')) {
+			const parent = e
+				.composedPath()
+				.find((node) => (node as HTMLElement).classList.contains('code-block')) as HTMLElement;
+			if (!parent) return;
+
+			const code = parent.querySelector('pre code') as HTMLElement;
+			if (!code) return;
+
+			onOpenInEditor?.(getTextFromElement(code));
+		}
+	}
 </script>
 
 {#snippet context(dataset: Table)}
@@ -115,7 +143,7 @@
 					{/if}
 				</h2>
 				{#if index === 0 && dataset}{@render context(dataset)}{/if}
-				<p class="markdown">
+				<p class="markdown" onclickcapture={handleClick}>
 					{@html transform(content)}
 				</p>
 			</article>
