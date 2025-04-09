@@ -1,6 +1,17 @@
 use std::path::PathBuf;
 
 fn main() {
+    let target_triple = std::env::consts::ARCH.to_string() + "-apple-" + "darwin";
+
+    let current_dir = std::env::current_dir().expect("Failed to get current directory");
+    let new_name = format!("libchdb.so-{}", target_triple);
+    let source = current_dir.join("libchdb.so");
+    let dest = current_dir.join(&new_name);
+
+    if source.exists() && !dest.exists() {
+        std::fs::rename(source, dest).expect("Failed to rename library file");
+    }
+
     tauri_build::build();
 
     // // Tell cargo to look for shared libraries in the specified directory
@@ -18,8 +29,7 @@ fn main() {
     let bindings = bindgen::Builder::default()
         // The input header we would like to generate
         // bindings for.
-        .header("chdb.h")
-        // Tell cargo to invalidate the built crate whenever any of the
+        .header("chdb.h") // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed.
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
         // Finish the builder and generate the bindings.
