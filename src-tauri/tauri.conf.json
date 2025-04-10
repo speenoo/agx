@@ -40,7 +40,8 @@
         "width": 1250,
         "height": 900,
         "theme": "Dark",
-        "useHttpsScheme": true
+        "useHttpsScheme": true,
+        "backgroundColor": "#000000"
       }
     ]
   }
