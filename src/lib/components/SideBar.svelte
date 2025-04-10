@@ -4,6 +4,7 @@
 	import type { Query } from '$lib/repositories/queries';
 	import Datasets from './Datasets/Datasets.svelte';
 	import History from './History.svelte';
+	import ProxySwitch from './ProxySwitch.svelte';
 	import Queries from './Queries/Queries.svelte';
 
 	type Tab = 'sources' | 'queries' | 'history';
@@ -44,14 +45,19 @@
 		<button aria-current={tab === 'queries'} onclick={() => switch_to('queries')}>Queries</button>
 		<button aria-current={tab === 'history'} onclick={() => switch_to('history')}>History</button>
 	</nav>
-	{#if tab === 'sources'}
-		<Datasets {tables} />
-	{/if}
-	{#if tab === 'queries'}
-		<Queries {queries} onDelete={onQueryDelete} onOpen={onQueryOpen} onRename={onQueryRename} />
-	{/if}
-	{#if tab === 'history'}
-		<History {history} onOpen={onHistoryOpen} onDelete={onHistoryDelete} />
+	<div>
+		{#if tab === 'sources'}
+			<Datasets {tables} />
+		{/if}
+		{#if tab === 'queries'}
+			<Queries {queries} onDelete={onQueryDelete} onOpen={onQueryOpen} onRename={onQueryRename} />
+		{/if}
+		{#if tab === 'history'}
+			<History {history} onOpen={onHistoryOpen} onDelete={onHistoryDelete} />
+		{/if}
+	</div>
+	{#if PLATFORM === 'NATIVE'}
+		<ProxySwitch />
 	{/if}
 </section>
 
@@ -62,15 +68,16 @@
 
 		padding: 14px 20px 0;
 		background-color: hsl(0deg 0% 5%);
-		display: flex;
-		flex-direction: column;
-		gap: 18px;
 		border-right: 1px solid hsl(0deg 0% 20%);
+
+		display: grid;
+		grid-template-rows: minmax(0, auto) 1fr minmax(0, auto);
 	}
 
 	nav {
 		display: flex;
 		justify-content: space-between;
+		margin-bottom: 18px;
 
 		& > button {
 			font-size: 11px;
@@ -84,6 +91,11 @@
 				background-color: hsl(0deg 0% 19%);
 			}
 		}
+	}
+
+	div {
+		display: flex;
+		flex-direction: column;
 	}
 
 	button {

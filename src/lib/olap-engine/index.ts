@@ -33,4 +33,7 @@ export interface OLAPEngine extends IListener<Events> {
 	getUDFs(): Promise<string[]>;
 }
 
-export const engine: OLAPEngine = PLATFORM === 'WEB' ? new RemoteEngine() : new CHDBEngine();
+export const engine: OLAPEngine =
+	PLATFORM === 'WEB' || (typeof window !== 'undefined' && window.location.search.includes('proxy='))
+		? new RemoteEngine()
+		: new CHDBEngine();
