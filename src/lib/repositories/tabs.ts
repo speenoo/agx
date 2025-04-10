@@ -27,7 +27,7 @@ export class SQLiteTabRepository implements TabRepository {
 		await this.db.exec(
 			`DELETE FROM tabs;
 INSERT INTO tabs (id, name, content, query_id, tab_index, active)
-VALUES ${Array.from({ length: rows.length }).fill('(?,?,?,?,?, ?)').join(',\n')}
+VALUES ${Array.from({ length: rows.length }).fill('(?,?,?,?,?,?)').join(',\n')}
 `,
 			rows
 				.map((r) => [

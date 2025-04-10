@@ -1,0 +1,184 @@
+@import 'highlight.js/styles/default.min.css';
+@import 'highlight.js/styles/vs2015.min.css';
+
+.markdown {
+	width: 100%;
+	overflow-x: auto;
+	word-break: break-word;
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		margin: 0;
+	}
+
+	& > p:first-child {
+		margin-top: 0;
+	}
+
+	& > p:last-child {
+		margin-bottom: 0;
+	}
+
+	a {
+		color: palevioletred;
+		text-decoration: underline;
+	}
+
+	code {
+		font-family: monospace;
+		font-size: 12px;
+	}
+
+	code:not(pre > code) {
+		background-color: #333;
+		border-radius: 3px;
+		padding: 0 2px;
+	}
+
+	li {
+		margin-bottom: 10px;
+	}
+
+	pre {
+		font-family: Menlo, Consolas, monospace;
+		margin: 0;
+		position: relative;
+		width: 100%;
+		box-sizing: border-box;
+		overflow-x: auto;
+	}
+
+	code.hljs {
+		text-align: left;
+		border-radius: 8px;
+		word-wrap: normal;
+		hyphens: none;
+		line-height: 1.5;
+		tab-size: 4;
+		white-space: pre;
+		word-break: normal;
+		word-spacing: normal;
+	}
+
+	.code-block {
+		position: relative;
+
+		&:hover > .controls {
+			opacity: 1;
+		}
+
+		.controls {
+			opacity: 0;
+			transition: opacity 0.2s;
+
+			z-index: 1;
+			position: absolute;
+			top: 6px;
+			right: 6px;
+
+			display: flex;
+			align-items: center;
+			justify-content: end;
+
+			& > button {
+				height: 20px;
+				aspect-ratio: 1;
+				border: 1px solid hsl(0 0% 20%);
+				border-radius: 4px;
+				background-color: hsl(0deg 0% 5%);
+
+				&:hover {
+					background-color: hsl(0deg 0% 20%);
+				}
+
+				&:has(~ button) {
+					border-bottom-right-radius: 0;
+					border-top-right-radius: 0;
+				}
+
+				& ~ button {
+					border-left: none;
+					border-bottom-left-radius: 0;
+					border-top-left-radius: 0;
+				}
+
+				&.copy {
+					position: relative;
+
+					&::before,
+					&::after {
+						content: '';
+						display: block;
+						position: absolute;
+						width: 100%;
+						height: 100%;
+						left: 0;
+						top: 0;
+						background: no-repeat 50% 50% / 60% 60%;
+						transition: opacity 0.2s;
+						transition-delay: 0.6s;
+					}
+
+					&::before {
+						background-image: url($lib/icons/copy.svg);
+					}
+
+					&::after {
+						background-image: url($lib/icons/check.svg);
+						opacity: 0;
+					}
+
+					&:active::before {
+						opacity: 0;
+						transition: none;
+					}
+
+					&:active::after {
+						opacity: 1;
+						transition: none;
+					}
+				}
+
+				&.open {
+					position: relative;
+					&::before {
+						content: '';
+						display: block;
+						position: absolute;
+						width: 100%;
+						height: 100%;
+						left: 0;
+						top: 0;
+						background: no-repeat 50% 50% / 60% 60%;
+						background-image: url($lib/icons/arrow-top-right-on-square.svg);
+					}
+				}
+			}
+		}
+	}
+
+	.hljs-attribute,
+	.hljs-doctag,
+	.hljs-keyword,
+	.hljs-meta .hljs-keyword,
+	.hljs-name,
+	.hljs-selector-tag {
+		font-weight: normal;
+	}
+
+	button {
+		appearance: none;
+		outline: none;
+		border: none;
+		background: none;
+		padding: 0;
+
+		&:not(:disabled):hover {
+			cursor: pointer;
+		}
+	}
+}
