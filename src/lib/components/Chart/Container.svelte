@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { ColumnDescriptor } from '$lib/olap-engine';
 	import type { ChartSettingsType } from '@agnosticeng/dv';
-
 	import { Chart } from '@agnosticeng/dv';
+	import _ from 'lodash';
 	import Settings from './Settings.svelte';
 
 	let {
@@ -12,6 +12,18 @@
 		data: Array<{ [key: string]: any }>;
 		columns: Array<ColumnDescriptor>;
 	} = $props();
+
+	const typedData = $derived(
+		data.map((row) =>
+			_.mapValues(row, (v) => {
+				try {
+					return JSON.parse(v);
+				} catch {
+					return v;
+				}
+			})
+		)
+	);
 
 	function setDefaultSettings() {
 		const candleColumns = ['open', 'close', 'low', 'high'];
@@ -59,7 +71,7 @@
 	});
 </script>
 
-<Chart {data} {settings} />
+<Chart data={typedData} {settings} />
 <Settings bind:settings {columns} />
 
 <style>
