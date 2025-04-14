@@ -96,6 +96,8 @@
 	div {
 		display: flex;
 		flex-direction: column;
+		overflow: hidden;
+		gap: 18px;
 	}
 
 	button {
