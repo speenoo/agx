@@ -16,7 +16,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"@agnosticeng/cache": "^0.0.3",
-		"@agnosticeng/dv": "^0.0.10",
+		"@agnosticeng/dv": "^0.0.12",
 		"@agnosticeng/migrate": "^0.0.2",
 		"@agnosticeng/sqlite": "^0.0.5",
 		"@floating-ui/dom": "^1.6.13",
