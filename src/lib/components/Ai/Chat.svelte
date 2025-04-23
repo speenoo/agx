@@ -7,9 +7,10 @@
 	import Plus from '$lib/icons/Plus.svelte';
 	import { getTextFromElement, transform } from '$lib/markdown';
 	import type { Table } from '$lib/olap-engine';
+	import { deserializeModel, serializeModel } from '.';
 	import DatasetsBox from './DatasetsBox.svelte';
 	import Loader from './Loader.svelte';
-	import type { ChatInput, ChatOutput } from './types';
+	import type { ChatInput, ChatOutput, Model } from './types';
 
 	interface Props {
 		messages?: ChatInput['messages'];
@@ -17,6 +18,9 @@
 		datasets: Table[];
 		dataset?: Table;
 		onOpenInEditor?: (sql: string) => void;
+		models: Model[];
+		selectedModel: Model;
+		onModelChange: (m: Model) => void;
 	}
 
 	let {
@@ -24,7 +28,10 @@
 		onClearConversation,
 		datasets,
 		dataset = $bindable(),
-		onOpenInEditor
+		onOpenInEditor,
+		models,
+		selectedModel,
+		onModelChange
 	}: Props = $props();
 
 	let loading = $state(false);
@@ -34,6 +41,7 @@
 	let textarea = $state<HTMLTextAreaElement>();
 	let abortController: AbortController | undefined;
 	let chatMessages = $derived(messages.filter((m) => m.role === 'user' || m.role === 'assistant'));
+	let modelsOptions = $derived(Object.entries(Object.groupBy(models, (item) => item.brand)));
 
 	function getContextFromTable(table: Table): string {
 		const columns = table.columns.map((col) => `- ${col.name} (${col.type})`).join('\n');
@@ -65,6 +73,7 @@
 				method: event.currentTarget.method,
 				headers: { 'Content-type': 'application/json' },
 				body: JSON.stringify({
+					model: selectedModel.name,
 					messages: dataset
 						? [{ role: 'user', content: getContextFromTable(dataset) }, ...messages]
 						: messages,
@@ -159,7 +168,7 @@
 				{#if chatMessages.length === 0 && dataset}{@render context(dataset)}{/if}
 				<form
 					id="user-message"
-					action="https://ai.agx.app/api/chat"
+					action={selectedModel.endpoint}
 					method="POST"
 					onsubmit={handleSubmit}
 				>
@@ -167,7 +176,7 @@
 						name="message"
 						tabindex="0"
 						rows="1"
-						placeholder="Ask Agnostic AI"
+						placeholder="Ask {selectedModel.name}"
 						disabled={loading}
 						use:autoresize
 						bind:value={message}
@@ -199,8 +208,24 @@
 				bind:dataset
 			/>
 		</Select>
-		<select disabled>
-			<option selected>Agnostic AI (v0)</option>
+		<select
+			onchange={(e) => {
+				const next = deserializeModel(e.currentTarget.value);
+				if (next) onModelChange(next);
+			}}
+			disabled={models.length === 1}
+		>
+			{#each modelsOptions as [brand, models]}
+				<optgroup label={brand}>
+					{#each models ?? [] as model}
+						{@const isSelected =
+							model.brand === selectedModel.brand &&
+							model.name === selectedModel.name &&
+							model.endpoint === selectedModel.endpoint}
+						<option selected={isSelected} value={serializeModel(model)}>{model.name}</option>
+					{/each}
+				</optgroup>
+			{/each}
 		</select>
 		<span class="spacer"></span>
 		{#if loading}

@@ -10,3 +10,9 @@ export interface ChatOutput {
 	created_at: string;
 	message: { role: 'assistant'; content: string };
 }
+
+export interface Model {
+	name: string;
+	brand: string;
+	endpoint: string;
+}
