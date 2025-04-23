@@ -16,6 +16,7 @@
 	import { FileDropEventManager } from '$lib/FileDropEventManager';
 	import Bars3 from '$lib/icons/Bars3.svelte';
 	import Bolt from '$lib/icons/Bolt.svelte';
+	import CircleStopSolid from '$lib/icons/CircleStopSolid.svelte';
 	import Copy from '$lib/icons/Copy.svelte';
 	import MagicWand from '$lib/icons/MagicWand.svelte';
 	import PanelBottom from '$lib/icons/PanelBottom.svelte';
@@ -55,6 +56,7 @@
 	let response = $state.raw<OLAPResponse>();
 	let loading = $state(false);
 	let counter = $state<ReturnType<typeof TimeCounter>>();
+	let abortController: AbortController | undefined;
 
 	const cache = new IndexedDBCache({ dbName: 'query-cache', storeName: 'response-data' });
 	let cached = $state(false);
@@ -79,11 +81,13 @@
 			}
 
 			cached = false;
-			response = await engine.exec(query);
+			abortController = new AbortController();
+			response = await engine.exec(query, { signal: abortController.signal });
 			await cache.set(query, response);
 		} finally {
 			loading = false;
 			counter?.stop();
+			abortController = undefined;
 		}
 	}
 
@@ -291,6 +295,7 @@
 	let errors = $state.raw<Log[]>([]);
 	engine.on('error', (e) => {
 		if (e instanceof Error) {
+			if (e.message === 'Canceled') return;
 			errors = errors.concat({ level: 'error', timestamp: new Date(), data: e.message });
 			bottomPanel.open = true;
 			bottomPanelTab = 'logs';
@@ -479,14 +484,24 @@ LIMIT 100;`;
 											>
 												<Save size="12" />
 											</button>
-											<button
-												class="action"
-												title="Run"
-												onclick={() => handleExec()}
-												disabled={loading}
-											>
-												<Play size="12" />
-											</button>
+											{#if loading}
+												<button
+													class="action"
+													title="Cancel"
+													onclick={() => abortController?.abort(new Error('Canceled'))}
+												>
+													<CircleStopSolid size="12" />
+												</button>
+											{:else}
+												<button
+													class="action"
+													title="Run"
+													onclick={() => handleExec()}
+													disabled={loading}
+												>
+													<Play size="12" />
+												</button>
+											{/if}
 											<button
 												class="action"
 												title="Force run"
