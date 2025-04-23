@@ -68,17 +68,16 @@
 
 <style>
 	.container {
+		--tab-height: 28px;
 		background-color: hsl(0deg 0% 5%);
 		border-left: 1px solid hsl(0deg 0% 20%);
 
 		height: 100%;
 		width: 100%;
-		display: grid;
-		grid-template-rows: 28px 1fr;
 	}
 
 	nav {
-		height: 100%;
+		height: var(--tab-height);
 		white-space: nowrap;
 		position: relative;
 		overflow: hidden;
@@ -127,6 +126,10 @@
 				background-color: hsl(0deg 0% 10%);
 			}
 		}
+	}
+
+	div.container > div {
+		height: calc(100% - var(--tab-height));
 	}
 
 	/* Reset button style */

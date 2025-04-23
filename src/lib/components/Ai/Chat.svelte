@@ -221,16 +221,17 @@
 
 <style>
 	.chat-container {
+		--submitter-height: 34px;
+
 		height: 100%;
 		width: 100%;
-		display: grid;
-		grid-template-rows: 1fr minmax(0, auto);
 	}
 
 	.conversation {
+		height: calc(100% - var(--submitter-height));
 		overflow-y: auto;
-		padding-bottom: 36px;
 		padding: 15px 20px 0;
+		padding-bottom: 36px;
 	}
 
 	.conversation > article {
@@ -295,6 +296,7 @@
 	.submitter {
 		border-top: 1px solid hsl(0deg 0% 20%);
 		padding: 6px 4px;
+		height: var(--submitter-height);
 		width: 100%;
 		overflow: hidden;
 
