@@ -16,7 +16,6 @@
 	import { FileDropEventManager } from '$lib/FileDropEventManager';
 	import Bars3 from '$lib/icons/Bars3.svelte';
 	import Bolt from '$lib/icons/Bolt.svelte';
-	import CircleStopSolid from '$lib/icons/CircleStopSolid.svelte';
 	import Copy from '$lib/icons/Copy.svelte';
 	import MagicWand from '$lib/icons/MagicWand.svelte';
 	import PanelBottom from '$lib/icons/PanelBottom.svelte';
@@ -26,6 +25,7 @@
 	import Plus from '$lib/icons/Plus.svelte';
 	import Save from '$lib/icons/Save.svelte';
 	import Sparkles from '$lib/icons/Sparkles.svelte';
+	import Stop from '$lib/icons/Stop.svelte';
 	import type { Table } from '$lib/olap-engine';
 	import { engine, type OLAPResponse } from '$lib/olap-engine';
 	import { PanelState } from '$lib/PanelState.svelte';
@@ -490,7 +490,7 @@ LIMIT 100;`;
 													title="Cancel"
 													onclick={() => abortController?.abort(new Error('Canceled'))}
 												>
-													<CircleStopSolid size="12" />
+													<Stop size="12" />
 												</button>
 											{:else}
 												<button
