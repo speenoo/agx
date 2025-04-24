@@ -484,7 +484,7 @@ LIMIT 100;`;
 											>
 												<Save size="12" />
 											</button>
-											{#if loading}
+											{#if loading && engine.isAbortable}
 												<button
 													class="action"
 													title="Cancel"

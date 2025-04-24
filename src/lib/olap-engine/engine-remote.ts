@@ -5,6 +5,8 @@ import CLICKHOUSE_GET_SCHEMA from './queries/clickhouse_get_schema.sql?raw';
 import CLICKHOUSE_GET_UDFS from './queries/clickhouse_get_udfs.sql?raw';
 
 export class RemoteEngine extends InternalEventEmitter<Events> implements OLAPEngine {
+	readonly isAbortable = true;
+
 	async init() {}
 
 	async exec(query: string, options: ExecOptions = {}, _emit = true) {

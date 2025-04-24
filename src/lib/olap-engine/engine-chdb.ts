@@ -7,6 +7,8 @@ import CLICKHOUSE_GET_UDFS from './queries/clickhouse_get_udfs.sql?raw';
 import CLICKHOUSE_INIT_DB from './queries/clickhouse_init_db.sql?raw';
 
 export class CHDBEngine extends InternalEventEmitter<Events> implements OLAPEngine {
+	readonly isAbortable = false;
+
 	async init() {
 		await this.exec(CLICKHOUSE_INIT_DB);
 	}
