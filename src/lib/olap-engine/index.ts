@@ -28,9 +28,12 @@ export interface Table {
 
 export type Events = 'error' | 'success';
 
+export type ExecOptions = { signal?: AbortSignal | null };
+
 export interface OLAPEngine extends IListener<Events> {
+	readonly isAbortable: boolean;
 	init(): Promise<void>;
-	exec(query: string): Promise<OLAPResponse | undefined>;
+	exec(query: string, options?: ExecOptions): Promise<OLAPResponse | undefined>;
 	getSchema(): Promise<Table[]>;
 	getUDFs(): Promise<string[]>;
 }

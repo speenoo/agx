@@ -1,16 +1,18 @@
 import { InternalEventEmitter } from './EventListener';
-import type { Events, OLAPEngine, OLAPResponse, Table } from './index';
+import type { Events, ExecOptions, OLAPEngine, OLAPResponse, Table } from './index';
 
 import CLICKHOUSE_GET_SCHEMA from './queries/clickhouse_get_schema.sql?raw';
 import CLICKHOUSE_GET_UDFS from './queries/clickhouse_get_udfs.sql?raw';
 
 export class RemoteEngine extends InternalEventEmitter<Events> implements OLAPEngine {
+	readonly isAbortable = true;
+
 	async init() {}
 
-	async exec(query: string, _emit = true) {
+	async exec(query: string, options: ExecOptions = {}, _emit = true) {
 		try {
 			const proxy = new URLSearchParams(window.location.search).get('proxy') ?? CLICKHOUSE_URL;
-			const response = await fetch(proxy, { method: 'POST', body: query });
+			const response = await fetch(proxy, { method: 'POST', body: query, signal: options.signal });
 
 			const r = await response.text();
 			if (!r) throw new Error(`Empty Response`);
@@ -29,13 +31,13 @@ export class RemoteEngine extends InternalEventEmitter<Events> implements OLAPEn
 	}
 
 	async getSchema() {
-		const response = await this.exec(CLICKHOUSE_GET_SCHEMA, false);
+		const response = await this.exec(CLICKHOUSE_GET_SCHEMA, {}, false);
 		if (!response) return [];
 		return response.data as Table[];
 	}
 
 	async getUDFs() {
-		const response = await this.exec(CLICKHOUSE_GET_UDFS, false);
+		const response = await this.exec(CLICKHOUSE_GET_UDFS, {}, false);
 		if (!response) return [];
 
 		return response.data.map((row) => row.name as string);

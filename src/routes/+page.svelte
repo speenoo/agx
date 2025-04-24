@@ -25,6 +25,7 @@
 	import Plus from '$lib/icons/Plus.svelte';
 	import Save from '$lib/icons/Save.svelte';
 	import Sparkles from '$lib/icons/Sparkles.svelte';
+	import Stop from '$lib/icons/Stop.svelte';
 	import type { Table } from '$lib/olap-engine';
 	import { engine, type OLAPResponse } from '$lib/olap-engine';
 	import { PanelState } from '$lib/PanelState.svelte';
@@ -55,6 +56,7 @@
 	let response = $state.raw<OLAPResponse>();
 	let loading = $state(false);
 	let counter = $state<ReturnType<typeof TimeCounter>>();
+	let abortController: AbortController | undefined;
 
 	const cache = new IndexedDBCache({ dbName: 'query-cache', storeName: 'response-data' });
 	let cached = $state(false);
@@ -79,11 +81,13 @@
 			}
 
 			cached = false;
-			response = await engine.exec(query);
+			abortController = new AbortController();
+			response = await engine.exec(query, { signal: abortController.signal });
 			await cache.set(query, response);
 		} finally {
 			loading = false;
 			counter?.stop();
+			abortController = undefined;
 		}
 	}
 
@@ -291,6 +295,7 @@
 	let errors = $state.raw<Log[]>([]);
 	engine.on('error', (e) => {
 		if (e instanceof Error) {
+			if (e.message === 'Canceled') return;
 			errors = errors.concat({ level: 'error', timestamp: new Date(), data: e.message });
 			bottomPanel.open = true;
 			bottomPanelTab = 'logs';
@@ -479,14 +484,24 @@ LIMIT 100;`;
 											>
 												<Save size="12" />
 											</button>
-											<button
-												class="action"
-												title="Run"
-												onclick={() => handleExec()}
-												disabled={loading}
-											>
-												<Play size="12" />
-											</button>
+											{#if loading && engine.isAbortable}
+												<button
+													class="action"
+													title="Cancel"
+													onclick={() => abortController?.abort(new Error('Canceled'))}
+												>
+													<Stop size="12" />
+												</button>
+											{:else}
+												<button
+													class="action"
+													title="Run"
+													onclick={() => handleExec()}
+													disabled={loading}
+												>
+													<Play size="12" />
+												</button>
+											{/if}
 											<button
 												class="action"
 												title="Force run"
