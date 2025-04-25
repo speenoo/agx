@@ -2,12 +2,13 @@
 	import { autoresize } from '$lib/actions/autoresize.svelte';
 	import { scroll_to_bottom } from '$lib/actions/scrollToBottom.svelte';
 	import Select from '$lib/components/Select.svelte';
+	import ChevronDown from '$lib/icons/ChevronDown.svelte';
 	import CircleStack from '$lib/icons/CircleStack.svelte';
 	import CircleStopSolid from '$lib/icons/CircleStopSolid.svelte';
 	import Plus from '$lib/icons/Plus.svelte';
 	import { getTextFromElement, transform } from '$lib/markdown';
 	import type { Table } from '$lib/olap-engine';
-	import { deserializeModel, serializeModel } from '.';
+	import ChangeModelBox from './ChangeModelBox.svelte';
 	import DatasetsBox from './DatasetsBox.svelte';
 	import Loader from './Loader.svelte';
 	import type { ChatInput, ChatOutput, Model } from './types';
@@ -37,11 +38,11 @@
 	let loading = $state(false);
 	let submitter = $state<HTMLButtonElement>();
 	let message = $state('');
-	let select = $state<ReturnType<typeof Select>>();
+	let datasetSelectbox = $state<ReturnType<typeof Select>>();
 	let textarea = $state<HTMLTextAreaElement>();
 	let abortController: AbortController | undefined;
 	let chatMessages = $derived(messages.filter((m) => m.role === 'user' || m.role === 'assistant'));
-	let modelsOptions = $derived(Object.entries(Object.groupBy(models, (item) => item.brand)));
+	let modelSelectbox = $state<ReturnType<typeof Select>>();
 
 	function getContextFromTable(table: Table): string {
 		const columns = table.columns.map((col) => `- ${col.name} (${col.type})`).join('\n');
@@ -195,38 +196,47 @@
 	</section>
 
 	<div class="submitter">
-		<button type="button" title="Add context" onclick={(e) => select?.open(e.currentTarget)}>
+		<button
+			type="button"
+			title="Add context"
+			onclick={(e) => datasetSelectbox?.open(e.currentTarget)}
+		>
 			<Plus size="12" />
 		</button>
-		<span class="separator"></span>
-		<Select bind:this={select} placement="top-start">
+		<Select bind:this={datasetSelectbox} placement="top-start">
 			<DatasetsBox
 				{datasets}
 				onSelect={() => (
-					select?.close(), abortController?.abort('Context changed'), onClearConversation?.()
+					datasetSelectbox?.close(),
+					abortController?.abort('Context changed'),
+					onClearConversation?.()
 				)}
 				bind:dataset
 			/>
 		</Select>
-		<select
-			onchange={(e) => {
-				const next = deserializeModel(e.currentTarget.value);
-				if (next) onModelChange(next);
-			}}
+		<span class="separator"></span>
+		<button
+			type="button"
+			title="Change model"
+			onclick={(e) => modelSelectbox?.open(e.currentTarget)}
 			disabled={models.length === 1}
+			class="select-trigger"
 		>
-			{#each modelsOptions as [brand, models]}
-				<optgroup label={brand}>
-					{#each models ?? [] as model}
-						{@const isSelected =
-							model.brand === selectedModel.brand &&
-							model.name === selectedModel.name &&
-							model.endpoint === selectedModel.endpoint}
-						<option selected={isSelected} value={serializeModel(model)}>{model.name}</option>
-					{/each}
-				</optgroup>
-			{/each}
-		</select>
+			<span>{selectedModel.name}</span>
+			{#if models.length > 1}
+				<ChevronDown size="12" />
+			{/if}
+		</button>
+		<Select bind:this={modelSelectbox} placement="top-start" id="change-model">
+			<ChangeModelBox
+				{models}
+				bind:model={selectedModel}
+				onSelect={() => {
+					modelSelectbox?.close();
+					abortController?.abort('Model changed');
+				}}
+			/>
+		</Select>
 		<span class="spacer"></span>
 		{#if loading}
 			<button
@@ -340,25 +350,6 @@
 		}
 	}
 
-	.submitter > select {
-		border: none;
-		outline: none;
-		background-color: transparent;
-		color: hsl(0deg 0% 65%);
-		font-size: 11px;
-		border-radius: 4px;
-		padding: 2px 0;
-
-		&:disabled {
-			appearance: none;
-		}
-
-		&:not(:disabled):hover {
-			cursor: pointer;
-			background-color: hsl(0deg 0% 10%);
-		}
-	}
-
 	.submitter > button {
 		display: grid;
 		place-items: center;
@@ -389,6 +380,18 @@
 				background-color: transparent;
 			}
 		}
+
+		&.select-trigger {
+			aspect-ratio: initial;
+			padding: 0 4px;
+			display: flex;
+			gap: 4px;
+		}
+	}
+
+	:global(body:has(#change-model)) .select-trigger :global(> svg) {
+		transform-origin: center;
+		transform: rotate(180deg);
 	}
 
 	button {
