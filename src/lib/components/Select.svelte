@@ -10,9 +10,10 @@
 		children?: Snippet;
 		onClose?: () => void;
 		anchor_size?: boolean;
+		id?: HTMLElement['id'];
 	}
 
-	let { placement = 'bottom-start', children, onClose, anchor_size = false }: Props = $props();
+	let { placement = 'bottom-start', children, onClose, anchor_size = false, id }: Props = $props();
 
 	let opened = $state(false);
 	let dropdown = $state<HTMLElement>();
@@ -65,6 +66,7 @@
 		transition:fade={{ duration: 150 }}
 		role="presentation"
 		onclick={(e) => e.target === e.currentTarget && close()}
+		{id}
 	>
 		<div role="dialog" bind:this={dropdown} transition:fly={{ duration: 150, y: -10 }}>
 			{@render children?.()}

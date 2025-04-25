@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { AiPanel, type Chat } from '$lib/components/Ai';
+	import { AiPanel, deserializeModel, serializeModel, type Chat } from '$lib/components/Ai';
 	import type { Log } from '$lib/components/Console.svelte';
 	import { ContextMenuState } from '$lib/components/ContextMenu';
 	import ContextMenu from '$lib/components/ContextMenu/ContextMenu.svelte';
@@ -41,12 +41,16 @@
 		type QueryRepository
 	} from '$lib/repositories/queries';
 	import { SQLiteTabRepository, type Tab, type TabRepository } from '$lib/repositories/tabs';
+	import { Persisted } from '$lib/states/Persisted.svelte';
 	import { store } from '$lib/store';
 	import { IndexedDBCache } from '@agnosticeng/cache';
 	import { SplitPane } from '@rich_harris/svelte-split-pane';
 	import debounce from 'p-debounce';
 	import { format } from 'sql-formatter';
 	import { tick, type ComponentProps } from 'svelte';
+	import type { PageProps } from './$types';
+
+	let { data }: PageProps = $props();
 
 	const historyRepository: HistoryRepository = new SQLiteHistoryRepository(store);
 	const queryRepository: QueryRepository = new SQLiteQueryRepository(store);
@@ -367,6 +371,18 @@ LIMIT 100;`;
 				else onRightPanelOpen();
 			})
 	);
+
+	const storedModel = new Persisted('ai:model', serializeModel(data.models[0]));
+	const selectedModel = $derived.by(() => {
+		const stored = deserializeModel(storedModel.current);
+		const fallback = data.models[0];
+		if (!stored) return fallback;
+		return (
+			data.models.find(
+				(m) => m.name === stored.name && m.brand === stored.brand && m.endpoint === stored.endpoint
+			) ?? fallback
+		);
+	});
 </script>
 
 <svelte:window onkeydown={handleKeyDown} bind:innerWidth={screenWidth} />
@@ -396,6 +412,9 @@ LIMIT 100;`;
 			else rightPanel.open = false;
 		}}
 		onOpenInEditor={openNewTabIfNeeded}
+		models={data.models}
+		{selectedModel}
+		onModelChange={(m) => (storedModel.current = serializeModel(m))}
 	/>
 {/snippet}
 

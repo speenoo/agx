@@ -5,6 +5,7 @@
 	import type { Chat } from '.';
 	import Tab from '../Tab.svelte';
 	import ChatComponent from './Chat.svelte';
+	import type { Model } from './types';
 
 	interface Props {
 		datasets: Table[];
@@ -12,6 +13,9 @@
 		focused?: number;
 		onCloseAllTab?: () => void;
 		onOpenInEditor?: (sql: string) => void;
+		models: Model[];
+		selectedModel: Model;
+		onModelChange: (m: Model) => void;
 	}
 
 	let {
@@ -19,7 +23,10 @@
 		focused = $bindable(0),
 		datasets,
 		onCloseAllTab,
-		onOpenInEditor
+		onOpenInEditor,
+		models,
+		selectedModel,
+		onModelChange
 	}: Props = $props();
 
 	const current = $derived(chats.at(focused));
@@ -61,6 +68,9 @@
 				bind:messages={current.messages}
 				onClearConversation={() => (current.messages = [])}
 				{onOpenInEditor}
+				{models}
+				{selectedModel}
+				{onModelChange}
 			/>
 		{/if}
 	</div>
