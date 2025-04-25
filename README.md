@@ -31,6 +31,14 @@ Get the latest release from [GitHub](https://github.com/agnosticeng/agx/releases
 
 https://agx.app
 
+#### Ollama Integration
+
+To use your local Ollama models with the live version (https://agx.app), run:
+
+```bash
+OLLAMA_ORIGINS="https://app.agx" ollama serve
+```
+
 ### → Local ([clickhouse](https://github.com/ClickHouse/ClickHouse))
 
 1. Clone the repository:
