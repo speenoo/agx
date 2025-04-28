@@ -509,7 +509,7 @@ LIMIT 100;`;
 													title="Cancel"
 													onclick={() => abortController?.abort(new Error('Canceled'))}
 												>
-													<Stop size="12" />
+													<Stop size="11" />
 												</button>
 											{:else}
 												<button
