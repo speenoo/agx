@@ -14,7 +14,7 @@
 	<ul role="listbox">
 		{#each models as m (m.name + m.brand)}
 			{@const isSelected =
-				m.brand === model.brand && m.name === model.name && m.endpoint === model.endpoint}
+				m.brand === model.brand && m.name === model.name && m.baseURL === model.baseURL}
 			<li role="option" aria-selected={isSelected}>
 				<button
 					title={[m.brand, m.name].filter(Boolean).join(' • ')}

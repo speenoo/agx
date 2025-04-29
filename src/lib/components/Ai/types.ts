@@ -1,6 +1,6 @@
 export interface ChatInput {
 	messages: {
-		role: 'user' | 'assistant' | 'system' | 'tool';
+		role: 'user' | 'assistant' | 'system';
 		content: string;
 	}[];
 	stream?: false | undefined;
@@ -14,5 +14,5 @@ export interface ChatOutput {
 export interface Model {
 	name: string;
 	brand: string;
-	endpoint: string;
+	baseURL: string;
 }

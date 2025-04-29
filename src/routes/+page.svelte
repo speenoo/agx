@@ -384,7 +384,7 @@ LIMIT 100;`;
 		if (!stored) return fallback;
 		return (
 			data.models.find(
-				(m) => m.name === stored.name && m.brand === stored.brand && m.endpoint === stored.endpoint
+				(m) => m.name === stored.name && m.brand === stored.brand && m.baseURL === stored.baseURL
 			) ?? fallback
 		);
 	});

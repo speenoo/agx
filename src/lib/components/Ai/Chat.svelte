@@ -11,7 +11,8 @@
 	import ChangeModelBox from './ChangeModelBox.svelte';
 	import DatasetsBox from './DatasetsBox.svelte';
 	import Loader from './Loader.svelte';
-	import type { ChatInput, ChatOutput, Model } from './types';
+	import { OpenAIClient } from './OpenAI';
+	import type { ChatInput, Model } from './types';
 
 	interface Props {
 		messages?: ChatInput['messages'];
@@ -43,6 +44,7 @@
 	let abortController: AbortController | undefined;
 	let chatMessages = $derived(messages.filter((m) => m.role === 'user' || m.role === 'assistant'));
 	let modelSelectbox = $state<ReturnType<typeof Select>>();
+	const uid = $props.id();
 
 	function getContextFromTable(table: Table): string {
 		const columns = table.columns.map((col) => `- ${col.name} (${col.type})`).join('\n');
@@ -52,6 +54,8 @@
 	$effect(() => {
 		dataset ??= datasets?.at(0);
 	});
+
+	const client = $derived(new OpenAIClient(selectedModel.baseURL));
 
 	async function handleSubmit(
 		event: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement }
@@ -70,26 +74,18 @@
 
 		try {
 			abortController = new AbortController();
-			const response = await fetch(event.currentTarget.action, {
-				method: event.currentTarget.method,
-				headers: { 'Content-type': 'application/json' },
-				body: JSON.stringify({
+			const completion = await client.createChatCompletion(
+				{
 					model: selectedModel.name,
 					messages: dataset
-						? [{ role: 'user', content: getContextFromTable(dataset) }, ...messages]
+						? [{ role: 'system', content: getContextFromTable(dataset) }, ...messages]
 						: messages,
 					stream: false
-				}),
-				signal: abortController.signal
-			});
+				},
+				{ signal: abortController.signal }
+			);
 
-			if (!response.ok) {
-				console.error(await response.text());
-				return;
-			}
-
-			const output: ChatOutput = await response.json();
-			messages = messages.concat(output.message);
+			messages = messages.concat(completion.choices[0].message);
 		} catch (e) {
 			if (e === 'Canceled by user') {
 				const last = messages.at(-1);
@@ -167,12 +163,7 @@
 			<article>
 				<h2>You</h2>
 				{#if chatMessages.length === 0 && dataset}{@render context(dataset)}{/if}
-				<form
-					id="user-message"
-					action={selectedModel.endpoint}
-					method="POST"
-					onsubmit={handleSubmit}
-				>
+				<form id="{uid}-user-message" method="POST" onsubmit={handleSubmit}>
 					<textarea
 						name="message"
 						tabindex="0"
@@ -231,9 +222,10 @@
 			<ChangeModelBox
 				{models}
 				bind:model={selectedModel}
-				onSelect={() => {
+				onSelect={(m) => {
 					modelSelectbox?.close();
 					abortController?.abort('Model changed');
+					onModelChange(m);
 				}}
 			/>
 		</Select>
@@ -247,7 +239,7 @@
 				<Stop size="11" />
 			</button>
 		{:else}
-			<button form="user-message" type="submit" bind:this={submitter} title="Send ⌘⏎">
+			<button form="{uid}-user-message" type="submit" bind:this={submitter} title="Send ⌘⏎">
 				Send ⌘⏎
 			</button>
 		{/if}
@@ -320,6 +312,7 @@
 		border: none;
 		padding: 0;
 		width: 100%;
+		min-height: 15px;
 		display: block;
 		overflow: visible;
 	}

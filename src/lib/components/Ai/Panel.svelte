@@ -60,20 +60,20 @@
 			<button class="add-chat" onclick={() => add('New Chat')}><Plus size="14" /></button>
 		</div>
 	</nav>
-	<div>
-		{#if current}
+	{#each chats as chat (chat.id)}
+		<div style:display={chat.id === current?.id ? '' : 'none'}>
 			<ChatComponent
-				bind:dataset={current.dataset}
+				bind:dataset={chat.dataset}
 				{datasets}
-				bind:messages={current.messages}
-				onClearConversation={() => (current.messages = [])}
+				bind:messages={chat.messages}
+				onClearConversation={() => (chat.messages = [])}
 				{onOpenInEditor}
 				{models}
 				{selectedModel}
 				{onModelChange}
 			/>
-		{/if}
-	</div>
+		</div>
+	{/each}
 </div>
 
 <style>
