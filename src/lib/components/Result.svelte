@@ -13,9 +13,16 @@
 		logs?: Log[];
 		tab?: 'data' | 'chart' | 'logs';
 		onClearLogs?: () => void;
+		warnings?: string[];
 	}
 
-	let { response, logs = [], tab = $bindable('data'), onClearLogs }: Props = $props();
+	let {
+		response,
+		logs = [],
+		tab = $bindable('data'),
+		onClearLogs,
+		warnings = []
+	}: Props = $props();
 </script>
 
 <section>
@@ -49,7 +56,15 @@
 		</div>
 
 		<div class="tab-content" style:visibility={tab === 'chart' ? 'visible' : 'hidden'}>
-			<Chart data={response?.data ?? []} columns={response?.meta ?? []} />
+			{#if warnings?.length}
+				<div class="warning">
+					{#each warnings as warning (warning)}
+						<span>{warning}</span>
+					{/each}
+				</div>
+			{:else}
+				<Chart data={response?.data ?? []} columns={response?.meta ?? []} />
+			{/if}
 		</div>
 
 		<div class="tab-content" style:visibility={tab === 'logs' ? 'visible' : 'hidden'}>
@@ -64,6 +79,15 @@
 		height: 100%;
 		width: 100%;
 		overflow: auto;
+	}
+
+	.warning {
+		height: 100%;
+		width: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-direction: column;
 	}
 
 	section {

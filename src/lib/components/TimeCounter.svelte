@@ -38,9 +38,7 @@
 </script>
 
 {#if ms !== 0}
-	<span title="Response time">
-		{format(ms)}
-	</span>
+	<span title="Response time">{format(ms)}</span>
 {/if}
 
 <style>
