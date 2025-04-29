@@ -579,10 +579,13 @@ LIMIT 100;`;
 				<PanelLeft size="12" />
 			</button>
 			<div class="spacer"></div>
+			{#if response && !loading}
+				<span class="label">{response.rows} rows in</span>
+			{/if}
+			<TimeCounter bind:this={counter} />
 			{#if cached}
 				<span class="label">from cache</span>
 			{/if}
-			<TimeCounter bind:this={counter} />
 			{#if BUILD}
 				<span class="label">build-{BUILD}</span>
 			{/if}
