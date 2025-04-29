@@ -4,8 +4,8 @@
 	import Select from '$lib/components/Select.svelte';
 	import ChevronDown from '$lib/icons/ChevronDown.svelte';
 	import CircleStack from '$lib/icons/CircleStack.svelte';
-	import CircleStopSolid from '$lib/icons/CircleStopSolid.svelte';
 	import Plus from '$lib/icons/Plus.svelte';
+	import Stop from '$lib/icons/Stop.svelte';
 	import { getTextFromElement, transform } from '$lib/markdown';
 	import type { Table } from '$lib/olap-engine';
 	import ChangeModelBox from './ChangeModelBox.svelte';
@@ -244,7 +244,7 @@
 				title="Cancel"
 				onclick={() => abortController?.abort('Canceled by user')}
 			>
-				<CircleStopSolid size="12" />
+				<Stop size="11" />
 			</button>
 		{:else}
 			<button form="user-message" type="submit" bind:this={submitter} title="Send ⌘⏎">

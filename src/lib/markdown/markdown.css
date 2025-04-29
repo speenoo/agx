@@ -30,8 +30,15 @@
 	}
 
 	code {
-		font-family: monospace;
-		font-size: 12px;
+		font-family: Menlo, Monaco, 'Courier New', monospace;
+		font-weight: normal;
+		font-size: 11px;
+		font-feature-settings:
+			'liga' 0,
+			'calt' 0;
+		font-variation-settings: normal;
+		line-height: 17px;
+		letter-spacing: 0px;
 	}
 
 	code:not(pre > code) {
