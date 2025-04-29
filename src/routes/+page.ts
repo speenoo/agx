@@ -8,9 +8,7 @@ export const load = (async () => {
 
 	const isOllamaInstalled = await isInstalled();
 	const models: Model[] = [ArgnosticModel];
-	if (isOllamaInstalled) {
-		models.push(...(await getModels()));
-	}
+	if (isOllamaInstalled) models.push(...(await getModels()));
 
 	return { models };
 }) satisfies PageLoad;
