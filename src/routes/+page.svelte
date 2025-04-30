@@ -14,6 +14,7 @@
 	import TimeCounter from '$lib/components/TimeCounter.svelte';
 	import { setAppContext } from '$lib/context';
 	import { FileDropEventManager } from '$lib/FileDropEventManager';
+	import { isResponseTooLarge, LARGE_RESULT } from '$lib/hints';
 	import Bars3 from '$lib/icons/Bars3.svelte';
 	import Bolt from '$lib/icons/Bolt.svelte';
 	import Copy from '$lib/icons/Copy.svelte';
@@ -61,6 +62,7 @@
 	let loading = $state(false);
 	let counter = $state<ReturnType<typeof TimeCounter>>();
 	let abortController: AbortController | undefined;
+	let warnings = $state.raw<string[]>([]);
 
 	const cache = new IndexedDBCache({ dbName: 'query-cache', storeName: 'response-data' });
 	let cached = $state(false);
@@ -92,6 +94,9 @@
 			loading = false;
 			counter?.stop();
 			abortController = undefined;
+			if (response && isResponseTooLarge(response)) {
+				if (!warnings.includes(LARGE_RESULT)) warnings = warnings.concat(LARGE_RESULT);
+			} else warnings = warnings.filter((w) => w !== LARGE_RESULT);
 		}
 	}
 
@@ -556,6 +561,7 @@ LIMIT 100;`;
 									logs={errors}
 									bind:tab={bottomPanelTab}
 									onClearLogs={() => (errors = [])}
+									{warnings}
 								/>
 							{/snippet}
 						</SplitPane>
@@ -578,13 +584,22 @@ LIMIT 100;`;
 			>
 				<PanelLeft size="12" />
 			</button>
-			<div class="spacer"></div>
-			{#if cached}
-				<span class="label">from cache</span>
-			{/if}
-			<TimeCounter bind:this={counter} />
 			{#if BUILD}
 				<span class="label">build-{BUILD}</span>
+			{/if}
+			<div class="spacer"></div>
+			{#if response && !loading}
+				<span
+					class="label"
+					style:color={warnings.includes(LARGE_RESULT) ? 'hsl(0deg 100% 90%)' : ''}
+				>
+					{response.rows} rows
+				</span>
+				<span class="label">in</span>
+			{/if}
+			<TimeCounter bind:this={counter} />
+			{#if cached}
+				<span class="label">from cache</span>
 			{/if}
 			<button
 				class:active={bottomPanel.open}
