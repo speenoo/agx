@@ -1,4 +1,4 @@
-import { CHDBEngine } from './engine-chdb';
+import { LocalEngine } from './engine-local';
 import { RemoteEngine } from './engine-remote';
 import type { IListener } from './EventListener';
 
@@ -41,4 +41,4 @@ export interface OLAPEngine extends IListener<Events> {
 export const engine: OLAPEngine =
 	PLATFORM === 'WEB' || (typeof window !== 'undefined' && window.location.search.includes('proxy='))
 		? new RemoteEngine()
-		: new CHDBEngine();
+		: new LocalEngine();
