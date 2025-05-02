@@ -1,6 +1,6 @@
 # agx
 
-**_agx_** is a desktop application that lets you explore and query data through a modern interface. It's built with [Tauri](https://tauri.app/), [SvelteKit](https://kit.svelte.dev/) and [Plot](https://observablehq.com/@observablehq/plot), and can work in two ways: as a native desktop app using ClickHouse's embedded database ([chdb](https://github.com/chdb-io/chdb)), or as a web interface connected to a [Clickhouse](https://clickhouse.com/) server instance.
+**_agx_** is a desktop application that lets you explore and query data through a modern interface. It's built with [Tauri](https://tauri.app/), [SvelteKit](https://kit.svelte.dev/) and [Plot](https://observablehq.com/@observablehq/plot), and can work in two ways: as a native desktop app using ([Clickhouse](https://github.com/clickhouse/clickhouse)), or as a web interface connected to a [Clickhouse](https://clickhouse.com/) server instance.
 
 ## Preview
 
@@ -23,7 +23,7 @@
 
 ## Getting Started
 
-### → Native ([chdb](https://github.com/chdb-io/chdb))
+### → Native ([clickhouse](https://github.com/clickhouse/clickhouse))
 
 Get the latest release from [GitHub](https://github.com/agnosticeng/agx/releases).
 
@@ -82,7 +82,7 @@ curl -fsSL https://raw.githubusercontent.com/agnosticeng/agx/main/scripts/instal
 - The frontend is built with SvelteKit, offering a reactive and efficient UI
 - The backend uses Tauri with Rust, providing native performance and security
 - Communication between frontend and backend happens through Tauri's IPC bridge
-- Data querying is handled by chdb, an embedded ClickHouse engine
+- Data querying is handled by clickhouse, locally
 
 ## Contributing
 

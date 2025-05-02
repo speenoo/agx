@@ -26,7 +26,7 @@
 </script>
 
 <div>
-	<button disabled={!usingProxy} onclick={() => setProxy()}>chDB</button>
+	<button disabled={!usingProxy} onclick={() => setProxy()}>Local</button>
 	<button disabled={usingProxy} onclick={() => setProxy(CLICKHOUSE_URL)}>agx.app</button>
 </div>
 
