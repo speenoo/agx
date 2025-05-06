@@ -42,6 +42,13 @@
 		settings.z = options[select.selectedIndex];
 		if (!settings.z) settings.z = undefined;
 	};
+
+	const handleLegendChange = (event: Event) => {
+		const select = event.target as HTMLSelectElement;
+		const options = Array.from(select.options).map((o) => o.value);
+		settings.legend = options[select.selectedIndex] as 'x' | 'y' | 'z';
+		if (!settings.legend) settings.legend = undefined;
+	};
 </script>
 
 {#if showChartSettings}
@@ -49,11 +56,12 @@
 		<form>
 			<div class="setting">
 				<span>type</span>
-				<select value={settings.type} onchange={handleChartTypeChange} size={4}>
+				<select value={settings.type} onchange={handleChartTypeChange} size={5}>
 					<option value="line">line</option>
 					<option value="candle">candle</option>
 					<option value="bar">bar</option>
 					<option value="h-bar">h-bar</option>
+					<option value="bubble">bubble</option>
 				</select>
 			</div>
 
@@ -92,6 +100,17 @@
 							{#each columns as column}
 								<option value={column.name}>{column.name}</option>
 							{/each}
+						</select>
+					</div>
+				</div>
+				<div class="setting">
+					<span>legend</span>
+					<div style="display: flex; gap: 5px;">
+						<select value={settings.legend} onchange={handleLegendChange} size={4}>
+							<option value="">none</option>
+							<option value="x">x</option>
+							<option value="y">y</option>
+							<option value="z">z</option>
 						</select>
 					</div>
 				</div>
