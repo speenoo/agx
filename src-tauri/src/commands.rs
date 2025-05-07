@@ -13,6 +13,8 @@ pub async fn query(app: tauri::AppHandle, _query: String, reader: tauri::ipc::Ch
     let clickhouse_cmd = app.shell().sidecar("clickhouse").unwrap().args([
         "--path",
         &state.path,
+        "-C",
+        &format!("{}/config.xml", state.path),
         "-q",
         &_query,
         "--output-format",

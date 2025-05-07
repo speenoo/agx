@@ -28,7 +28,7 @@
   "productName": "agx",
   "mainBinaryName": "agx",
   "version": "0.1.0",
-  "identifier": "com.agx.app",
+  "identifier": "app.agx",
   "plugins": {},
   "app": {
     "security": {
