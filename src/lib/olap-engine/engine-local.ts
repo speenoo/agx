@@ -54,6 +54,7 @@ export class LocalEngine extends InternalEventEmitter<Events> implements OLAPEng
 			});
 
 			if (result.length === 0) {
+				if (_emit) this.emit('success', query, undefined);
 				return undefined;
 			}
 
