@@ -23,6 +23,7 @@
         {
           "args": [
             "--path",
+            "-C",
             "-q",
             "--output-format"
           ],

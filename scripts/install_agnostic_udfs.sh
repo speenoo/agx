@@ -5,7 +5,7 @@ REPO="agnosticeng/clickhouse-evm"
 API_URL="https://api.github.com/repos/$REPO/releases/latest"
 OS_ARCH="$(uname | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')"
 USER_PATH="$HOME"
-DEST="$USER_PATH/Library/Application Support/com.agx.app/ch"
+DEST="$USER_PATH/Library/Application Support/app.agx/ch"
 
 # Fetch release info
 RELEASE_JSON=$(curl -s "$API_URL")
