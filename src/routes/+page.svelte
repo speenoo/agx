@@ -3,6 +3,7 @@
 	import type { Log } from '$lib/components/Console.svelte';
 	import { ContextMenuState } from '$lib/components/ContextMenu';
 	import ContextMenu from '$lib/components/ContextMenu/ContextMenu.svelte';
+	import { goToDefinition } from '$lib/components/Datasets';
 	import Drawer from '$lib/components/Drawer.svelte';
 	import { functions, keywords, operators, types } from '$lib/components/Editor/clickhouse';
 	import Editor from '$lib/components/Editor/Editor.svelte';
@@ -550,7 +551,11 @@ LIMIT 100;`;
 									</nav>
 									{#each tabs as tab, i (tab.id)}
 										<div style:display={selectedTabIndex == i ? 'block' : 'none'}>
-											<Editor bind:value={tab.content} />
+											<Editor
+												bind:value={tab.content}
+												linkables={tables.map((t) => t.name)}
+												onCmdClick={goToDefinition}
+											/>
 										</div>
 									{/each}
 								</div>

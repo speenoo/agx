@@ -10,6 +10,31 @@ export function setupLanguage(
 	columns: string[] = []
 ) {
 	monaco.languages.register({ id });
+	monaco.languages.setLanguageConfiguration(id, {
+		comments: {
+			lineComment: '--',
+			blockComment: ['/*', '*/']
+		},
+		brackets: [
+			['{', '}'],
+			['[', ']'],
+			['(', ')']
+		],
+		autoClosingPairs: [
+			{ open: '{', close: '}' },
+			{ open: '[', close: ']' },
+			{ open: '(', close: ')' },
+			{ open: '"', close: '"' },
+			{ open: "'", close: "'" }
+		],
+		surroundingPairs: [
+			{ open: '{', close: '}' },
+			{ open: '[', close: ']' },
+			{ open: '(', close: ')' },
+			{ open: '"', close: '"' },
+			{ open: "'", close: "'" }
+		]
+	});
 	monaco.languages.setMonarchTokensProvider(id, {
 		ignoreCase: true,
 		keywords: keywords.map((k) => k.split(' ')[0]),
@@ -18,6 +43,11 @@ export function setupLanguage(
 		typeKeywords: types,
 		operators: operators,
 		columns: columns,
+
+		brackets: [
+			{ open: '[', close: ']', token: 'delimiter.square' },
+			{ open: '(', close: ')', token: 'delimiter.parenthesis' }
+		],
 
 		symbols: /[=><!~?:&|+\-*\/\^%]+/,
 
@@ -65,7 +95,7 @@ export function setupLanguage(
 		}
 	});
 
-	const sql = {
+	const sql: monaco.languages.CompletionItemProvider = {
 		provideCompletionItems: (model: monaco.editor.ITextModel, position: monaco.Position) => {
 			const word = model.getWordUntilPosition(position);
 			const range = {

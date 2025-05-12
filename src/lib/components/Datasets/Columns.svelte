@@ -1,5 +1,11 @@
 <script lang="ts">
-	let { columns } = $props();
+	import type { ColumnDescriptor } from '$lib/olap-engine';
+
+	interface Props {
+		columns: ColumnDescriptor[];
+	}
+
+	let { columns }: Props = $props();
 </script>
 
 <ul>

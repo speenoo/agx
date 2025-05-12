@@ -2,7 +2,8 @@
 	import type { Table } from '$lib/olap-engine';
 	import type { HistoryEntry } from '$lib/repositories/history';
 	import type { Query } from '$lib/repositories/queries';
-	import Datasets from './Datasets/Datasets.svelte';
+	import { tick } from 'svelte';
+	import Datasets, { goToDefinition, onExpand as onDatasetExpand } from './Datasets';
 	import History from './History.svelte';
 	import ProxySwitch from './ProxySwitch.svelte';
 	import Queries from './Queries/Queries.svelte';
@@ -13,6 +14,16 @@
 	function switch_to(next: Tab) {
 		tab = next;
 	}
+
+	$effect(() =>
+		onDatasetExpand(async (table) => {
+			if (tab !== 'sources') {
+				tab = 'sources';
+				await tick();
+				goToDefinition(table);
+			}
+		})
+	);
 
 	type Props = {
 		tables?: Table[];
