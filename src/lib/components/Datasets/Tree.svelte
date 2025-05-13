@@ -3,18 +3,34 @@
 	import FolderOpen from '$lib/icons/FolderOpen.svelte';
 	import Table from '$lib/icons/Table.svelte';
 	import Columns from './Columns.svelte';
+	import { onExpand } from './emitter';
 	import Tree from './Tree.svelte';
+	import { findNodeInTree, type TreeNode } from './utils';
 
-	let { node = {}, level = 0, expanded: forceExpanded = false } = $props();
+	interface Props {
+		node: TreeNode;
+		level?: number;
+		expanded?: boolean;
+	}
+
+	let { node, level = 0, expanded: forceExpanded }: Props = $props();
+
 	let expanded = $state(false);
 
 	$effect(() => {
-		expanded = forceExpanded;
+		if (typeof forceExpanded === 'boolean') expanded = forceExpanded;
 	});
 
 	function toggleExpanded() {
 		expanded = !expanded;
 	}
+
+	$effect(() =>
+		onExpand((value) => {
+			if (node.type === 'dataset' && node.value === value) expanded = true;
+			else if (node.type === 'group' && findNodeInTree(node.children, value)) expanded = true;
+		})
+	);
 </script>
 
 <div class="node" style:opacity={expanded ? 1 : 0.7 + level}>
@@ -43,10 +59,12 @@
 			</span>
 		{/if}
 	</button>
-	{#if node.type === 'group' && node.children && expanded}
-		{#each node.children as child}
-			<Tree node={child} level={level + 1} expanded={forceExpanded} />
-		{/each}
+	{#if node.type === 'group'}
+		<div style:display={expanded ? 'contents' : 'none'}>
+			{#each node.children as child}
+				<Tree node={child} level={level + 1} expanded={forceExpanded} />
+			{/each}
+		</div>
 	{/if}
 	{#if node.type === 'dataset' && expanded}
 		<div class="dataset">

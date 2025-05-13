@@ -1,4 +1,4 @@
-import { type ColumnDescriptor, type Table } from '$lib/olap-engine';
+import type { ColumnDescriptor, Table } from '$lib/olap-engine';
 import _ from 'lodash';
 
 export function filter(sources: Table[], search: string) {
@@ -12,12 +12,19 @@ export function filter(sources: Table[], search: string) {
 	);
 }
 
-type TreeNode = {
+export type TreeNode = GroupTreeNode | DatasetTreeNode;
+
+type GroupTreeNode = {
 	name: string;
-	type: 'group' | 'dataset';
-	value?: string;
-	columns?: ColumnDescriptor[];
-	children?: TreeNode[];
+	type: 'group';
+	children: TreeNode[];
+};
+
+type DatasetTreeNode = {
+	name: string;
+	type: 'dataset';
+	value: string;
+	columns: ColumnDescriptor[];
 };
 
 export function buildTree(tables: Table[]): TreeNode[] {
@@ -36,14 +43,28 @@ export function buildTree(tables: Table[]): TreeNode[] {
 	const toArray = (obj: any): TreeNode[] =>
 		_.map(
 			obj,
-			(value, key): TreeNode => ({
-				name: key,
-				type: value.children ? 'group' : 'dataset',
-				value: value.value,
-				columns: value.columns,
-				children: value.children ? toArray(value.children) : undefined
-			})
+			(value, key) =>
+				({
+					name: key,
+					type: value.children ? 'group' : 'dataset',
+					value: value.value,
+					columns: value.columns,
+					children: value.children ? toArray(value.children) : undefined
+				}) as TreeNode
 		);
 
 	return toArray(root);
+}
+
+export function findNodeInTree(
+	tree: TreeNode[],
+	value: DatasetTreeNode['value']
+): TreeNode | undefined {
+	for (const node of tree) {
+		if (node.type === 'dataset' && node.value === value) return node;
+		else if (node.type === 'group') {
+			const found = findNodeInTree(node.children!, value);
+			if (found) return found;
+		}
+	}
 }
