@@ -48,6 +48,9 @@ monaco.editor.defineTheme('agnostic', {
 		'editorOverviewRuler.border': '#7F7F7F4D',
 		'editorGutter.modifiedBackground': '#1B81A8',
 		'editorGutter.addedBackground': '#487E02',
-		'editorGutter.deletedBackground': '#F14C4C'
+		'editorGutter.deletedBackground': '#F14C4C',
+		'editorBracketHighlight.foreground1': '#D4D4D4',
+		'editorBracketHighlight.foreground2': '#D4D4D4',
+		'editorBracketHighlight.foreground3': '#D4D4D4'
 	}
 });
