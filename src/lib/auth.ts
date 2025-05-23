@@ -1,5 +1,4 @@
 import { type Auth0Client, createAuth0Client } from '@auth0/auth0-spa-js';
-import { getCurrentWindow } from '@tauri-apps/api/window';
 import { onOpenUrl } from '@tauri-apps/plugin-deep-link';
 import { openUrl } from '@tauri-apps/plugin-opener';
 
@@ -14,17 +13,19 @@ async function init() {
 		authorizationParams: {
 			redirect_uri: AUTH0_REDIRECT_URI || window.location.origin
 		},
-		cacheLocation: 'localstorage'
+		cacheLocation: 'localstorage',
+		useRefreshTokens: true
 	});
 }
 
-export async function checkLoginState() {
+export async function checkLoginState(onStateChange?: () => void) {
 	await init();
 
 	if (PLATFORM === 'WEB') {
 		if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
 			await client.handleRedirectCallback();
 			window.history.replaceState({}, document.title, '/');
+			onStateChange?.();
 		}
 	}
 
@@ -36,7 +37,7 @@ export async function checkLoginState() {
 
 			if (url) {
 				await client.handleRedirectCallback(url.toString());
-				await getCurrentWindow().setFocus();
+				onStateChange?.();
 			}
 		});
 	}

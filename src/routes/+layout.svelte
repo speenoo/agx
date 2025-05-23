@@ -37,7 +37,9 @@
 			await displayOnboarding();
 		}
 
-		await checkLoginState();
+		await checkLoginState(async () => {
+			authenticated = await isAuthenticated();
+		});
 		authenticated = await isAuthenticated();
 
 		mounted = true;
