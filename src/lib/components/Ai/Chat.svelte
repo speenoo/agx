@@ -69,6 +69,7 @@
 		event: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement }
 	) {
 		event.preventDefault();
+		const form = event.currentTarget;
 
 		let token: string | undefined;
 		if (isAgnosticModel(model)) {
@@ -78,7 +79,7 @@
 
 		const lastMessage = messages.at(-1);
 		if (lastMessage?.role !== 'user') {
-			const data = new FormData(event.currentTarget);
+			const data = new FormData(form);
 			let content = data.get('message');
 			if (!content || typeof content !== 'string') return;
 			content = content.trim();
