@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { autoresize } from '$lib/actions/autoresize.svelte';
 	import { scroll_to_bottom } from '$lib/actions/scrollToBottom.svelte';
-	import { getToken } from '$lib/auth';
+	import { getToken, logout } from '$lib/auth';
 	import Select from '$lib/components/Select.svelte';
 	import { getAppContext } from '$lib/context';
 	import ChevronDown from '$lib/icons/ChevronDown.svelte';
@@ -113,6 +113,10 @@
 					message = last.content;
 					textarea?.dispatchEvent(new InputEvent('input'));
 				}
+			}
+
+			if (e instanceof Error && e.message.includes('401') && isAgnosticModel(model)) {
+				await logout();
 			}
 		} finally {
 			loading = false;

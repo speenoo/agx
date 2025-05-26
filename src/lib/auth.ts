@@ -7,6 +7,7 @@ if (!AUTH0_DOMAIN) throw new Error('AUTH0_DOMAIN is not defined');
 if (!AUTH0_CLIENT_ID) throw new Error('AUTH0_CLIENT_ID is not defined');
 
 const emitter = mitt<{ 'auth:changed': boolean }>();
+const noop = () => {};
 
 let client: Auth0Client;
 async function init() {
@@ -69,12 +70,14 @@ export async function login() {
 	if (client) await client.loginWithRedirect({ openUrl });
 }
 
-export async function logout() {
-	if (client)
+export async function logout(silently = true) {
+	if (client) {
 		await client.logout({
-			logoutParams: { returnTo: AUTH0_REDIRECT_URI || window.location.origin, federated: false },
-			openUrl
+			logoutParams: { returnTo: AUTH0_REDIRECT_URI || window.location.origin },
+			openUrl: silently ? noop : openUrl
 		});
+		emitter.emit('auth:changed', false);
+	}
 }
 
 async function openUrl(url: string) {
