@@ -1,9 +1,12 @@
 import { type Auth0Client, createAuth0Client } from '@auth0/auth0-spa-js';
 import { onOpenUrl } from '@tauri-apps/plugin-deep-link';
-import { openUrl } from '@tauri-apps/plugin-opener';
+import { openUrl as openUrlWithBrowser } from '@tauri-apps/plugin-opener';
+import mitt from 'mitt';
 
 if (!AUTH0_DOMAIN) throw new Error('AUTH0_DOMAIN is not defined');
 if (!AUTH0_CLIENT_ID) throw new Error('AUTH0_CLIENT_ID is not defined');
+
+const emitter = mitt<{ 'auth:changed': boolean }>();
 
 let client: Auth0Client;
 async function init() {
@@ -16,16 +19,18 @@ async function init() {
 		cacheLocation: 'localstorage',
 		useRefreshTokens: true
 	});
+
+	emitter.emit('auth:changed', await client.isAuthenticated());
 }
 
-export async function checkLoginState(onStateChange?: () => void) {
+export async function checkLoginState() {
 	await init();
 
 	if (PLATFORM === 'WEB') {
 		if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
 			await client.handleRedirectCallback();
 			window.history.replaceState({}, document.title, '/');
-			onStateChange?.();
+			emitter.emit('auth:changed', true);
 		}
 	}
 
@@ -37,43 +42,42 @@ export async function checkLoginState(onStateChange?: () => void) {
 
 			if (url) {
 				await client.handleRedirectCallback(url.toString());
-				onStateChange?.();
+				emitter.emit('auth:changed', true);
 			}
 		});
 	}
 }
 
+export function onStateChange(cb: (authenticated: boolean) => unknown) {
+	emitter.on('auth:changed', cb);
+	return () => emitter.off('auth:changed', cb);
+}
+
 export async function isAuthenticated() {
-	if (client) {
-		return await client.isAuthenticated();
-	}
+	if (client) return await client.isAuthenticated();
 	return false;
 }
 
 export async function getToken() {
-	if (client) return await client.getTokenSilently();
+	if (client) {
+		const tokens = await client.getTokenSilently({ detailedResponse: true });
+		return tokens.id_token;
+	}
 }
 
 export async function login() {
-	if (client) {
-		await client.loginWithRedirect({
-			async openUrl(url) {
-				if (PLATFORM === 'WEB') {
-					window.location.assign(url);
-				}
-
-				if (PLATFORM === 'NATIVE') {
-					await openUrl(url);
-				}
-			}
-		});
-	}
+	if (client) await client.loginWithRedirect({ openUrl });
 }
 
 export async function logout() {
-	if (client) {
+	if (client)
 		await client.logout({
-			logoutParams: { returnTo: AUTH0_REDIRECT_URI || window.location.origin }
+			logoutParams: { returnTo: AUTH0_REDIRECT_URI || window.location.origin, federated: false },
+			openUrl
 		});
-	}
+}
+
+async function openUrl(url: string) {
+	if (PLATFORM === 'WEB') window.location.assign(url);
+	if (PLATFORM === 'NATIVE') await openUrlWithBrowser(url);
 }

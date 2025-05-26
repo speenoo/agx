@@ -5,7 +5,7 @@
 	import { store } from '$lib/store';
 	import { MigrationManager } from '@agnosticeng/migrate';
 
-	import { checkLoginState, isAuthenticated } from '$lib/auth';
+	import { checkLoginState, onStateChange } from '$lib/auth';
 	import { ContextMenu, ContextMenuState } from '$lib/components/ContextMenu';
 	import { setAppContext } from '$lib/context';
 	import { MIGRATIONS } from '$lib/migrations';
@@ -27,6 +27,8 @@
 		}
 	}
 
+	$effect(() => onStateChange((a) => (authenticated = a)));
+
 	onMount(async () => {
 		const m = new MigrationManager(store);
 		await m.migrate(MIGRATIONS);
@@ -37,10 +39,7 @@
 			await displayOnboarding();
 		}
 
-		await checkLoginState(async () => {
-			authenticated = await isAuthenticated();
-		});
-		authenticated = await isAuthenticated();
+		await checkLoginState();
 
 		mounted = true;
 	});
