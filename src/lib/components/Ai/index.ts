@@ -20,7 +20,7 @@ export const ArgnosticModel: Model = {
 };
 
 export function isAgnosticModel(m: Model) {
-	return m.baseURL === m.baseURL;
+	return m.baseURL === ArgnosticModel.baseURL;
 }
 
 export function serializeModel(model: Model) {
