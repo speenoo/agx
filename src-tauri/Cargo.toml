@@ -1,6 +1,6 @@
 [package]
 name = "agx"
-version = "0.1.0"
+version = "0.3.0"
 description = "A Tauri App"
 authors = ["Didier Franc"]
 edition = "2021"
