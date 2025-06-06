@@ -41,6 +41,15 @@
 		overflow-y: scroll;
 	}
 
+	.datasets::-webkit-scrollbar {
+		display: none;
+	}
+
+	.datasets {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+
 	.toolbar {
 		position: sticky;
 		top: 0px;
