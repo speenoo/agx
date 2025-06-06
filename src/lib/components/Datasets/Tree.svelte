@@ -2,6 +2,7 @@
 	import Folder from '$lib/icons/Folder.svelte';
 	import FolderOpen from '$lib/icons/FolderOpen.svelte';
 	import Table from '$lib/icons/Table.svelte';
+	import { tick } from 'svelte';
 	import Columns from './Columns.svelte';
 	import { onExpand } from './emitter';
 	import Tree from './Tree.svelte';
@@ -26,11 +27,22 @@
 	}
 
 	$effect(() =>
-		onExpand((value) => {
-			if (node.type === 'dataset' && node.value === value) expanded = true;
-			else if (node.type === 'group' && findNodeInTree(node.children, value)) expanded = true;
+		onExpand(async (value) => {
+			if (node.type === 'dataset' && node.value === value) {
+				expanded = true;
+				await tick();
+				animateExpand(value);
+			} else if (node.type === 'group' && findNodeInTree(node.children, value)) expanded = true;
 		})
 	);
+
+	function animateExpand(id: string) {
+		const element = document.getElementById(id);
+		if (element) {
+			element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			element.style.backgroundColor = 'yellow';
+		}
+	}
 </script>
 
 <div class="node" style:opacity={expanded ? 1 : 0.7 + level}>
@@ -53,7 +65,11 @@
 		{/if}
 
 		{#if node.type == 'dataset'}
-			<span class="name">
+			<span
+				class="name"
+				id={node.value}
+				ontransitionend={(e) => (e.currentTarget.style.backgroundColor = '')}
+			>
 				<Table size={10} />
 				<span>{node.name}</span>
 			</span>
@@ -94,6 +110,8 @@
 		display: flex;
 		align-items: center;
 		margin-top: 3px;
+
+		transition: background-color linear 0.25s;
 	}
 
 	.name span {
