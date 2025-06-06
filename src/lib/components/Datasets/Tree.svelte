@@ -4,23 +4,21 @@
 	import Table from '$lib/icons/Table.svelte';
 	import { tick } from 'svelte';
 	import Columns from './Columns.svelte';
-	import { onExpand } from './emitter';
+	import { onCollapseAll, onExpand, onExpandAll } from './emitter';
 	import Tree from './Tree.svelte';
 	import { findNodeInTree, type TreeNode } from './utils';
 
 	interface Props {
 		node: TreeNode;
 		level?: number;
-		expanded?: boolean;
 	}
 
-	let { node, level = 0, expanded: forceExpanded }: Props = $props();
+	let { node, level = 0 }: Props = $props();
 
 	let expanded = $state(false);
 
-	$effect(() => {
-		if (typeof forceExpanded === 'boolean') expanded = forceExpanded;
-	});
+	$effect(() => onCollapseAll(() => (expanded = false)));
+	$effect(() => onExpandAll(() => (expanded = true)));
 
 	function toggleExpanded() {
 		expanded = !expanded;
@@ -78,7 +76,7 @@
 	{#if node.type === 'group'}
 		<div style:display={expanded ? 'contents' : 'none'}>
 			{#each node.children as child}
-				<Tree node={child} level={level + 1} expanded={forceExpanded} />
+				<Tree node={child} level={level + 1} />
 			{/each}
 		</div>
 	{/if}
