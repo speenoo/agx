@@ -61,7 +61,7 @@ export async function isAuthenticated() {
 
 export async function getToken() {
 	if (client) {
-		const tokens = await client.getTokenSilently({ detailedResponse: true });
+		const tokens = await client.getTokenSilently({ detailedResponse: true, cacheMode: 'off' });
 		return tokens.id_token;
 	}
 }
