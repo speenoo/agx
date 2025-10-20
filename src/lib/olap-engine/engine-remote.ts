@@ -49,26 +49,35 @@ export class RemoteEngine extends InternalEventEmitter<Events> implements OLAPEn
 
 	private getCustomSchemaFromUrl(): Table[] {
 		const schema = new URLSearchParams(window.location.search).get('schema');
-		if (!schema) return [];
+		const replaces = new URLSearchParams(window.location.search).getAll('replace');
+
+		if (!schema || !replaces) return [];
+
 		if (!TABLE_PATTERN.test(schema)) {
 			console.warn('Bad schema passed');
 			return [];
 		}
 
-		return schema.split(';').map((raw) => {
-			const [name, _columns] = raw.split(':');
+		return schema
+			.split(';')
+			.map((raw) => {
+				const [name, _columns] = raw.split(':');
+				const url = replaces.find((r) => r.startsWith(`${name}:`))?.replace(`${name}:`, '') ?? '';
 
-			return {
-				engine: 'custom',
-				name,
-				short: name,
-				url: '',
-				columns: _columns.split(',').map((_column) => {
-					const [name, type] = _column.split('=');
-					return { name, type };
-				})
-			};
-		});
+				if (!url) console.warn(`No URL found for ${name}: table ignored`);
+
+				return {
+					engine: 'custom',
+					name,
+					short: name,
+					url,
+					columns: _columns.split(',').map((_column) => {
+						const [name, type] = _column.split('=');
+						return { name, type };
+					})
+				};
+			})
+			.filter((t) => t.url);
 	}
 }
 
