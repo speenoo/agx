@@ -42,3 +42,5 @@ export const engine: OLAPEngine =
 	PLATFORM === 'WEB' || (typeof window !== 'undefined' && window.location.search.includes('proxy='))
 		? new RemoteEngine()
 		: new LocalEngine();
+
+export { applySlugs } from './tables';

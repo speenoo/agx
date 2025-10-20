@@ -32,7 +32,7 @@
 	import Sparkles from '$lib/icons/Sparkles.svelte';
 	import Stop from '$lib/icons/Stop.svelte';
 	import type { Table } from '$lib/olap-engine';
-	import { engine, type OLAPResponse } from '$lib/olap-engine';
+	import { applySlugs, engine, type OLAPResponse } from '$lib/olap-engine';
 	import { PanelState } from '$lib/PanelState.svelte';
 	import { SQLiteChatsRepository, type ChatsRepository } from '$lib/repositories/chats';
 	import {
@@ -75,6 +75,10 @@
 		const query = currentTab.content;
 		if (loading || !query) return;
 
+		const sources = tables
+			.filter((t) => t.engine === 'custom')
+			.map((t) => ({ slug: t.name, path: t.url }));
+
 		loading = true;
 		counter?.start();
 		try {
@@ -92,7 +96,7 @@
 
 			cached = false;
 			abortController = new AbortController();
-			response = await engine.exec(query, { signal: abortController.signal });
+			response = await engine.exec(applySlugs(query, sources), { signal: abortController.signal });
 			await cache.set(query, response);
 		} finally {
 			loading = false;
