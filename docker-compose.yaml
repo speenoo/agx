@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - CLICKHOUSE_URL=http://localhost:8123?default_format=JSON
+        - CLICKHOUSE_URL=http://default:Work12345!@40.160.52.156:8123?default_format=JSON
     ports:
       - '8080:80'
     depends_on:
