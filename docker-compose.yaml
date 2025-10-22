@@ -6,24 +6,8 @@ services:
       dockerfile: Dockerfile
       args:
         - CLICKHOUSE_URL=http://default:Work12345%21@40.160.52.156:8123?default_format=JSON
-    expose:
-      - '8080'
+    ports:
+      - '8080:80'
     depends_on:
       clickhouse:
         condition: service_healthy
-  clickhouse:
-    image: clickhouse/clickhouse-server:latest
-    ports:
-      - '8123:8123'
-      - '9000:9000'
-    volumes:
-      - clickhouse_data:/var/lib/clickhouse
-      - ./conf/config.xml:/etc/clickhouse-server/config.d/config.xml
-      - ./conf/users.xml:/etc/clickhouse-server/users.d/users.xml
-    healthcheck:
-      test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
-      interval: 3s
-      timeout: 5s
-      retries: 5
-volumes:
-  clickhouse_data:
