@@ -8,6 +8,4 @@ services:
         - CLICKHOUSE_URL=http://default:Work12345%21@40.160.52.156:8123?default_format=JSON
     ports:
       - '8080:80'
-    depends_on:
-      clickhouse:
-        condition: service_healthy
+  volumes: {}
