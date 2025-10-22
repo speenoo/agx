@@ -1,10 +1,32 @@
-version: '3'
+# Fix 1: map the right container port (AGX serves on 80, not 8080)
+version: '3.9'
 services:
   agx_app:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        - CLICKHOUSE_URL=http://default:Work12345%21@40.160.52.156:8123?default_format=JSON
+        - CLICKHOUSE_URL=http://default:Work12345%21@clickhouse:8123?default_format=JSON
+    depends_on:
+      clickhouse:
+        condition: service_healthy
     ports:
-      - '8081:8080'
+      - "8081:80" # <- use 80 inside the container
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./conf/config.xml:/etc/clickhouse-server/config.d/config.xml
+      - ./conf/users.xml:/etc/clickhouse-server/users.d/users.xml
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
+      interval: 3s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  clickhouse_data:
